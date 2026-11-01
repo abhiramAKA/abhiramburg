@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ "Mine" ]
 
 jobs:
   deploy:
@@ -19,7 +19,8 @@ jobs:
       run: dotnet publish Match3Game/Match3Game.csproj -c Release -o release
 
     - name: Fix Routing for GitHub Pages
-      run: cp release/wwwroot/index.html release/wwwroot/404.html
+      run: |
+        cp release/wwwroot/index.html release/wwwroot/404.html
 
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@v4
