@@ -1,7 +1,9 @@
 <div class="menu-screen">
-    <!-- Вы можете свободно менять заголовки, тексты и добавлять новые кнопки здесь -->
     <h1 class="menu-title">💥 MATCH-3 💥</h1>
     
+    <!-- Встраиваем наш изолированный компонент авторизации прямо в меню -->
+    <TelegramAuth Username="@TelegramUser" OnUserAuthenticated="HandleAuth" />
+
     <p class="menu-desc">
         Собери как можно больше комбинаций!<br>
         У тебя есть ровно @MaxMoves ходов.
@@ -11,11 +13,17 @@
 </div>
 
 @code {
-    // Настройки, которые меню получает снаружи
     [Parameter] public int MaxMoves { get; set; } = 25;
-    
-    // Событие, которое сообщает игре, что кнопка нажата
     [Parameter] public EventCallback OnStartGame { get; set; }
+    
+    // Переменные для отслеживания игрока
+    private string? TelegramUser { get; set; }
+
+    private void HandleAuth(string username)
+    {
+        TelegramUser = username;
+        StateHasChanged();
+    }
 
     private async Task OnStartClick()
     {
