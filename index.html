@@ -2,49 +2,44 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <!-- Настройка, чтобы игра идеально сидела на экране мобильного телефона -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Моя Мобильная Игра</title>
+    <title>Мобильная Игра</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #000;
-            overflow: hidden;
-        }
+        body { margin: 0; padding: 0; background: #000; overflow: hidden; }
     </style>
-    <!-- Подключаем сам движок Phaser 3 -->
-    <script src="https://jsdelivr.net"></script>
+    
+    <!-- Используем сверхнадежное зеркало Cloudflare, которое отлично работает в РФ -->
+    <script src="https://cloudflare.com"></script>
 </head>
 <body>
 
-    <!-- Подключаем наши изолированные разделы (сцены) -->
+    <!-- Подключаем наши изолированные файлы сценариев -->
     <script src="menu.js"></script>
     <script src="game.js"></script>
 
     <script>
-        // Главные настройки всей игры
-        const config = {
-            type: Phaser.AUTO,
-            width: window.innerWidth,  // Берем реальную ширину экрана телефона
-            height: window.innerHeight, // Берем реальную высоту экрана телефона
-            parent: 'game-container',
-            backgroundColor: '#2d3436',
-            physics: {
-                default: 'arcade', // Базовая физика для прыжков/столкновений
-                arcade: { debug: false }
-            },
-            // Список сцен, которые есть в игре. Меню запустится первым!
-            scene: [MainMenuScene, GameplayScene]
+        // Запускаем игру строго после того, как ВСЕ скрипты полностью скачаются
+        window.onload = function() {
+            // Проверка на случай, если интернет совсем пропал
+            if (typeof Phaser === 'undefined') {
+                alert("Не удалось загрузить движок игры. Пожалуйста, обновите страницу или проверьте интернет-соединение.");
+                return;
+            }
+
+            const config = {
+                type: Phaser.AUTO,
+                width: window.innerWidth,
+                height: window.innerHeight,
+                backgroundColor: '#2d3436', // Красивый темно-серый фон
+                scene: [MainMenuScene, GameplayScene]
+            };
+
+            const game = new Phaser.Game(config);
+
+            window.addEventListener('resize', () => { 
+                game.scale.resize(window.innerWidth, window.innerHeight); 
+            });
         };
-
-        // Запуск игры
-        const game = new Phaser.Game(config);
-
-        // Автоматический подгон под размер экрана при повороте телефона
-        window.addEventListener('resize', () => {
-            game.scale.resize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
 </html>
