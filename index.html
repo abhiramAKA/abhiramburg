@@ -7,39 +7,81 @@
     <style>
         body { margin: 0; padding: 0; background: #000; overflow: hidden; }
     </style>
-    
-    <!-- Используем сверхнадежное зеркало Cloudflare, которое отлично работает в РФ -->
-    <script src="https://cloudflare.com"></script>
+    <!-- Загружаем движок напрямую -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.60.0/phaser.min.js"></script>
 </head>
 <body>
 
-    <!-- Подключаем наши изолированные файлы сценариев -->
-    <script src="menu.js"></script>
-    <script src="game.js"></script>
-
     <script>
-        // Запускаем игру строго после того, как ВСЕ скрипты полностью скачаются
-        window.onload = function() {
-            // Проверка на случай, если интернет совсем пропал
-            if (typeof Phaser === 'undefined') {
-                alert("Не удалось загрузить движок игры. Пожалуйста, обновите страницу или проверьте интернет-соединение.");
-                return;
-            }
+    // --- ИЗОЛИРОВАННАЯ СЦЕНА 1: ГЛАВНОЕ МЕНЮ ---
+    class MainMenuScene extends Phaser.Scene {
+        constructor() { 
+            super({ key: 'MainMenuScene' }); 
+        }
+        create() {
+            const cx = this.cameras.main.centerX;
+            const cy = this.cameras.main.centerY;
 
-            const config = {
-                type: Phaser.AUTO,
-                width: window.innerWidth,
-                height: window.innerHeight,
-                backgroundColor: '#2d3436', // Красивый темно-серый фон
-                scene: [MainMenuScene, GameplayScene]
-            };
+            this.add.text(cx, cy - 100, 'МЕГА ИГРА 2026', { 
+                fontSize: '32px', fill: '#fff', fontFamily: 'Arial' 
+            }).setOrigin(0.5);
 
-            const game = new Phaser.Game(config);
-
-            window.addEventListener('resize', () => { 
-                game.scale.resize(window.innerWidth, window.innerHeight); 
+            const startButton = this.add.text(cx, cy + 50, '[ НАЧАТЬ ИГРУ ]', { 
+                fontSize: '28px', fill: '#00ffcc', backgroundColor: '#1e272e', padding: 10, fontFamily: 'Arial' 
+            }).setOrigin(0.5).setInteractive();
+            
+            startButton.on('pointerdown', () => { 
+                this.scene.start('GameplayScene'); 
             });
+        }
+    }
+
+    // --- ИЗОЛИРОВАННАЯ СЦЕНА 2: ИГРОВОЙ ПРОЦЕСС ---
+    class GameplayScene extends Phaser.Scene {
+        constructor() { 
+            super({ key: 'GameplayScene' }); 
+        }
+        create() {
+            const cx = this.cameras.main.centerX;
+            const cy = this.cameras.main.centerY;
+
+            this.add.text(cx, cy - 150, 'ИГРОВОЙ ПРОЦЕСС', { 
+                fontSize: '24px', fill: '#ffff00', fontFamily: 'Arial' 
+            }).setOrigin(0.5);
+
+            this.score = 0;
+            this.scoreText = this.add.text(cx, cy, 'Кликов: 0', { 
+                fontSize: '40px', fill: '#fff', fontFamily: 'Arial' 
+            }).setOrigin(0.5);
+
+            const target = this.add.circle(cx, cy + 100, 60, 0xff4757).setInteractive();
+            
+            target.on('pointerdown', () => {
+                this.score += 1;
+                this.scoreText.setText('Кликов: ' + this.score);
+            });
+
+            const backButton = this.add.text(cx, this.cameras.main.height - 80, 'В меню', { 
+                fontSize: '20px', fill: '#aaa', fontFamily: 'Arial' 
+            }).setOrigin(0.5).setInteractive();
+            
+            backButton.on('pointerdown', () => { 
+                this.scene.start('MainMenuScene'); 
+            });
+        }
+    }
+
+    // --- СБОРКА И ЗАПУСК ИГРЫ ---
+    window.onload = function() {
+        const config = {
+            type: Phaser.AUTO,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            backgroundColor: '#2d3436',
+            scene: [MainMenuScene, GameplayScene]
         };
+        const game = new Phaser.Game(config);
+        window.addEventListener('resize', () => { game.scale.resize(window.innerWidth, window.innerHeight); });
     </script>
 </body>
 </html>
