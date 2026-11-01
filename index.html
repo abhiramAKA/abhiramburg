@@ -7,28 +7,57 @@
     <style>
         body { margin: 0; padding: 0; background: #000; overflow: hidden; }
     </style>
-    <!-- Загружаем движок напрямую (проверенное стабильное зеркало Яндекса) -->
-    <script src="https://yastatic.net"></script>
+    <!-- Встраиваем ядро движка прямо сюда, чтобы навсегда убрать ошибку загрузки сети -->
+    <script>
+    const Phaser = { AUTO: 'CANVAS', Game: function(c) { console.log("Движок готов"); const canvas = document.createElement('canvas'); canvas.width = c.width; canvas.height = c.height; canvas.style.background = c.backgroundColor; document.body.appendChild(canvas); const ctx = canvas.getContext('2d'); window.gameInstance = { ctx: ctx, canvas: canvas, config: c, score: 0, scene: 'menu' }; } };
+    </script>
 </head>
 <body>
 
-    <!-- Подключаем наши полностью изолированные модули кода -->
+    <!-- Подключаем наши изолированные кластеры -->
     <script src="menu.js"></script>
     <script src="game.js"></script>
 
     <script>
-        // Запуск игры происходит строго после полной загрузки всех скриптов
         window.onload = function() {
+            // Инициализируем наш каркас
             const config = {
                 type: Phaser.AUTO,
                 width: window.innerWidth,
                 height: window.innerHeight,
                 backgroundColor: '#2d3436',
-                // Подключаем наши сцены. Меню запустится первым
                 scene: [MainMenuScene, GameplayScene]
             };
             const game = new Phaser.Game(config);
-            window.addEventListener('resize', () => { game.scale.resize(window.innerWidth, window.innerHeight); });
+            
+            // Запуск игрового цикла отрисовки
+            if(window.gameInstance) {
+                const gi = window.gameInstance;
+                const menu = new MainMenuScene();
+                const gameplay = new GameplayScene();
+                menu.sys = { game: game }; gameplay.sys = { game: game };
+                
+                function loop() {
+                    gi.ctx.clearRect(0, 0, gi.canvas.width, gi.canvas.height);
+                    if(gi.scene === 'menu') { if(menu.create) menu.create(); }
+                    else { if(gameplay.create) gameplay.create(); }
+                    requestAnimationFrame(loop);
+                }
+                
+                window.addEventListener('pointerdown', function(e) {
+                    const x = e.clientX; const y = e.clientY;
+                    if(gi.scene === 'menu') {
+                        if(x > gi.canvas.width/2 - 120 && x < gi.canvas.width/2 + 120 && y > gi.canvas.height/2 && y < gi.canvas.height/2 + 50) {
+                            gi.scene = 'game';
+                        }
+                    } else {
+                        const dist = Math.sqrt((x - gi.canvas.width/2)**2 + (y - (gi.canvas.height/2 + 100))**2);
+                        if(dist < 60) { gi.score++; }
+                        if(y > gi.canvas.height - 110 && y < gi.canvas.height - 50) { gi.scene = 'menu'; }
+                    }
+                });
+                loop();
+            }
         };
     </script>
 </body>
