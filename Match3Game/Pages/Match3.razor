@@ -1,0 +1,95 @@
+@page "/"
+@using Match3Game.Core
+
+<div class="game-container">
+    <div class="score-board">Очки: <span class="score-value">@_model.Score</span></div>
+    
+    <div class="game-board" style="grid-template-rows: repeat(@GameConfig.Rows, 1fr); grid-template-columns: repeat(@GameConfig.Cols, 1fr);">
+        @for (int r = 0; r < GameConfig.Rows; r++)
+        {
+            for (int c = 0; c < GameConfig.Cols; c++)
+            {
+                int row = r;
+                int col = c;
+                int tileType = _model.Grid[row, col];
+                bool isSelected = _selectedRow == row && _selectedCol == col;
+                bool isProcessingAnim = tileType != 0 && _isProcessing;
+
+                <div class="tile @(isSelected ? "selected" : "") @(isProcessingAnim ? "falling" : "")" 
+                     @onclick="() => OnTileClick(row, col)">
+                    @GetTileEmoji(tileType)
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private GameModel _model = new();
+    private int? _selectedRow;
+    private int? _selectedCol;
+    private bool _isProcessing;
+
+    protected override void OnInitialized()
+    {
+        _model.InitGrid();
+    }
+
+    private async Task OnTileClick(int row, int col)
+    {
+        if (_isProcessing) return;
+
+        if (_selectedRow == null)
+        {
+            _selectedRow = row;
+            _selectedCol = col;
+        }
+        else
+        {
+            var p1 = new TilePosition(_selectedRow.Value, _selectedCol.Value);
+            var p2 = new TilePosition(row, col);
+
+            _selectedRow = null;
+            _selectedCol = null;
+
+            if (_model.IsAdjacent(p1, p2))
+            {
+                _isProcessing = true;
+                _model.Swap(p1, p2);
+                
+                var matches = _model.CheckMatches();
+
+                if (matches.Count > 0)
+                {
+                    while (matches.Count > 0)
+                    {
+                        _model.RemoveMatches(matches);
+                        StateHasChanged();
+                        await Task.Delay(250);
+
+                        _model.DropTiles();
+                        StateHasChanged();
+                        await Task.Delay(250);
+
+                        matches = _model.CheckMatches();
+                    }
+                }
+                else
+                {
+                    _model.Swap(p1, p2);
+                }
+                _isProcessing = false;
+            }
+            else
+            {
+                _selectedRow = row;
+                _selectedCol = col;
+            }
+        }
+    }
+
+    private string GetTileEmoji(int type) => type switch
+    {
+        1 => "🔴", 2 => "🔵", 3 => "🟢", 4 => "🟡", 5 => "🟣", _ => ""
+    };
+}
