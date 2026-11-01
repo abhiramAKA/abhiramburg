@@ -17,8 +17,7 @@ body {
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    position: relative;
-    z-index: 1;
+    user-select: none;
 }
 
 .score-board {
@@ -52,46 +51,38 @@ body {
     border-radius: 8px;
     width: 380px;
     height: 380px;
-    position: relative;
-    z-index: 2;
 }
 
+/* Сама ячейка статична, она никогда не прыгает и не мигает */
 .tile {
     background-color: #444;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 26px;
-    cursor: pointer !important;
-    user-select: none;
+    cursor: pointer;
     border-radius: 6px;
-    transition: transform 0.15s ease-out, background-color 0.2s;
-    pointer-events: auto !important; /* Гарантирует прохождение кликов через браузер */
+    transition: background-color 0.2s;
+    overflow: hidden;
 }
 
 .tile:hover {
-    transform: scale(1.05);
     background-color: #555;
 }
 
-.tile.falling {
-    animation: dropIn 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+/* Анимация применяется исключительно к самому смайлику при его изменении */
+.tile-content {
+    display: inline-block;
+    animation: appear 0.2s ease-out forwards;
 }
 
-@keyframes dropIn {
-    0% { transform: translateY(-30px) scale(0.6); opacity: 0; }
-    70% { transform: translateY(4px) scale(1.03); }
-    100% { transform: translateY(0) scale(1); opacity: 1; }
+@keyframes appear {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
+/* Выделенная фишка */
 .tile.selected {
     outline: 3px solid #ffeb3b !important;
     background-color: #666 !important;
-    animation: pulse 1s infinite alternate;
-    z-index: 10;
-}
-
-@keyframes pulse {
-    0% { transform: scale(0.95); }
-    100% { transform: scale(1.03); }
 }
