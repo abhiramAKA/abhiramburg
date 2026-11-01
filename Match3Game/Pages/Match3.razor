@@ -4,7 +4,7 @@
 <div class="game-container">
     @if (_gameState == GameState.Menu)
     {
-        <!-- Вызываем изолированное меню и передаем ему параметры -->
+        <!-- СТАРТОВОЕ МЕНЮ -->
         <GameMenu MaxMoves="25" OnStartGame="StartNewGame" />
     }
     else if (_gameState == GameState.Playing)
@@ -26,11 +26,21 @@
                     int col = c;
                     int tileType = _model.Grid[row, col];
                     bool isSelected = _selectedRow == row && _selectedCol == col;
+                    
+                    // Если тип равен 0, значит камень только что взорвался
+                    bool isExploding = tileType == 0;
 
                     <div @key="@($"tile-{row}-{col}")" 
-                         class="tile @(isSelected ? "selected" : "")" 
+                         class="tile @(isSelected ? "selected" : "") @(isExploding ? "explode" : "")" 
                          @onclick="() => OnTileClick(row, col)">
-                        <span class="tile-content">@GetTileEmoji(tileType)</span>
+                        @if (!isExploding)
+                        {
+                            <!-- Добавляем блик-эффект внутрь каждого камня через CSS -->
+                            <div class="gem-wrapper">
+                                <span class="tile-content">@GetTileEmoji(tileType)</span>
+                                <div class="shine-effect"></div>
+                            </div>
+                        }
                     </div>
                 }
             }
@@ -114,10 +124,12 @@
 
                     while (matches.Count > 0)
                     {
+                        // Сначала переводим ячейки в состояние взрыва (ставим 0)
                         _model.RemoveMatches(matches);
                         StateHasChanged();
-                        await Task.Delay(250);
+                        await Task.Delay(250); // Время на проигрывание анимации взрыва в CSS
 
+                        // Затем сдвигаем камни вниз
                         _model.DropTiles();
                         StateHasChanged();
                         await Task.Delay(250);
@@ -146,8 +158,14 @@
         }
     }
 
+    // Заменили обычные шарики на роскошные ограненные кристаллы и самоцветы
     private string GetTileEmoji(int type) => type switch
     {
-        1 => "🔴", 2 => "🔵", 3 => "🟢", 4 => "🟡", 5 => "🟣", _ => ""
+        1 => "💎", // Алмаз / Рубин
+        2 => "🔷", // Сапфир
+        3 => "💚", // Изумруд
+        4 => "🔶", // Топаз
+        5 => "🔮", // Аметист
+        _ => ""
     };
 }
