@@ -1,0 +1,42 @@
+@inject Microsoft.JSInterop.IJSRuntime JS
+
+<div class="auth-container">
+    @if (string.IsNullOrEmpty(Username))
+    {
+        <p class="auth-status">Войдите, чтобы сохранить свой результат:</p>
+        <!-- Сюда JavaScript динамически вставит официальную кнопку Telegram -->
+        <div id="telegram-login-container"></div>
+    }
+    else
+    {
+        <div class="user-badge">
+            <span class="user-avatar">👤</span>
+            <span class="user-name">Привет, @Username!</span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Username { get; set; }
+    [Parameter] public EventCallback<string> OnUserAuthenticated { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && string.IsNullOrEmpty(Username))
+        {
+            // Передаем в JavaScript команду создать виджет Telegram
+            // ЗАМЕНИТЕ "имя_вашего_бота" на то имя, которое дал @BotFather (например: my_match3_super_game_bot)
+            await JS.InvokeVoidAsync("initTelegramWidget", "имя_вашего_бота");
+        }
+    }
+
+    // Этот метод автоматически вызовется из JavaScript, когда пользователь нажмет "Войти"
+    [JSInvokable]
+    public async Task ReceiveTelegramUser(string username)
+    {
+        if (OnUserAuthenticated.HasDelegate)
+        {
+            await OnUserAuthenticated.InvokeAsync(username);
+        }
+    }
+}
