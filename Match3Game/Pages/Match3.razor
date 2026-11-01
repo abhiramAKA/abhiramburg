@@ -15,9 +15,13 @@
                 int col = c;
                 int tileType = _model.Grid[row, col];
                 bool isSelected = _selectedRow == row && _selectedCol == col;
-                bool isProcessingAnim = tileType != 0 && _isProcessing;
+                
+                // Анимация падения сработает только тогда, когда игра обрабатывает новые упавшие фишки
+                bool isNewOrFalling = tileType != 0 && _isJustDropped; 
 
-                <div class="tile @(isSelected ? "selected" : "") @(isProcessingAnim ? "falling" : "")" 
+                <!-- @key гарантирует, что Blazor обновит только изменившиеся ячейки, убирая мигание -->
+                <div @key="@($"tile-{row}-{col}-{tileType}")" 
+                     class="tile @(isSelected ? "selected" : "") @(isNewOrFalling ? "falling" : "")" 
                      @onclick="() => OnTileClick(row, col)">
                     @GetTileEmoji(tileType)
                 </div>
@@ -31,6 +35,7 @@
     private int? _selectedRow;
     private int? _selectedCol;
     private bool _isProcessing;
+    private bool _isJustDropped; // Переменная для контроля анимации падения
 
     protected override void OnInitialized()
     {
@@ -40,12 +45,15 @@
     private void MixBoard()
     {
         _model.InitGrid();
+        _isJustDropped = true; // При перемешивании пусть красиво упадут сверху
         StateHasChanged();
     }
 
     private async Task OnTileClick(int row, int col)
     {
         if (_isProcessing) return;
+
+        _isJustDropped = false; // Отключаем падение сверху при обычном клике/выделении
 
         if (_selectedRow == null || _selectedCol == null)
         {
@@ -64,9 +72,11 @@
             if (_model.IsAdjacent(p1, p2))
             {
                 _isProcessing = true;
+                
+                // 1. Поменяли местами
                 _model.Swap(p1, p2);
                 StateHasChanged();
-                await Task.Delay(250);
+                await Task.Delay(200);
                 
                 var matches = _model.CheckMatches();
 
@@ -74,19 +84,24 @@
                 {
                     while (matches.Count > 0)
                     {
+                        // 2. Взорвали совпадения
                         _model.RemoveMatches(matches);
                         StateHasChanged();
                         await Task.Delay(250);
 
+                        // 3. Сдвинули старые и насыпали новые
+                        _isJustDropped = true; // Включаем эффект падения только для этого момента!
                         _model.DropTiles();
                         StateHasChanged();
                         await Task.Delay(250);
-
+                        
+                        _isJustDropped = false; // Выключаем обратно
                         matches = _model.CheckMatches();
                     }
                 }
                 else
                 {
+                    // Если совпадений нет — возвращаем плавно назад без мигания
                     _model.Swap(p1, p2);
                     StateHasChanged();
                 }
@@ -94,6 +109,7 @@
             }
             else
             {
+                // Если кликнули на другую фишку, просто переключаем выделение
                 _selectedRow = row;
                 _selectedCol = col;
                 StateHasChanged();
