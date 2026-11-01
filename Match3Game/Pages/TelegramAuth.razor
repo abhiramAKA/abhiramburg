@@ -1,13 +1,7 @@
-@inject Microsoft.JSInterop.IJSRuntime JS
-
 <div class="auth-container">
     @if (string.IsNullOrEmpty(Username))
     {
-        <p class="auth-status">Войдите, чтобы сохранить свой результат:</p>
-        <!-- Целевое безопасное окно для прорисовки синей кнопки -->
-        <div id="telegram-auth-box" style="min-height: 40px; display: flex; justify-content: center; align-items: center;">
-            <span style="font-size: 12px; color: #555;">Инициализация виджета...</span>
-        </div>
+        <p class="auth-status">Режим гостя (сохранение отключено)</p>
     }
     else
     {
@@ -21,38 +15,4 @@
 @code {
     [Parameter] public string? Username { get; set; }
     [Parameter] public EventCallback<string> OnUserAuthenticated { get; set; }
-
-    private static TelegramAuth? _instance;
-
-    protected override void OnInitialized()
-    {
-        _instance = this;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && string.IsNullOrEmpty(Username))
-        {
-            // Пауза 200мс, чтобы дать браузеру полностью построить разметку меню
-            await Task.Delay(200);
-            try
-            {
-                // Посылаем команду на сборку синей кнопки
-                await JS.InvokeVoidAsync("renderTelegramButton");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Ошибка отрисовки кнопки Telegram: {ex.Message}");
-            }
-        }
-    }
-
-    [JSInvokable]
-    public static async Task ReceiveTelegramUser(string username)
-    {
-        if (_instance != null && _instance.OnUserAuthenticated.HasDelegate)
-        {
-            await _instance.OnUserAuthenticated.InvokeAsync(username);
-        }
-    }
 }
