@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Match3Game",
   "resources": {
-    "hash": "sha256-KfQMDxlj7vdKoYlKwDmglFFwTNnJ5XVIJDRHkSQH5EA=",
+    "hash": "sha256-34ch///ZVRabfk2OKr5ccCVHn8CE5H7PTBQkvtREUE4=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-1DK+nm58uZjvv7U2c/UlUp1zFjeBZnqXHFHBX/W1igo="
     },
@@ -47,7 +47,7 @@
       "System.Text.Json.wasm": "sha256-vSzrEfhKCRETSkoKaoTYM3IGVFTmm9fvQtGa6hqlJ+8=",
       "System.Text.RegularExpressions.wasm": "sha256-e6A4KEzVsxVjwjSJNDSTUEcSQFgZP700+U8BC+I3Pio=",
       "System.Private.CoreLib.wasm": "sha256-1UpPDvap0rfMg+ZA6l9tZ8T5wT92eUzx3ACWWEkS85E=",
-      "Match3Game.wasm": "sha256-ROHvkRkstqkZ+6fYTSpUFGms/Y1jkfXJ/CM3Jn/JN9w="
+      "Match3Game.wasm": "sha256-Vflarv4iGZCKFD7e5GU6z9gxn3qVTwtbyn+wSftyYJQ="
     }
   },
   "cacheBootResources": true,
