@@ -4,7 +4,7 @@
     @if (string.IsNullOrEmpty(Username))
     {
         <p class="auth-status">Войдите, чтобы сохранить свой результат:</p>
-        <!-- Сюда JavaScript динамически вставит официальную кнопку Telegram -->
+        <!-- Сюда JavaScript гарантированно вставит кнопку после короткой паузы -->
         <div id="telegram-login-container"></div>
     }
     else
@@ -24,13 +24,22 @@
     {
         if (firstRender && string.IsNullOrEmpty(Username))
         {
-            // Передаем в JavaScript команду создать виджет Telegram
-            // ЗАМЕНИТЕ "имя_вашего_бота" на то имя, которое дал @BotFather (например: my_match3_super_game_bot)
-            await JS.InvokeVoidAsync("initTelegramWidget", "имя_вашего_бота");
+            // Даем браузеру 100 миллисекунд, чтобы точно нарисовать HTML-контейнер на экране
+            await Task.Delay(100);
+
+            try
+            {
+                // ЗАМЕНИТЕ "имя_вашего_бота" на точное юзернейм вашего бота от @BotFather
+                // Например: await JS.InvokeVoidAsync("initTelegramWidget", "my_match3_super_game_bot");
+                await JS.InvokeVoidAsync("initTelegramWidget", "имя_вашего_бота");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка инициализации виджета Telegram: {ex.Message}");
+            }
         }
     }
 
-    // Этот метод автоматически вызовется из JavaScript, когда пользователь нажмет "Войти"
     [JSInvokable]
     public async Task ReceiveTelegramUser(string username)
     {
