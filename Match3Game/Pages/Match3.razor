@@ -1,10 +1,14 @@
 @page "/"
 @using Match3Game.Core
+@inject Microsoft.JSInterop.IJSRuntime JS
 
 <div class="game-container">
     <div class="score-board">Очки: <span class="score-value">@_model.Score</span></div>
     
-    <button class="test-btn" @onclick="MixBoard">Перемешать поле</button>
+    <div class="button-container">
+        <button class="game-btn" @onclick="MixBoard">Перемешать</button>
+        <button class="game-btn music-btn" @onclick="ToggleMusic">🎵 Музыка</button>
+    </div>
 
     <div class="game-board" style="grid-template-rows: repeat(@GameConfig.Rows, 1fr); grid-template-columns: repeat(@GameConfig.Cols, 1fr);">
         @for (int r = 0; r < GameConfig.Rows; r++)
@@ -16,7 +20,6 @@
                 int tileType = _model.Grid[row, col];
                 bool isSelected = _selectedRow == row && _selectedCol == col;
 
-                <!-- Ключ жестко привязан к координате. Ячейка никогда не пересоздается с нуля -->
                 <div @key="@($"tile-{row}-{col}")" 
                      class="tile @(isSelected ? "selected" : "")" 
                      @onclick="() => OnTileClick(row, col)">
@@ -44,9 +47,17 @@
         StateHasChanged();
     }
 
+    private async Task ToggleMusic()
+    {
+        await JS.InvokeVoidAsync("audioEngine.toggleMusic");
+    }
+
     private async Task OnTileClick(int row, int col)
     {
         if (_isProcessing) return;
+
+        // При самом первом клике по полю даем команду запустить фоновую музыку
+        await JS.InvokeVoidAsync("audioEngine.playMusic");
 
         if (_selectedRow == null || _selectedCol == null)
         {
@@ -65,8 +76,6 @@
             if (_model.IsAdjacent(p1, p2))
             {
                 _isProcessing = true;
-                
-                // 1. Меняем местами
                 _model.Swap(p1, p2);
                 StateHasChanged();
                 await Task.Delay(250);
@@ -77,12 +86,13 @@
                 {
                     while (matches.Count > 0)
                     {
-                        // 2. Удаляем совпадения
+                        // Проигрываем звук взрыва при совпадении фишек
+                        await JS.InvokeVoidAsync("audioEngine.playMatchSound");
+
                         _model.RemoveMatches(matches);
                         StateHasChanged();
                         await Task.Delay(250);
 
-                        // 3. Фишки падают
                         _model.DropTiles();
                         StateHasChanged();
                         await Task.Delay(250);
@@ -92,7 +102,6 @@
                 }
                 else
                 {
-                    // Если матчей нет, возвращаем обратно
                     _model.Swap(p1, p2);
                     StateHasChanged();
                 }
@@ -109,11 +118,6 @@
 
     private string GetTileEmoji(int type) => type switch
     {
-        1 => "🔴",
-        2 => "🔵",
-        3 => "🟢",
-        4 => "🟡",
-        5 => "🟣",
-        _ => ""
+        1 => "🔴", 2 => "🔵", 3 => "🟢", 4 => "🟡", 5 => "🟣", _ => ""
     };
 }
