@@ -41,14 +41,17 @@
         _model.InitGrid();
     }
 
-    private void MixBoard()
+    private async Task MixBoard()
     {
+        // Пробуждаем музыку при нажатии кнопок управления
+        await JS.InvokeVoidAsync("audioEngine.playMusic");
         _model.InitGrid();
         StateHasChanged();
     }
 
     private async Task ToggleMusic()
     {
+        // Принудительно запускаем или останавливаем трек
         await JS.InvokeVoidAsync("audioEngine.toggleMusic");
     }
 
@@ -56,7 +59,7 @@
     {
         if (_isProcessing) return;
 
-        // При самом первом клике по полю даем команду запустить фоновую музыку
+        // Важнейший шаг: любой первый клик игрока по фишке снимает блокировку звука в браузере
         await JS.InvokeVoidAsync("audioEngine.playMusic");
 
         if (_selectedRow == null || _selectedCol == null)
@@ -86,7 +89,7 @@
                 {
                     while (matches.Count > 0)
                     {
-                        // Проигрываем звук взрыва при совпадении фишек
+                        // Даем мгновенную команду браузеру воспроизвести взрыв
                         await JS.InvokeVoidAsync("audioEngine.playMatchSound");
 
                         _model.RemoveMatches(matches);
