@@ -11,28 +11,11 @@
     </script>
     <link rel="stylesheet" href="css/match3.css" />
 
-    <!-- Скрипт-мост для связи виджета Telegram и нашего C# кода -->
     <script>
-        window.initTelegramWidget = function (botName) {
-            var container = document.getElementById('telegram-login-container');
-            if (!container) return;
-
-            // Создаем официальный скрипт кнопки Telegram
-            var script = document.createElement('script');
-            script.src = "https://telegram.org";
-            script.setAttribute('data-telegram-login', botName);
-            script.setAttribute('data-size', 'large');
-            script.setAttribute('data-radius', '8');
-            script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-            script.setAttribute('data-request-access', 'write');
-
-            container.appendChild(script);
-        };
-
-        // Эта функция вызывается самим Telegram при успешном входе
+        // Эта функция вызывается самим Telegram при успешном входе пользователя
         window.onTelegramAuth = function (user) {
             if (user && user.username) {
-                // Передаем имя пользователя обратно в C# (в компонент TelegramAuth)
+                // Передаем имя пользователя обратно в C# среду выполнения Blazor
                 DotNet.invokeMethodAsync('Match3Game', 'ReceiveTelegramUser', user.username)
                     .catch(err => console.error("Ошибка передачи данных в C#:", err));
             }
@@ -42,5 +25,16 @@
 <body>
     <div id="app">Загрузка игры...</div>
     <script src="_framework/blazor.webassembly.js"></script>
+
+    <!-- Скрытый контейнер-шаблон для виджета Telegram, который мы будем использовать в меню -->
+    <div id="telegram-widget-template" style="display:none;">
+        <script async src="https://telegram.org" 
+                data-telegram-login="abhiram_game_bot" 
+                data-size="large" 
+                data-radius="8" 
+                data-onauth="onTelegramAuth(user)" 
+                data-request-access="write">
+        </script>
+    </div>
 </body>
 </html>
