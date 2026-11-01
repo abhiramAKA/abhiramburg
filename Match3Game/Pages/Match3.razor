@@ -1,14 +1,10 @@
 @page "/"
 @using Match3Game.Core
-@inject Microsoft.JSInterop.IJSRuntime JS
 
 <div class="game-container">
     <div class="score-board">Очки: <span class="score-value">@_model.Score</span></div>
     
-    <div class="button-container">
-        <button class="game-btn" @onclick="MixBoard">Перемешать</button>
-        <button class="game-btn music-btn" @onclick="ToggleMusic">🎵 Музыка</button>
-    </div>
+    <button class="test-btn" @onclick="MixBoard">Перемешать поле</button>
 
     <div class="game-board" style="grid-template-rows: repeat(@GameConfig.Rows, 1fr); grid-template-columns: repeat(@GameConfig.Cols, 1fr);">
         @for (int r = 0; r < GameConfig.Rows; r++)
@@ -41,26 +37,15 @@
         _model.InitGrid();
     }
 
-    private async Task MixBoard()
+    private void MixBoard()
     {
-        // Пробуждаем музыку при нажатии кнопок управления
-        await JS.InvokeVoidAsync("audioEngine.playMusic");
         _model.InitGrid();
         StateHasChanged();
-    }
-
-    private async Task ToggleMusic()
-    {
-        // Принудительно запускаем или останавливаем трек
-        await JS.InvokeVoidAsync("audioEngine.toggleMusic");
     }
 
     private async Task OnTileClick(int row, int col)
     {
         if (_isProcessing) return;
-
-        // Важнейший шаг: любой первый клик игрока по фишке снимает блокировку звука в браузере
-        await JS.InvokeVoidAsync("audioEngine.playMusic");
 
         if (_selectedRow == null || _selectedCol == null)
         {
@@ -79,6 +64,7 @@
             if (_model.IsAdjacent(p1, p2))
             {
                 _isProcessing = true;
+                
                 _model.Swap(p1, p2);
                 StateHasChanged();
                 await Task.Delay(250);
@@ -89,9 +75,6 @@
                 {
                     while (matches.Count > 0)
                     {
-                        // Даем мгновенную команду браузеру воспроизвести взрыв
-                        await JS.InvokeVoidAsync("audioEngine.playMatchSound");
-
                         _model.RemoveMatches(matches);
                         StateHasChanged();
                         await Task.Delay(250);
@@ -121,6 +104,11 @@
 
     private string GetTileEmoji(int type) => type switch
     {
-        1 => "🔴", 2 => "🔵", 3 => "🟢", 4 => "🟡", 5 => "🟣", _ => ""
+        1 => "🔴",
+        2 => "🔵",
+        3 => "🟢",
+        4 => "🟡",
+        5 => "🟣",
+        _ => ""
     };
 }
