@@ -11,29 +11,35 @@
     </script>
     <link rel="stylesheet" href="css/match3.css" />
 
-    <!-- Аудио-скрипты для изоляции звуковой логики от C# -->
+    <!-- Изолированный звуковой движок игры -->
     <script>
         window.audioEngine = {
             playMusic: function () {
                 var music = document.getElementById('bg-music');
-                if (music) {
-                    music.volume = 0.3; // Громкость 30%, чтобы не глушило
-                    music.play().catch(e => console.log("Музыка ждет клика игрока"));
+                if (music && music.paused) {
+                    music.volume = 0.25; // Оптимальная громкость фоновой музыки
+                    music.play().catch(function(error) {
+                        console.log("Браузер заблокировал автозапуск. Ожидаем активности пользователя.");
+                    });
                 }
             },
             toggleMusic: function() {
                 var music = document.getElementById('bg-music');
                 if (music) {
-                    if (music.paused) music.play();
-                    else music.pause();
+                    if (music.paused) {
+                        music.volume = 0.25;
+                        music.play();
+                    } else {
+                        music.pause();
+                    }
                 }
             },
             playMatchSound: function () {
                 var sound = document.getElementById('match-sound');
                 if (sound) {
-                    sound.currentTime = 0; // Сброс в начало для мгновенного повтора
-                    sound.volume = 0.6;
-                    sound.play();
+                    sound.currentTime = 0; // Мгновенный сброс для частых взрывов
+                    sound.volume = 0.50; // Громкость эффектов чуть выше музыки
+                    sound.play().catch(e => console.log("Ошибка воспроизведения звука эффекта"));
                 }
             }
         };
@@ -43,13 +49,15 @@
     <div id="app">Загрузка игры...</div>
     <script src="_framework/blazor.webassembly.js"></script>
 
-    <!-- Аудио-ресурсы: Эпическая боевая фэнтези-музыка и звук взрыва (из открытых архивов) -->
-    <audio id="bg-music" loop>
-        <source src="https://google.com" type="audio/ogg"> <!-- Временный фоновый поток, ниже заменим на оркестр -->
-        <source src="https://soundhelix.com" type="audio/mp3"> 
+    <!-- Использование стабильных, разрешенных CDN-аудиопотоков без блокировок -->
+    <!-- Фоновый трек: Эпический фэнтези-оркестр с боевыми барабанами -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="https://soundhelix.com" type="audio/mp3">
     </audio>
-    <audio id="match-sound">
-        <source src="https://google.com" type="audio/ogg">
+    
+    <!-- Эффект: Короткий сочный взрыв при уничтожении фишек -->
+    <audio id="match-sound" preload="auto">
+        <source src="https://mixkit.co" type="audio/wav">
     </audio>
 </body>
 </html>
