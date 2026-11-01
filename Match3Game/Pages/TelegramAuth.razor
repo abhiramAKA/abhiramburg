@@ -4,7 +4,7 @@
     @if (string.IsNullOrEmpty(Username))
     {
         <p class="auth-status">Войдите, чтобы сохранить свой результат:</p>
-        <!-- Контейнер, куда JavaScript вставит официальную кнопку Telegram -->
+        <!-- Сюда мгновенно и безопасно перенесется кнопка Telegram -->
         <div id="telegram-login-container"></div>
     }
     else
@@ -20,31 +20,39 @@
     [Parameter] public string? Username { get; set; }
     [Parameter] public EventCallback<string> OnUserAuthenticated { get; set; }
 
+    private static TelegramAuth? _currentInstance;
+
+    protected override void OnInitialized()
+    {
+        _currentInstance = this;
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && string.IsNullOrEmpty(Username))
         {
-            // Даем браузеру 100 миллисекунд, чтобы точно нарисовать контейнер на экране
-            await Task.Delay(100);
-
-            try
-            {
-                // Имя вашего бота вставлено намертво — менять вручную ничего не нужно
-                await JS.InvokeVoidAsync("initTelegramWidget", "abhiram_game_bot");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Ошибка инициализации виджета Telegram: {ex.Message}");
-            }
+            // Небольшая пауза, чтобы структура меню отрисовалась
+            await Task.Delay(50);
+            
+            // Запускаем простую команду перемещения готовой кнопки из index.html в наше меню
+            await JS.InvokeVoidAsync("eval", @"
+                var template = document.getElementById('telegram-widget-template');
+                var container = document.getElementById('telegram-login-container');
+                if (template && container) {
+                    container.appendChild(template);
+                    template.style.display = 'block';
+                }
+            ");
         }
     }
 
+    // Системный метод-мост для приема данных авторизации
     [JSInvokable]
-    public async Task ReceiveTelegramUser(string username)
+    public static async Task ReceiveTelegramUser(string username)
     {
-        if (OnUserAuthenticated.HasDelegate)
+        if (_currentInstance != null && _currentInstance.OnUserAuthenticated.HasDelegate)
         {
-            await OnUserAuthenticated.InvokeAsync(username);
+            await _currentInstance.OnUserAuthenticated.InvokeAsync(username);
         }
     }
 }
