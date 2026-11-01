@@ -1,7 +1,5 @@
 @page "/"
 @using Match3Game.Core
-@using Microsoft.AspNetCore.Components.Web
-@rendermode WebAssemblyRenderMode
 
 <div class="game-container">
     <div class="score-board">Очки: <span class="score-value">@_model.Score</span></div>
@@ -58,6 +56,7 @@
             {
                 _isProcessing = true;
                 _model.Swap(p1, p2);
+                StateHasChanged(); // Принудительно обновляем UI после обмена местами
                 
                 var matches = _model.CheckMatches();
 
@@ -79,6 +78,7 @@
                 else
                 {
                     _model.Swap(p1, p2);
+                    StateHasChanged(); // Принудительно возвращаем фишки, если нет совпадений
                 }
                 _isProcessing = false;
             }
@@ -86,6 +86,7 @@
             {
                 _selectedRow = row;
                 _selectedCol = col;
+                StateHasChanged(); // Принудительно перерисовываем желтую рамку выделения
             }
         }
     }
