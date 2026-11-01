@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Match3 Game</title>
+    <script>
+        var path = window.location.pathname;
+        if (!path.endsWith('/')) { path += '/'; }
+        document.write('<base href="' + path + '" />');
+    </script>
+    <link rel="stylesheet" href="css/match3.css" />
+</head>
+<body>
+    <div id="app">Загрузка игры...</div>
+    <script src="_framework/blazor.webassembly.js"></script>
+</body>
+</html>
