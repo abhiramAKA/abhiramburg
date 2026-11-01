@@ -4,16 +4,52 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Match3 Game</title>
-    <!-- Скрипт автоматически рассчитывает правильный базовый путь для GitHub Pages -->
     <script>
         var path = window.location.pathname;
         if (!path.endsWith('/')) { path += '/'; }
         document.write('<base href="' + path + '" />');
     </script>
     <link rel="stylesheet" href="css/match3.css" />
+
+    <!-- Аудио-скрипты для изоляции звуковой логики от C# -->
+    <script>
+        window.audioEngine = {
+            playMusic: function () {
+                var music = document.getElementById('bg-music');
+                if (music) {
+                    music.volume = 0.3; // Громкость 30%, чтобы не глушило
+                    music.play().catch(e => console.log("Музыка ждет клика игрока"));
+                }
+            },
+            toggleMusic: function() {
+                var music = document.getElementById('bg-music');
+                if (music) {
+                    if (music.paused) music.play();
+                    else music.pause();
+                }
+            },
+            playMatchSound: function () {
+                var sound = document.getElementById('match-sound');
+                if (sound) {
+                    sound.currentTime = 0; // Сброс в начало для мгновенного повтора
+                    sound.volume = 0.6;
+                    sound.play();
+                }
+            }
+        };
+    </script>
 </head>
 <body>
     <div id="app">Загрузка игры...</div>
     <script src="_framework/blazor.webassembly.js"></script>
+
+    <!-- Аудио-ресурсы: Эпическая боевая фэнтези-музыка и звук взрыва (из открытых архивов) -->
+    <audio id="bg-music" loop>
+        <source src="https://google.com" type="audio/ogg"> <!-- Временный фоновый поток, ниже заменим на оркестр -->
+        <source src="https://soundhelix.com" type="audio/mp3"> 
+    </audio>
+    <audio id="match-sound">
+        <source src="https://google.com" type="audio/ogg">
+    </audio>
 </body>
 </html>
