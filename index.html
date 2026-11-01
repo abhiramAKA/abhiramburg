@@ -10,32 +10,6 @@
         document.write('<base href="' + path + '" />');
     </script>
     <link rel="stylesheet" href="css/match3.css" />
-
-    <script>
-        window.onTelegramAuth = function (user) {
-            if (user && user.username) {
-                DotNet.invokeMethodAsync('Match3Game', 'ReceiveTelegramUser', user.username)
-                    .catch(err => console.error("Ошибка передачи данных в C#:", err));
-            }
-        };
-
-        window.renderTelegramButton = function () {
-            var container = document.getElementById('telegram-auth-box');
-            if (!container) return;
-            container.innerHTML = '';
-
-            var script = document.createElement('script');
-            script.async = true;
-            script.src = "https://telegram.org";
-            script.setAttribute('data-telegram-login', 'abhiram_game_bot');
-            script.setAttribute('data-size', 'large');
-            script.setAttribute('data-radius', '8');
-            script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-            script.setAttribute('data-request-access', 'write');
-
-            container.appendChild(script);
-        };
-    </script>
 </head>
 <body>
     <div id="app">Загрузка игры...</div>
