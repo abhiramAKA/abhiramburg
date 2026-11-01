@@ -1,18 +1,19 @@
 class GameplayScene {
     constructor() {
         this.gridSize = 6;
-        // Базовые цвета для создания объемных глянцевых 3D-градиентов
-        this.baseColors = {
-            '#ff4757': { dark: '#c0392b', light: '#ff6b81' }, // Рубин
-            '#2ecc71': { dark: '#27ae60', light: '#55efc4' }, // Изумруд
-            '#54a0ff': { dark: '#2980b9', light: '#74b9ff' }, // Сапфир
-            '#feca57': { dark: '#f39c12', light: '#ffeaa7' }, // Топаз
-            '#9b59b6': { dark: '#8e44ad', light: '#a29bfe' }  // Аметист
+        // Настройки кристаллов: цвет и форма
+        this.gemTypes = {
+            '#ff4757': { shape: 'diamond', light: '#ff6b81' },   // Рубин (Ромб)
+            '#2ecc71': { shape: 'square', light: '#55efc4' },    // Изумруд (Квадрат)
+            '#54a0ff': { shape: 'triangle', light: '#74b9ff' },  // Сапфир (Треугольник)
+            '#feca57': { shape: 'circle', light: '#ffeaa7' },    // Топаз (Сфера)
+            '#9b59b6': { shape: 'diamond', light: '#a29bfe' }   // Аметист
         };
-        this.colors = Object.keys(this.baseColors);
+        this.colors = Object.keys(this.gemTypes);
         this.board = [];
         this.selectedGem = null;
-        this.particles = []; // Кластер спецэффектов (взрывы частиц)
+        this.particles = [];
+        this.shimmerTimer = 0;
     }
 
     create() {
@@ -25,117 +26,92 @@ class GameplayScene {
 
         if (this.board.length === 0) this.generateBoard();
 
-        // --- ОБНОВЛЕНИЕ ЛОГИКИ ЭФФЕКТОВ ---
+        // Таймер мерцания граней
+        this.shimmerTimer += 0.05;
         this.updateParticles();
 
-        // --- РЕНДЕР ГРАФИКИ ---
-        // 1. Неоновый футуристичный фон интерфейса
+        // 1. Интерфейс очков
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 26px Arial';
+        ctx.font = 'bold 24px Arial';
         ctx.textAlign = 'center';
-        ctx.shadowColor = '#00ffcc';
-        ctx.shadowBlur = 10; // Эффект свечения
-        ctx.fillText('САМОЦВЕТЫ 3D', gi.canvas.width / 2, gi.canvas.height * 0.08);
+        ctx.fillText('Очки: ' + gi.score, gi.canvas.width / 2, gi.canvas.height * 0.12);
 
-        ctx.fillStyle = '#ffff00';
-        ctx.shadowColor = '#ffff00';
-        ctx.fillText('Очки: ' + gi.score, gi.canvas.width / 2, gi.canvas.height * 0.15);
-        ctx.shadowBlur = 0; // Сбрасываем свечение для остальных элементов
-
-        // 2. Игровое поле и 3D-сферы
+        // 2. Рисуем сетку и мерцающие камни
         for (let r = 0; r < this.gridSize; r++) {
             for (let c = 0; c < this.gridSize; c++) {
                 const x = this.offsetX + c * this.cellSize + this.cellSize / 2;
                 const y = this.offsetY + r * this.cellSize + this.cellSize / 2;
                 
-                // Стильная 3D плитка фона
+                // Клетки поля
                 ctx.fillStyle = '#1e1b4b';
-                ctx.fillRect(x - this.cellSize/2 + 3, y - this.cellSize/2 + 3, this.cellSize - 6, this.cellSize - 6);
-                ctx.strokeStyle = '#4338ca';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(x - this.cellSize/2 + 3, y - this.cellSize/2 + 3, this.cellSize - 6, this.cellSize - 6);
+                ctx.fillRect(x - this.cellSize/2 + 2, y - this.cellSize/2 + 2, this.cellSize - 4, this.cellSize - 4);
+                ctx.strokeStyle = '#312e81';
+                ctx.strokeRect(x - this.cellSize/2 + 2, y - this.cellSize/2 + 2, this.cellSize - 4, this.cellSize - 4);
 
-                const gemColor = this.board[r][c];
-                if (!gemColor) continue;
+                const color = this.board[r][c];
+                if (!color) continue;
 
-                // Создаем объемную 3D-сферу с помощью радиального градиента
-                const radius = this.cellSize * 0.36;
-                const colorData = this.baseColors[gemColor] || { dark: '#000', light: '#fff' };
+                const gem = this.gemTypes[color];
+                const sz = this.cellSize * 0.35;
                 
-                // Смещение центра блика вверх-влево дает иллюзию объема и 3D света
-                const gradient = ctx.createRadialGradient(
-                    x - radius * 0.3, y - radius * 0.3, radius * 0.1, 
-                    x, y, radius
-                );
-                gradient.addColorStop(0, colorData.light);
-                gradient.addColorStop(0.5, gemColor);
-                gradient.addColorStop(1, colorData.dark);
+                // Магия живого мерцания кристаллов
+                const brightness = Math.sin(this.shimmerTimer + (r + c)) * 0.2 + 0.8;
 
-                ctx.fillStyle = gradient;
+                ctx.save();
+                ctx.translate(x, y);
+                
+                // Рисуем форму камня
+                ctx.fillStyle = color;
                 ctx.beginPath();
-                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                if (gem.shape === 'diamond') {
+                    ctx.moveTo(0, -sz); ctx.lineTo(sz, 0); ctx.lineTo(0, sz); ctx.lineTo(-sz, 0);
+                } else if (gem.shape === 'triangle') {
+                    ctx.moveTo(0, -sz); ctx.lineTo(sz, sz); ctx.lineTo(-sz, sz);
+                } else if (gem.shape === 'square') {
+                    ctx.rect(-sz*0.8, -sz*0.8, sz*1.6, sz*1.6);
+                } else {
+                    ctx.arc(0, 0, sz, 0, Math.PI * 2);
+                }
+                ctx.closePath();
                 ctx.fill();
 
-                // Эффектная пульсирующая рамка вокруг выбранного самоцвета
+                // Наносим грани огранки
+                ctx.strokeStyle = `rgba(255, 255, 255, ${0.3 * brightness})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, 0); ctx.lineTo(0, -sz);
+                ctx.moveTo(0, 0); ctx.lineTo(sz, 0);
+                ctx.stroke();
+
+                // Белый сияющий блик на камне
+                ctx.fillStyle = `rgba(255, 255, 255, ${0.5 * brightness})`;
+                ctx.beginPath();
+                ctx.arc(-sz*0.3, -sz*0.3, sz*0.2, 0, Math.PI*2);
+                ctx.fill();
+
+                ctx.restore();
+
+                // Если камень выбран игроком
                 if (this.selectedGem && this.selectedGem.r === r && this.selectedGem.c === c) {
                     ctx.strokeStyle = '#ffffff';
                     ctx.lineWidth = 4;
-                    ctx.shadowColor = '#ffffff';
-                    ctx.shadowBlur = 15;
-                    ctx.stroke();
-                    ctx.shadowBlur = 0;
+                    ctx.strokeRect(x - this.cellSize/2 + 4, y - this.cellSize/2 + 4, this.cellSize - 8, this.cellSize - 8);
                 }
             }
         }
 
-        // 3. Отрисовка спецэффектов (взрывы частиц)
+        // 3. Рисуем летающие искры взрыва
         this.particles.forEach(p => {
             ctx.fillStyle = p.color;
-            ctx.shadowColor = p.color;
-            ctx.shadowBlur = 8;
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
             ctx.fill();
         });
-        ctx.shadowBlur = 0;
 
-        // 4. Кнопка "В меню"
-        ctx.fillStyle = '#ffffff';
+        // 4. Кнопка возврата в меню
+        ctx.fillStyle = '#aaaaaa';
         ctx.font = '20px Arial';
         ctx.fillText('В меню', gi.canvas.width / 2, gi.canvas.height - 60);
-
-        if (!this.inputSetup) {
-            window.addEventListener('pointerdown', (e) => this.handleTap(e));
-            this.inputSetup = true;
-        }
-    }
-
-    // Создание взрыва частиц в точке уничтожения камня
-    spawnExplosion(x, y, color) {
-        for (let i = 0; i < 8; i++) {
-            this.particles.push({
-                x: x,
-                y: y,
-                vx: (Math.random() - 0.5) * 6,
-                vy: (Math.random() - 0.5) * 6,
-                size: Math.random() * 4 + 2,
-                color: color,
-                alpha: 1,
-                life: 25 // Время жизни частиц в кадрах
-            });
-        }
-    }
-
-    updateParticles() {
-        for (let i = this.particles.length - 1; i >= 0; i--) {
-            const p = this.particles[i];
-            p.x += p.vx;
-            p.y += p.vy;
-            p.life--;
-            if (p.life <= 0) {
-                this.particles.splice(i, 1);
-            }
-        }
     }
 
     generateBoard() {
@@ -223,18 +199,28 @@ class GameplayScene {
             const y = this.offsetY + pos.r * this.cellSize + this.cellSize / 2;
             const color = this.board[pos.r][pos.c];
             
-            // Запускаем взрыв в координатах удаляемого камня!
-            if (color) this.spawnExplosion(x, y, color);
-            
+            if (color) {
+                // Создаем искры взрыва
+                for(let i=0; i<8; i++) {
+                    this.particles.push({
+                        x, y,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6,
+                        size: Math.random() * 3 + 2,
+                        color: this.gemTypes[color].light,
+                        life: 20
+                    });
+                }
+            }
             this.board[pos.r][pos.c] = this.colors[Math.floor(Math.random() * this.colors.length)];
         });
-        
-        setTimeout(() => {
-            let nextMatches = this.checkMatches();
-            if (nextMatches.length > 0) {
-                window.gameInstance.score += nextMatches.length * 10;
-                this.removeMatches(nextMatches);
-            }
-        }, 200);
+    }
+
+    updateParticles() {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.x += p.vx; p.y += p.vy; p.life--;
+            if (p.life <= 0) this.particles.splice(i, 1);
+        }
     }
 }
