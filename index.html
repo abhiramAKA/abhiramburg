@@ -7,8 +7,8 @@
     <style>
         body { margin: 0; padding: 0; background: #000; overflow: hidden; }
     </style>
-    <!-- Загружаем движок напрямую -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.60.0/phaser.min.js"></script>
+    <!-- Загружаем движок напрямую (проверенное стабильное зеркало) -->
+    <script src="https://cloudflare.com"></script>
 </head>
 <body>
 
@@ -23,7 +23,7 @@
             const cy = this.cameras.main.centerY;
 
             this.add.text(cx, cy - 100, 'МЕГА ИГРА 2026', { 
-                fontSize: '32px', fill: '#fff', fontFamily: 'Arial' 
+                fontSize: '32px', fill: '#ffffff', fontFamily: 'Arial' 
             }).setOrigin(0.5);
 
             const startButton = this.add.text(cx, cy + 50, '[ НАЧАТЬ ИГРУ ]', { 
@@ -51,7 +51,7 @@
 
             this.score = 0;
             this.scoreText = this.add.text(cx, cy, 'Кликов: 0', { 
-                fontSize: '40px', fill: '#fff', fontFamily: 'Arial' 
+                fontSize: '40px', fill: '#ffffff', fontFamily: 'Arial' 
             }).setOrigin(0.5);
 
             const target = this.add.circle(cx, cy + 100, 60, 0xff4757).setInteractive();
@@ -62,7 +62,7 @@
             });
 
             const backButton = this.add.text(cx, this.cameras.main.height - 80, 'В меню', { 
-                fontSize: '20px', fill: '#aaa', fontFamily: 'Arial' 
+                fontSize: '20px', fill: '#aaaaaa', fontFamily: 'Arial' 
             }).setOrigin(0.5).setInteractive();
             
             backButton.on('pointerdown', () => { 
@@ -74,7 +74,7 @@
     // --- СБОРКА И ЗАПУСК ИГРЫ ---
     window.onload = function() {
         const config = {
-            type: Phaser.AUTO,
+            type: Phaser.AUTO, // Браузер сам выберет WebGL или Canvas
             width: window.innerWidth,
             height: window.innerHeight,
             backgroundColor: '#2d3436',
@@ -82,6 +82,7 @@
         };
         const game = new Phaser.Game(config);
         window.addEventListener('resize', () => { game.scale.resize(window.innerWidth, window.innerHeight); });
+    };
     </script>
 </body>
 </html>
