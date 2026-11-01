@@ -1,25 +1,21 @@
-class MainMenuScene extends Phaser.Scene {
-    constructor() { 
-        super({ key: 'MainMenuScene' }); 
-    }
-    
+class MainMenuScene {
     create() {
-        const cx = this.cameras.main.centerX;
-        const cy = this.cameras.main.centerY;
+        const gi = window.gameInstance;
+        const ctx = gi.ctx;
+        const cx = gi.canvas.width / 2;
+        const cy = gi.canvas.height / 2;
 
         // Название игры
-        this.add.text(cx, cy - 100, 'МЕГА ИГРА 2026', { 
-            fontSize: '32px', fill: '#ffffff', fontFamily: 'Arial' 
-        }).setOrigin(0.5);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '32px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('МЕГА ИГРА 2026', cx, cy - 50);
 
-        // Кнопка запуска
-        const startButton = this.add.text(cx, cy + 50, '[ НАЧАТЬ ИГРУ ]', { 
-            fontSize: '28px', fill: '#00ffcc', backgroundColor: '#1e272e', padding: 10, fontFamily: 'Arial' 
-        }).setOrigin(0.5).setInteractive();
-        
-        // Переход на игровой экран
-        startButton.on('pointerdown', () => { 
-            this.scene.start('GameplayScene'); 
-        });
+        // Кнопка старта
+        ctx.fillStyle = '#1e272e';
+        ctx.fillRect(cx - 120, cy, 240, 50);
+        ctx.fillStyle = '#00ffcc';
+        ctx.font = '24px Arial';
+        ctx.fillText('[ НАЧАТЬ ИГРУ ]', cx, cy + 35);
     }
 }

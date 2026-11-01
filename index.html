@@ -7,20 +7,19 @@
     <style>
         body { margin: 0; padding: 0; background: #000; overflow: hidden; }
     </style>
-    <!-- Встраиваем ядро движка прямо сюда, чтобы навсегда убрать ошибку загрузки сети -->
+    <!-- Автономный микро-движок -->
     <script>
     const Phaser = { AUTO: 'CANVAS', Game: function(c) { console.log("Движок готов"); const canvas = document.createElement('canvas'); canvas.width = c.width; canvas.height = c.height; canvas.style.background = c.backgroundColor; document.body.appendChild(canvas); const ctx = canvas.getContext('2d'); window.gameInstance = { ctx: ctx, canvas: canvas, config: c, score: 0, scene: 'menu' }; } };
     </script>
 </head>
 <body>
 
-    <!-- Подключаем наши изолированные кластеры -->
+    <!-- Подключаем файлы кластеров обратно по стандартным именам -->
     <script src="menu.js"></script>
     <script src="game.js"></script>
 
     <script>
         window.onload = function() {
-            // Инициализируем наш каркас
             const config = {
                 type: Phaser.AUTO,
                 width: window.innerWidth,
@@ -30,12 +29,10 @@
             };
             const game = new Phaser.Game(config);
             
-            // Запуск игрового цикла отрисовки
             if(window.gameInstance) {
                 const gi = window.gameInstance;
                 const menu = new MainMenuScene();
                 const gameplay = new GameplayScene();
-                menu.sys = { game: game }; gameplay.sys = { game: game };
                 
                 function loop() {
                     gi.ctx.clearRect(0, 0, gi.canvas.width, gi.canvas.height);
