@@ -1,5 +1,5 @@
 body {
-    background-color: #1a1a1a;
+    background-color: #121212;
     margin: 0;
     display: flex;
     justify-content: center;
@@ -12,14 +12,15 @@ body {
     flex-direction: column;
     align-items: center;
     font-family: sans-serif;
-    background-color: #222;
+    background-color: #1e1e1e;
     color: white;
     padding: 30px;
     border-radius: 16px;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.8);
     user-select: none;
     min-width: 380px;
     box-sizing: border-box;
+    border: 1px solid #2d2d2d;
 }
 
 /* СТИЛИ СТАРТОВОГО МЕНЮ И ЭКРАНА КОНЦА ИГРЫ */
@@ -33,9 +34,10 @@ body {
 
 .menu-title {
     font-size: 36px;
-    color: #ffeb3b;
+    color: #ffd700;
     margin-bottom: 10px;
     letter-spacing: 2px;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
 }
 
 .menu-desc {
@@ -46,7 +48,7 @@ body {
 }
 
 .start-btn {
-    background-color: #4caf50;
+    background-color: #2e7d32;
     color: white;
     border: none;
     padding: 14px 32px;
@@ -55,17 +57,17 @@ body {
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.2s, transform 0.1s;
-    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
 }
 
 .start-btn:hover {
-    background-color: #66bb6a;
+    background-color: #388e3c;
     transform: scale(1.05);
 }
 
 .gameover-title {
     font-size: 32px;
-    color: #ef5350;
+    color: #e53935;
     margin-bottom: 15px;
 }
 
@@ -75,7 +77,7 @@ body {
 }
 
 .gameover-score span {
-    color: #ffeb3b;
+    color: #ffd700;
     font-weight: bold;
     font-size: 24px;
 }
@@ -88,90 +90,140 @@ body {
 }
 
 .stat-box {
-    background-color: #333;
+    background-color: #2a2a2a;
     padding: 8px 16px;
     border-radius: 6px;
     font-size: 20px;
     font-weight: bold;
-    border: 1px solid #444;
+    border: 1px solid #3a3a3a;
 }
 
 .stat-box span {
-    color: #ffeb3b;
+    color: #ffd700;
 }
 
 .test-btn {
-    background-color: #444;
-    color: white;
-    border: 2px solid #555;
+    background-color: #333;
+    color: #ccc;
+    border: 1px solid #444;
     padding: 8px 16px;
     font-size: 14px;
     border-radius: 6px;
     cursor: pointer;
     margin-bottom: 20px;
-    transition: background 0.2s;
+    transition: background 0.2s, color 0.2s;
 }
 
 .test-btn:hover {
-    background-color: #555;
+    background-color: #444;
+    color: white;
 }
 
 .game-board {
     display: grid;
-    gap: 5px;
-    background-color: #333;
-    padding: 10px;
-    border-radius: 8px;
-    width: 380px;
-    height: 380px;
+    gap: 6px;
+    background-color: #151515;
+    padding: 12px;
+    border-radius: 12px;
+    width: 390px;
+    height: 390px;
+    border: 2px solid #2a2a2a;
 }
 
+/* КОРПУС ЯЧЕЙКИ КАМНЯ */
 .tile {
-    background-color: #444;
+    background-color: #262626;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 26px;
+    font-size: 28px;
     cursor: pointer;
-    border-radius: 6px;
-    transition: background-color 0.2s;
+    border-radius: 8px;
+    transition: background-color 0.2s, border-color 0.2s;
+    position: relative;
     overflow: hidden;
+    border: 1px solid #333;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
 }
 
 .tile:hover {
-    background-color: #555;
+    background-color: #323232;
+    border-color: #444;
+}
+
+/* КОНТЕЙНЕР ДЛЯ ЭФФЕКТА БЛЕСКА КАМНЯ */
+.gem-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Эффект плавной прокрутки светового блика по граням кристалла */
+.shine-effect {
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 30%;
+    height: 200%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+    transform: rotate(30deg);
+    animation: gemShine 4s infinite ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes gemShine {
+    0% { left: -60%; }
+    15% { left: 130%; }
+    100% { left: 130%; }
 }
 
 .tile-content {
     display: inline-block;
-    animation: appear 0.2s ease-out forwards;
+    animation: appear 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
 }
 
 @keyframes appear {
-    0% { transform: scale(0.5); opacity: 0; }
+    0% { transform: scale(0.3); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
 }
 
+/* ЭФФЕКТ ВЗРЫВА И УНИЧТОЖЕНИЯ КАМНЕЙ */
+.tile.explode {
+    animation: gemExplode 0.25s ease-out forwards;
+    background-color: #3a2222;
+}
+
+@keyframes gemExplode {
+    0% { transform: scale(1); filter: brightness(1.8) blur(0px); opacity: 1; }
+    50% { transform: scale(1.1); box-shadow: 0 0 15px #ffd700; }
+    100% { transform: scale(0); filter: brightness(2) blur(4px); opacity: 0; }
+}
+
+/* РАМКА ВЫДЕЛЕНИЯ АКТИВНОГО САМОЦВЕТА */
 .tile.selected {
     outline: 3px solid #ffeb3b !important;
-    background-color: #666 !important;
+    background-color: #3a3a3a !important;
+    box-shadow: 0 0 12px rgba(255, 235, 59, 0.6);
+    z-index: 5;
 }
 
-/* СТИЛИ ДЛЯ ИЗОЛИРОВАННОГО БЛОКА АВТОРИЗАЦИИ TELEGRAM */
+/* СТИЛИ ДЛЯ АВТОРИЗАЦИИ TELEGRAM */
 .auth-container {
     margin-bottom: 20px;
-    background-color: #2c2c2c;
+    background-color: #2a2a2a;
     padding: 12px 20px;
     border-radius: 10px;
-    border: 1px solid #3d3d3d;
+    border: 1px solid #3a3a3a;
 }
-
 .auth-status {
     font-size: 14px;
     color: #b0bec5;
     margin: 0 0 10px 0;
 }
-
 .user-badge {
     display: flex;
     align-items: center;
@@ -180,7 +232,6 @@ body {
     font-weight: bold;
     color: #64b5f6;
 }
-
 .user-avatar {
     font-size: 20px;
 }
