@@ -1,75 +1,143 @@
 class GameplayScene {
     constructor() {
-        this.gridSize = 6; // Поле 6 на 6 элементов (идеально для экрана телефона)
-        this.colors = ['#ff4757', '#2ecc71', '#54a0ff', '#feca57', '#9b59b6']; // Красный, зеленый, синий, желтый, фиолетовый
+        this.gridSize = 6;
+        // Базовые цвета для создания объемных глянцевых 3D-градиентов
+        this.baseColors = {
+            '#ff4757': { dark: '#c0392b', light: '#ff6b81' }, // Рубин
+            '#2ecc71': { dark: '#27ae60', light: '#55efc4' }, // Изумруд
+            '#54a0ff': { dark: '#2980b9', light: '#74b9ff' }, // Сапфир
+            '#feca57': { dark: '#f39c12', light: '#ffeaa7' }, // Топаз
+            '#9b59b6': { dark: '#8e44ad', light: '#a29bfe' }  // Аметист
+        };
+        this.colors = Object.keys(this.baseColors);
         this.board = [];
         this.selectedGem = null;
+        this.particles = []; // Кластер спецэффектов (взрывы частиц)
     }
 
     create() {
         const gi = window.gameInstance;
         const ctx = gi.ctx;
         
-        // Размеры и отступы для сетки под экран телефона
         this.cellSize = Math.floor(gi.canvas.width / (this.gridSize + 1));
         this.offsetX = (gi.canvas.width - (this.cellSize * this.gridSize)) / 2;
-        this.offsetY = gi.canvas.height * 0.25; // Смещаем поле чуть ниже центра
+        this.offsetY = gi.canvas.height * 0.25;
 
-        // Генерируем игровое поле, если оно еще не создано
-        if (this.board.length === 0) {
-            this.generateBoard();
-        }
+        if (this.board.length === 0) this.generateBoard();
 
-        // --- ОТРИСОВКА ---
-        // 1. Верхний интерфейс
+        // --- ОБНОВЛЕНИЕ ЛОГИКИ ЭФФЕКТОВ ---
+        this.updateParticles();
+
+        // --- РЕНДЕР ГРАФИКИ ---
+        // 1. Неоновый футуристичный фон интерфейса
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 24px Arial';
+        ctx.font = 'bold 26px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('ТРИ В РЯД', gi.canvas.width / 2, gi.canvas.height * 0.08);
+        ctx.shadowColor = '#00ffcc';
+        ctx.shadowBlur = 10; // Эффект свечения
+        ctx.fillText('САМОЦВЕТЫ 3D', gi.canvas.width / 2, gi.canvas.height * 0.08);
 
         ctx.fillStyle = '#ffff00';
-        ctx.font = '28px Arial';
+        ctx.shadowColor = '#ffff00';
         ctx.fillText('Очки: ' + gi.score, gi.canvas.width / 2, gi.canvas.height * 0.15);
+        ctx.shadowBlur = 0; // Сбрасываем свечение для остальных элементов
 
-        // 2. Рисуем сетку и самоцветы
+        // 2. Игровое поле и 3D-сферы
         for (let r = 0; r < this.gridSize; r++) {
             for (let c = 0; c < this.gridSize; c++) {
                 const x = this.offsetX + c * this.cellSize + this.cellSize / 2;
                 const y = this.offsetY + r * this.cellSize + this.cellSize / 2;
                 
-                // Задний фон ячейки
-                ctx.fillStyle = '#341f97';
-                ctx.fillRect(x - this.cellSize/2 + 2, y - this.cellSize/2 + 2, this.cellSize - 4, this.cellSize - 4);
+                // Стильная 3D плитка фона
+                ctx.fillStyle = '#1e1b4b';
+                ctx.fillRect(x - this.cellSize/2 + 3, y - this.cellSize/2 + 3, this.cellSize - 6, this.cellSize - 6);
+                ctx.strokeStyle = '#4338ca';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(x - this.cellSize/2 + 3, y - this.cellSize/2 + 3, this.cellSize - 6, this.cellSize - 6);
 
-                // Рисуем самоцвет
                 const gemColor = this.board[r][c];
-                ctx.fillStyle = gemColor;
+                if (!gemColor) continue;
+
+                // Создаем объемную 3D-сферу с помощью радиального градиента
+                const radius = this.cellSize * 0.36;
+                const colorData = this.baseColors[gemColor] || { dark: '#000', light: '#fff' };
+                
+                // Смещение центра блика вверх-влево дает иллюзию объема и 3D света
+                const gradient = ctx.createRadialGradient(
+                    x - radius * 0.3, y - radius * 0.3, radius * 0.1, 
+                    x, y, radius
+                );
+                gradient.addColorStop(0, colorData.light);
+                gradient.addColorStop(0.5, gemColor);
+                gradient.addColorStop(1, colorData.dark);
+
+                ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(x, y, this.cellSize * 0.35, 0, Math.PI * 2);
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Обводка выбранного самоцвета
+                // Эффектная пульсирующая рамка вокруг выбранного самоцвета
                 if (this.selectedGem && this.selectedGem.r === r && this.selectedGem.c === c) {
                     ctx.strokeStyle = '#ffffff';
                     ctx.lineWidth = 4;
+                    ctx.shadowColor = '#ffffff';
+                    ctx.shadowBlur = 15;
                     ctx.stroke();
+                    ctx.shadowBlur = 0;
                 }
             }
         }
 
-        // 3. Кнопка возврата в меню
-        ctx.fillStyle = '#aaaaaa';
+        // 3. Отрисовка спецэффектов (взрывы частиц)
+        this.particles.forEach(p => {
+            ctx.fillStyle = p.color;
+            ctx.shadowColor = p.color;
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        ctx.shadowBlur = 0;
+
+        // 4. Кнопка "В меню"
+        ctx.fillStyle = '#ffffff';
         ctx.font = '20px Arial';
         ctx.fillText('В меню', gi.canvas.width / 2, gi.canvas.height - 60);
 
-        // Подключаем управление (обработка тапов), если еще не подключено
         if (!this.inputSetup) {
             window.addEventListener('pointerdown', (e) => this.handleTap(e));
             this.inputSetup = true;
         }
     }
 
-    // Создание случайного поля без готовых комбинаций в ряд
+    // Создание взрыва частиц в точке уничтожения камня
+    spawnExplosion(x, y, color) {
+        for (let i = 0; i < 8; i++) {
+            this.particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6,
+                size: Math.random() * 4 + 2,
+                color: color,
+                alpha: 1,
+                life: 25 // Время жизни частиц в кадрах
+            });
+        }
+    }
+
+    updateParticles() {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life--;
+            if (p.life <= 0) {
+                this.particles.splice(i, 1);
+            }
+        }
+    }
+
     generateBoard() {
         for (let r = 0; r < this.gridSize; r++) {
             this.board[r] = [];
@@ -86,7 +154,6 @@ class GameplayScene {
         }
     }
 
-    // Обработка нажатий игрока на экране телефона
     handleTap(e) {
         const gi = window.gameInstance;
         if (gi.scene !== 'game') return;
@@ -94,53 +161,43 @@ class GameplayScene {
         const x = e.clientX;
         const y = e.clientY;
 
-        // Проверяем нажатие кнопки "В меню"
         if (y > gi.canvas.height - 90 && y < gi.canvas.height - 30) {
             gi.scene = 'menu';
             this.selectedGem = null;
             return;
         }
 
-        // Вычисляем, в какую ячейку поля нажал игрок
         const c = Math.floor((x - this.offsetX) / this.cellSize);
         const r = Math.floor((y - this.offsetY) / this.cellSize);
 
-        // Если клик мимо поля — сбрасываем выбор
         if (c < 0 || c >= this.gridSize || r < 0 || r >= this.gridSize) return;
 
         if (!this.selectedGem) {
-            // Первый клик: выбираем самоцвет
             this.selectedGem = { r, c };
         } else {
-            // Второй клик: проверяем, соседняя ли это ячейка
             const dRow = Math.abs(this.selectedGem.r - r);
             const dCol = Math.abs(this.selectedGem.c - c);
 
             if ((dRow === 1 && dCol === 0) || (dRow === 0 && dCol === 1)) {
-                // Меняем местами самоцветы
                 let temp = this.board[this.selectedGem.r][this.selectedGem.c];
                 this.board[this.selectedGem.r][this.selectedGem.c] = this.board[r][c];
                 this.board[r][c] = temp;
 
-                // Проверяем, появились ли после этого три в ряд
                 let matches = this.checkMatches();
                 if (matches.length > 0) {
-                    gi.score += matches.length * 10; // Добавляем очки за каждый уничтоженный камень
+                    gi.score += matches.length * 10;
                     this.removeMatches(matches);
                 } else {
-                    // Если комбинации нет — возвращаем камни обратно
                     this.board[r][c] = this.board[this.selectedGem.r][this.selectedGem.c];
                     this.board[this.selectedGem.r][this.selectedGem.c] = temp;
                 }
             }
-            this.selectedGem = null; // Сбрасываем выделение
+            this.selectedGem = null;
         }
     }
 
-    // Поиск совпадений "Три в ряд"
     checkMatches() {
         let matchPositions = [];
-        // Проверка по горизонтали
         for (let r = 0; r < this.gridSize; r++) {
             for (let c = 0; c < this.gridSize - 2; c++) {
                 let color = this.board[r][c];
@@ -149,7 +206,6 @@ class GameplayScene {
                 }
             }
         }
-        // Проверка по вертикали
         for (let c = 0; c < this.gridSize; c++) {
             for (let r = 0; r < this.gridSize - 2; r++) {
                 let color = this.board[r][c];
@@ -161,20 +217,24 @@ class GameplayScene {
         return matchPositions;
     }
 
-    // Удаление совпавших рядов и падение новых камней сверху
     removeMatches(matches) {
-        // Заменяем удаленные камни на случайные новые
         matches.forEach(pos => {
+            const x = this.offsetX + pos.c * this.cellSize + this.cellSize / 2;
+            const y = this.offsetY + pos.r * this.cellSize + this.cellSize / 2;
+            const color = this.board[pos.r][pos.c];
+            
+            // Запускаем взрыв в координатах удаляемого камня!
+            if (color) this.spawnExplosion(x, y, color);
+            
             this.board[pos.r][pos.c] = this.colors[Math.floor(Math.random() * this.colors.length)];
         });
         
-        // Повторная проверка, если новые упавшие камни случайно собрали еще один ряд
         setTimeout(() => {
             let nextMatches = this.checkMatches();
             if (nextMatches.length > 0) {
                 window.gameInstance.score += nextMatches.length * 10;
                 this.removeMatches(nextMatches);
             }
-        }, 300);
+        }, 200);
     }
 }
