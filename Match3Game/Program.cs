@@ -11,7 +11,8 @@ namespace Match3Game
         public static async Task Main(string[] args)
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
-            builder.RootComponents.Add<Pages.Match3>("#app");
+            // Изменили точку входа на App, чтобы оживить интерактивность
+            builder.RootComponents.Add<App>("#app");
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
