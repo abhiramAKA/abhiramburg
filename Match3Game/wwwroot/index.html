@@ -10,6 +10,34 @@
         document.write('<base href="' + path + '" />');
     </script>
     <link rel="stylesheet" href="css/match3.css" />
+
+    <!-- Скрипт-мост для связи виджета Telegram и нашего C# кода -->
+    <script>
+        window.initTelegramWidget = function (botName) {
+            var container = document.getElementById('telegram-login-container');
+            if (!container) return;
+
+            // Создаем официальный скрипт кнопки Telegram
+            var script = document.createElement('script');
+            script.src = "https://telegram.org";
+            script.setAttribute('data-telegram-login', botName);
+            script.setAttribute('data-size', 'large');
+            script.setAttribute('data-radius', '8');
+            script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+            script.setAttribute('data-request-access', 'write');
+
+            container.appendChild(script);
+        };
+
+        // Эта функция вызывается самим Telegram при успешном входе
+        window.onTelegramAuth = function (user) {
+            if (user && user.username) {
+                // Передаем имя пользователя обратно в C# (в компонент TelegramAuth)
+                DotNet.invokeMethodAsync('Match3Game', 'ReceiveTelegramUser', user.username)
+                    .catch(err => console.error("Ошибка передачи данных в C#:", err));
+            }
+        };
+    </script>
 </head>
 <body>
     <div id="app">Загрузка игры...</div>
