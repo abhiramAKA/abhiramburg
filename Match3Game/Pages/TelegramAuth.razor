@@ -4,8 +4,10 @@
     @if (string.IsNullOrEmpty(Username))
     {
         <p class="auth-status">Войдите, чтобы сохранить свой результат:</p>
-        <!-- Сюда мгновенно и безопасно перенесется кнопка Telegram -->
-        <div id="telegram-login-container"></div>
+        <!-- Целевое безопасное окно для прорисовки синей кнопки -->
+        <div id="telegram-auth-box" style="min-height: 40px; display: flex; justify-content: center; align-items: center;">
+            <span style="font-size: 12px; color: #555;">Инициализация виджета...</span>
+        </div>
     }
     else
     {
@@ -20,39 +22,37 @@
     [Parameter] public string? Username { get; set; }
     [Parameter] public EventCallback<string> OnUserAuthenticated { get; set; }
 
-    private static TelegramAuth? _currentInstance;
+    private static TelegramAuth? _instance;
 
     protected override void OnInitialized()
     {
-        _currentInstance = this;
+        _instance = this;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && string.IsNullOrEmpty(Username))
         {
-            // Небольшая пауза, чтобы структура меню отрисовалась
-            await Task.Delay(50);
-            
-            // Запускаем простую команду перемещения готовой кнопки из index.html в наше меню
-            await JS.InvokeVoidAsync("eval", @"
-                var template = document.getElementById('telegram-widget-template');
-                var container = document.getElementById('telegram-login-container');
-                if (template && container) {
-                    container.appendChild(template);
-                    template.style.display = 'block';
-                }
-            ");
+            // Пауза 200мс, чтобы дать браузеру полностью построить разметку меню
+            await Task.Delay(200);
+            try
+            {
+                // Посылаем команду на сборку синей кнопки
+                await JS.InvokeVoidAsync("renderTelegramButton");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка отрисовки кнопки Telegram: {ex.Message}");
+            }
         }
     }
 
-    // Системный метод-мост для приема данных авторизации
     [JSInvokable]
     public static async Task ReceiveTelegramUser(string username)
     {
-        if (_currentInstance != null && _currentInstance.OnUserAuthenticated.HasDelegate)
+        if (_instance != null && _instance.OnUserAuthenticated.HasDelegate)
         {
-            await _currentInstance.OnUserAuthenticated.InvokeAsync(username);
+            await _instance.OnUserAuthenticated.InvokeAsync(username);
         }
     }
 }
