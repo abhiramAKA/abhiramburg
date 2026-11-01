@@ -1,7 +1,7 @@
 <div class="menu-screen">
     <h1 class="menu-title">💥 MATCH-3 💥</h1>
     
-    <!-- Встраиваем наш изолированный компонент авторизации прямо в меню -->
+    <!-- Подключаем авторизацию обратно -->
     <TelegramAuth Username="@TelegramUser" OnUserAuthenticated="HandleAuth" />
 
     <p class="menu-desc">
@@ -16,7 +16,6 @@
     [Parameter] public int MaxMoves { get; set; } = 25;
     [Parameter] public EventCallback OnStartGame { get; set; }
     
-    // Переменные для отслеживания игрока
     private string? TelegramUser { get; set; }
 
     private void HandleAuth(string username)
