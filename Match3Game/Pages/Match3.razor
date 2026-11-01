@@ -2,50 +2,88 @@
 @using Match3Game.Core
 
 <div class="game-container">
-    <div class="score-board">Очки: <span class="score-value">@_model.Score</span></div>
-    
-    <button class="test-btn" @onclick="MixBoard">Перемешать поле</button>
+    @if (_gameState == GameState.Menu)
+    {
+        <!-- Вызываем изолированное меню и передаем ему параметры -->
+        <GameMenu MaxMoves="25" OnStartGame="StartNewGame" />
+    }
+    else if (_gameState == GameState.Playing)
+    {
+        <!-- ИГРОВОЙ ПРОЦЕСС -->
+        <div class="game-header">
+            <div class="stat-box">Очки: <span class="stat-value">@_model.Score</span></div>
+            <div class="stat-box">Ходы: <span class="stat-value">@_movesLeft</span></div>
+        </div>
+        
+        <button class="test-btn" @onclick="MixBoard">Перемешать поле</button>
 
-    <div class="game-board" style="grid-template-rows: repeat(@GameConfig.Rows, 1fr); grid-template-columns: repeat(@GameConfig.Cols, 1fr);">
-        @for (int r = 0; r < GameConfig.Rows; r++)
-        {
-            for (int c = 0; c < GameConfig.Cols; c++)
+        <div class="game-board" style="grid-template-rows: repeat(@GameConfig.Rows, 1fr); grid-template-columns: repeat(@GameConfig.Cols, 1fr);">
+            @for (int r = 0; r < GameConfig.Rows; r++)
             {
-                int row = r;
-                int col = c;
-                int tileType = _model.Grid[row, col];
-                bool isSelected = _selectedRow == row && _selectedCol == col;
+                for (int c = 0; c < GameConfig.Cols; c++)
+                {
+                    int row = r;
+                    int col = c;
+                    int tileType = _model.Grid[row, col];
+                    bool isSelected = _selectedRow == row && _selectedCol == col;
 
-                <div @key="@($"tile-{row}-{col}")" 
-                     class="tile @(isSelected ? "selected" : "")" 
-                     @onclick="() => OnTileClick(row, col)">
-                    <span class="tile-content">@GetTileEmoji(tileType)</span>
-                </div>
+                    <div @key="@($"tile-{row}-{col}")" 
+                         class="tile @(isSelected ? "selected" : "")" 
+                         @onclick="() => OnTileClick(row, col)">
+                        <span class="tile-content">@GetTileEmoji(tileType)</span>
+                    </div>
+                }
             }
-        }
-    </div>
+        </div>
+    }
+    else if (_gameState == GameState.GameOver)
+    {
+        <!-- ЭКРАН ОКОНЧАНИЯ ИГРЫ -->
+        <div class="gameover-screen">
+            <h2 class="gameover-title">Ходы закончились!</h2>
+            <p class="gameover-score">Финальный счёт: <span>@_model.Score</span></p>
+            <button class="start-btn" @onclick="GoToMenu">В меню</button>
+        </div>
+    }
 </div>
 
 @code {
+    private enum GameState { Menu, Playing, GameOver }
+    private GameState _gameState = GameState.Menu;
+
     private GameModel _model = new();
     private int? _selectedRow;
     private int? _selectedCol;
     private bool _isProcessing;
+    private int _movesLeft = 25;
 
-    protected override void OnInitialized()
+    private void StartNewGame()
     {
         _model.InitGrid();
+        _movesLeft = 25;
+        _selectedRow = null;
+        _selectedCol = null;
+        _isProcessing = false;
+        _gameState = GameState.Playing;
+        StateHasChanged();
+    }
+
+    private void GoToMenu()
+    {
+        _gameState = GameState.Menu;
+        StateHasChanged();
     }
 
     private void MixBoard()
     {
+        if (_gameState != GameState.Playing) return;
         _model.InitGrid();
         StateHasChanged();
     }
 
     private async Task OnTileClick(int row, int col)
     {
-        if (_isProcessing) return;
+        if (_isProcessing || _gameState != GameState.Playing) return;
 
         if (_selectedRow == null || _selectedCol == null)
         {
@@ -64,7 +102,6 @@
             if (_model.IsAdjacent(p1, p2))
             {
                 _isProcessing = true;
-                
                 _model.Swap(p1, p2);
                 StateHasChanged();
                 await Task.Delay(250);
@@ -73,6 +110,8 @@
 
                 if (matches.Count > 0)
                 {
+                    _movesLeft--;
+
                     while (matches.Count > 0)
                     {
                         _model.RemoveMatches(matches);
@@ -84,6 +123,11 @@
                         await Task.Delay(250);
 
                         matches = _model.CheckMatches();
+                    }
+
+                    if (_movesLeft <= 0)
+                    {
+                        _gameState = GameState.GameOver;
                     }
                 }
                 else
@@ -104,11 +148,6 @@
 
     private string GetTileEmoji(int type) => type switch
     {
-        1 => "🔴",
-        2 => "🔵",
-        3 => "🟢",
-        4 => "🟡",
-        5 => "🟣",
-        _ => ""
+        1 => "🔴", 2 => "🔵", 3 => "🟢", 4 => "🟡", 5 => "🟣", _ => ""
     };
 }
