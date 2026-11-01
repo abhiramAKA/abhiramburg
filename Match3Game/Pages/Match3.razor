@@ -39,7 +39,7 @@
     {
         if (_isProcessing) return;
 
-        if (_selectedRow == null)
+        if (_selectedRow == null || _selectedCol == null)
         {
             _selectedRow = row;
             _selectedCol = col;
@@ -90,6 +90,11 @@
 
     private string GetTileEmoji(int type) => type switch
     {
-        1 => "🔴", 2 => "🔵", 3 => "🟢", 4 => "🟡", 5 => "🟣", _ => ""
+        1 => "🔴",
+        2 => "🔵",
+        3 => "🟢",
+        4 => "🟡",
+        5 => "🟣",
+        _ => ""
     };
 }
