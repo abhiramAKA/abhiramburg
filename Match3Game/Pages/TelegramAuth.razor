@@ -4,7 +4,7 @@
     @if (string.IsNullOrEmpty(Username))
     {
         <p class="auth-status">Войдите, чтобы сохранить свой результат:</p>
-        <!-- Сюда JavaScript гарантированно вставит кнопку после короткой паузы -->
+        <!-- Контейнер, куда JavaScript вставит официальную кнопку Telegram -->
         <div id="telegram-login-container"></div>
     }
     else
@@ -24,14 +24,13 @@
     {
         if (firstRender && string.IsNullOrEmpty(Username))
         {
-            // Даем браузеру 100 миллисекунд, чтобы точно нарисовать HTML-контейнер на экране
+            // Даем браузеру 100 миллисекунд, чтобы точно нарисовать контейнер на экране
             await Task.Delay(100);
 
             try
             {
-                // ЗАМЕНИТЕ "имя_вашего_бота" на точное юзернейм вашего бота от @BotFather
-                // Например: await JS.InvokeVoidAsync("initTelegramWidget", "my_match3_super_game_bot");
-                await JS.InvokeVoidAsync("initTelegramWidget", "имя_вашего_бота");
+                // Имя вашего бота вставлено намертво — менять вручную ничего не нужно
+                await JS.InvokeVoidAsync("initTelegramWidget", "abhiram_game_bot");
             }
             catch (Exception ex)
             {
