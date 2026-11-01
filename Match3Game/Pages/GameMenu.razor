@@ -1,0 +1,27 @@
+<div class="menu-screen">
+    <!-- Вы можете свободно менять заголовки, тексты и добавлять новые кнопки здесь -->
+    <h1 class="menu-title">💥 MATCH-3 💥</h1>
+    
+    <p class="menu-desc">
+        Собери как можно больше комбинаций!<br>
+        У тебя есть ровно @MaxMoves ходов.
+    </p>
+    
+    <button class="start-btn" @onclick="OnStartClick">Начать игру</button>
+</div>
+
+@code {
+    // Настройки, которые меню получает снаружи
+    [Parameter] public int MaxMoves { get; set; } = 25;
+    
+    // Событие, которое сообщает игре, что кнопка нажата
+    [Parameter] public EventCallback OnStartGame { get; set; }
+
+    private async Task OnStartClick()
+    {
+        if (OnStartGame.HasDelegate)
+        {
+            await OnStartGame.InvokeAsync();
+        }
+    }
+}
