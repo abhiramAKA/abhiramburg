@@ -27,7 +27,13 @@ body {
     letter-spacing: 1px;
 }
 
-.test-btn {
+.button-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.game-btn {
     background-color: #444;
     color: white;
     border: 2px solid #555;
@@ -35,12 +41,21 @@ body {
     font-size: 14px;
     border-radius: 6px;
     cursor: pointer;
-    margin-bottom: 15px;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.1s;
 }
 
-.test-btn:hover {
+.game-btn:hover {
     background-color: #555;
+    transform: scale(1.02);
+}
+
+.music-btn {
+    background-color: #2e4a3f;
+    border-color: #3d6354;
+}
+
+.music-btn:hover {
+    background-color: #3d6354;
 }
 
 .game-board {
@@ -53,7 +68,6 @@ body {
     height: 380px;
 }
 
-/* Сама ячейка статична, она никогда не прыгает и не мигает */
 .tile {
     background-color: #444;
     display: flex;
@@ -70,7 +84,6 @@ body {
     background-color: #555;
 }
 
-/* Анимация применяется исключительно к самому смайлику при его изменении */
 .tile-content {
     display: inline-block;
     animation: appear 0.2s ease-out forwards;
@@ -81,7 +94,6 @@ body {
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* Выделенная фишка */
 .tile.selected {
     outline: 3px solid #ffeb3b !important;
     background-color: #666 !important;
