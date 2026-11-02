@@ -58,7 +58,7 @@
 
     private int rows = 8;
     private int cols = 8;
-    private int[,] grid = new int;
+    private int[,] grid = new int[8, 8];
     
     private int selectedRow = -1;
     private int selectedCol = -1;
@@ -298,7 +298,6 @@
     .low-moves {
         color: #e74c3c;
         border-color: #e74c3c;
-        animation: pulse 1s infinite alternate;
     }
 
     .grid-container {
@@ -376,3 +375,4 @@
         box-sizing: border-box;
     }
     .game-over-overlay h2 { color: #e74c3c; margin-bottom: 10px; }
+    .restart-btn { background-color: #2ecc71; margin-bottom: 10px; width: 200px; }
