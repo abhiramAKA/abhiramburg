@@ -5,6 +5,22 @@
         <RouteView RouteData="@routeData" />
     </Found>
     <NotFound>
-        <p>Страница не найдена.</p>
+        <div class="main-layout-fallback">
+            <p>Страница не найдена.</p>
+        </div>
     </NotFound>
 </Router>
+
+<style>
+    /* Базовый каркас приложения для корректного отображения сетки */
+    html, body {
+        margin: 0;
+        padding: 0;
+        background-color: #1a1a1a;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: white;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+</style>
