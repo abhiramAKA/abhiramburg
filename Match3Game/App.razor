@@ -1,5 +1,6 @@
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.JSInterop
+@using Match3Game.Core
 @inject IJSRuntime JS
 
 <Router AppAssembly="@typeof(Program).Assembly">
@@ -19,7 +20,6 @@
         if (firstRender)
         {
             objRef = DotNetObjectReference.Create(this);
-            // Инициализируем TON Connect один раз на глобальном уровне
             await JS.InvokeVoidAsync("initTonConnect", objRef);
         }
     }
@@ -27,14 +27,20 @@
     [JSInvokable]
     public void OnWalletConnected(string realAddress)
     {
-        // Передаем адрес в наше статическое состояние меню
-        Match3Game.Pages.GameMenu.UpdateWalletStatus(realAddress);
+        GameHistoryService.WalletAddress = realAddress;
     }
 
     [JSInvokable]
     public void OnWalletDisconnected()
     {
-        Match3Game.Pages.GameMenu.ClearWalletStatus();
+        GameHistoryService.WalletAddress = "";
+        GameHistoryService.IsRegistered = false;
+        GameHistoryService.UserName = "Гость";
+    }
+
+    public void Dispose()
+    {
+        objRef?.Dispose();
     }
 }
 
