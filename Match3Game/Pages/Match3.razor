@@ -1,4 +1,8 @@
-@using Match3Game.Core
+@page "/match3"
+@using System
+@using System.Threading.Tasks
+@using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop
 @inject IJSRuntime JS
 
 <div class="game-wrapper">
@@ -25,7 +29,7 @@
                 var row = r;
                 var col = c;
                 var tileId = grid[row, col];
-                var isSelected = selectedRow == row && selectedCol == col;
+                var isSelected = (selectedRow == row && selectedCol == col);
                 
                 <div class="grid-cell" @onclick="() => OnCellClick(row, col)">
                     @if (tileId > 0)
@@ -56,7 +60,6 @@
     private int cols = 8;
     private int[,] grid = new int[8, 8];
     
-    // Переходим на простые типы данных, чтобы избежать конфликтов Nullable
     private int selectedRow = -1;
     private int selectedCol = -1;
     
@@ -103,7 +106,6 @@
     {
         if (isGameOver) return;
 
-        // Если еще ничего не выбрано
         if (selectedRow == -1 && selectedCol == -1)
         {
             selectedRow = r;
@@ -111,7 +113,6 @@
         }
         else
         {
-            // Проверяем соседство через текущие переменные
             if (IsAdjacent(selectedRow, selectedCol, r, c))
             {
                 SwapTiles(selectedRow, selectedCol, r, c);
@@ -128,7 +129,6 @@
                 }
                 else
                 {
-                    // Возвращаем назад, если совпадения не случилось
                     SwapTiles(selectedRow, selectedCol, r, c);
                 }
             }
