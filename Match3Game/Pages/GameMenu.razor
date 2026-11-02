@@ -2,12 +2,12 @@
 @using Match3Game.Pages
 @using Match3Game.Core
 
-@if (currentScreen == ScreenState.TownSquare || currentScreen == ScreenState.ValleyOfLight || currentScreen == ScreenState.ProfileMenu)
+@if (currentScreen != ScreenState.InGame)
 {
     <div class="info-block-1" style="background: linear-gradient(135deg, #2c3e50, #34495e); color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 2px solid #4a6572;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
             <div style="display: flex; align-items: center; gap: 8px;">
-                <button style="background: #34495e; border: 1px solid #4a6572; color: white; font-size: 1.1rem; padding: 4px 8px; border-radius: 6px; cursor: pointer;" @onclick="OpenHistoryModal">👤</button>
+                <button style="background: #34495e; border: 1px solid #4a6572; color: white; font-size: 1.1rem; padding: 4px 8px; border-radius: 6px; cursor: pointer;" @onclick="() => showHistory = true">👤</button>
                 <h3 style="margin: 0; font-size: 1.1rem; color: #f1c40f;">Аккаунт: @(isRegistered ? userName : "Гость")</h3>
             </div>
             <button style="background: #f1c40f; color: #2c3e50; border: none; padding: 4px 12px; border-radius: 6px; font-weight: bold; font-size: 0.85rem; cursor: pointer;" @onclick="ToggleProfile">
@@ -27,7 +27,7 @@
     <div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
         <h1 style="color: #fff; font-size: 1.6rem; margin-bottom: 25px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Центральная площадь</h1>
         <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 300px;">
-            <button style="background: #3498db; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer;" @onclick="GoToValleyOfLight">🌅 Долина света</button>
+            <button style="background: #3498db; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer;" @onclick="() => currentScreen = ScreenState.ValleyOfLight">🌅 Долина света</button>
             <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="ShowSoonAlert">🔒 Таверна</button>
             <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="ShowSoonAlert">🔒 Шахты</button>
             <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="ShowSoonAlert">🔒 Мастерская</button>
@@ -41,31 +41,64 @@ else if (currentScreen == ScreenState.ValleyOfLight)
     <div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
         <h1 style="color: #fff; font-size: 1.6rem; margin-bottom: 25px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">🌅 Долина света</h1>
         <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 300px;">
-            <button style="background: #2ecc71; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer;" @onclick="StartGame">🎮 Играть</button>
+            <button style="background: #2ecc71; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer;" @onclick="() => currentScreen = ScreenState.InGame">🎮 Играть</button>
             <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="ShowSoonAlert">🔒 Позвать друга</button>
             <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="ShowSoonAlert">🔒 Лидеры</button>
-            <button style="background: #95a5a6; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px;" @onclick="GoToTownSquare">⬅️ Назад в город</button>
+            <button style="background: #95a5a6; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px;" @onclick="() => currentScreen = ScreenState.TownSquare">⬅️ Назад в город</button>
         </div>
     </div>
 }
 else if (currentScreen == ScreenState.ProfileMenu)
 {
-    <div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
-        <h1 style="color: #fff; font-size: 1.6rem; margin-bottom: 25px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">👤 Регистрация</h1>
-        <div style="background: #2c3e50; border: 2px solid #34495e; border-radius: 12px; padding: 20px; width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 15px;">
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label style="font-size: 0.9rem; color: #f1c40f; font-weight: bold;">Имя игрока:</label>
-                <input type="text" @bind="inputName" placeholder="Придумайте имя..." maxlength="20" style="padding: 10px; border-radius: 6px; border: 1px solid #4a6572; background: #1a1a1a; color: white;" />
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label style="font-size: 0.9rem; color: #f1c40f; font-weight: bold;">Криптокошелек Грам:</label>
-                <input type="text" @bind="inputWallet" placeholder="Адрес кошелька..." style="padding: 10px; border-radius: 6px; border: 1px solid #4a6572; background: #1a1a1a; color: white;" />
-            </div>
-            <button style="background: #2ecc71; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer;" @onclick="SaveProfile">💾 Сохранить аккаунт</button>
-        </div>
-    </div>
+    <ProfileForm Name="@inputName" Wallet="@inputWallet" OnNameChanged="(v) => inputName = v" OnWalletChanged="(v) => inputWallet = v" OnSave="SaveProfile" />
 }
 else if (currentScreen == ScreenState.InGame)
 {
-    <Match3 IsWalletConnected="@isRegistered" OnGameOver="HandleGameOver" OnRequestAuth="HandleRequestAuth" />
+    <Match3 IsWalletConnected="@isRegistered" OnGameOver="() => currentScreen = ScreenState.ValleyOfLight" OnRequestAuth="HandleRequestAuth" />
+}
+
+<HistoryModal IsOpen="@showHistory" OnClose="() => showHistory = false" />
+
+@if (!string.IsNullOrEmpty(alertMessage))
+{
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+        <div style="background: #2c3e50; color: white; padding: 25px 40px; border-radius: 15px; text-align: center; border: 2px solid #f1c40f;">
+            <p style="font-size: 1.3rem; margin: 0 0 20px 0; font-weight: bold;">@alertMessage</p>
+            <button style="background: #f1c40f; color: #2c3e50; border: none; padding: 8px 25px; font-weight: bold; border-radius: 5px; cursor: pointer;" @onclick="() => alertMessage = null">OK</button>
+        </div>
+    </div>
+}
+
+@code {
+    private enum ScreenState { TownSquare, ValleyOfLight, InGame, ProfileMenu }
+    private ScreenState currentScreen = ScreenState.TownSquare;
+    private ScreenState previousScreen = ScreenState.TownSquare;
+    private string alertMessage;
+    private bool showHistory = false;
+    private bool isRegistered = false;
+    private string userName = "Гость";
+    private string walletAddress = "";
+    private string inputName = "";
+    private string inputWallet = "";
+
+    private void ToggleProfile()
+    {
+        if (currentScreen == ScreenState.ProfileMenu) currentScreen = previousScreen;
+        else { previousScreen = currentScreen; inputName = isRegistered ? userName : ""; inputWallet = isRegistered ? walletAddress : ""; currentScreen = ScreenState.ProfileMenu; }
+    }
+
+    private void SaveProfile()
+    {
+        if (string.IsNullOrWhiteSpace(inputName) || string.IsNullOrWhiteSpace(inputWallet)) { alertMessage = "Заполните все поля!"; return; }
+        userName = inputName.Trim(); walletAddress = inputWallet.Trim(); isRegistered = true;
+        alertMessage = "Аккаунт сохранен!"; currentScreen = ScreenState.TownSquare;
+    }
+
+    private void HandleRequestAuth()
+    {
+        previousScreen = ScreenState.ValleyOfLight; inputName = ""; inputWallet = ""; currentScreen = ScreenState.ProfileMenu; StateHasChanged();
+    }
+
+    private string ShortenWallet(string addr) => addr.Length <= 10 ? addr : addr.Substring(0, 6) + "..." + addr.Substring(addr.Length - 4);
+    private void ShowSoonAlert() => alertMessage = "Скоро";
 }
