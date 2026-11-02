@@ -1,7 +1,6 @@
 @page "/"
 @using Match3Game.Pages
 @using Match3Game.Core
-@inject IJSRuntime JS
 
 @if (currentScreen != ScreenState.InGame)
 {
@@ -31,13 +30,11 @@ else if (currentScreen == ScreenState.ValleyOfLight)
 }
 else if (currentScreen == ScreenState.ProfileMenu)
 {
+    <!-- Передаем события изменения данных напрямую в профиль -->
     <UserProfileView 
         Name="@inputName" 
         WalletAddress="@walletAddress" 
-        OnNameChanged="(v) => inputName = v" 
-        OnConnect="ConnectViaTon" 
-        OnDisconnect="DisconnectTon" 
-        OnSave="SaveProfile" />
+        OnProfileSaved="HandleProfileSaved" />
 }
 else if (currentScreen == ScreenState.InGame)
 {
@@ -67,54 +64,29 @@ else if (currentScreen == ScreenState.InGame)
     private string walletAddress = "";
     private string inputName = "";
 
-    private DotNetObjectReference<object>? objRef;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            objRef = DotNetObjectReference.Create<object>(this);
-            await JS.InvokeVoidAsync("initTonConnect", objRef);
-        }
-    }
-
     private void ToggleProfile()
     {
         if (currentScreen == ScreenState.ProfileMenu) currentScreen = previousScreen;
         else { previousScreen = currentScreen; inputName = isRegistered ? userName : ""; currentScreen = ScreenState.ProfileMenu; }
     }
 
-    private async Task ConnectViaTon() => await JS.InvokeVoidAsync("openTonConnectModal");
-    private async Task DisconnectTon() => await JS.InvokeVoidAsync("disconnectTonWallet");
-
-    [JSInvokable]
-    public void OnWalletConnected(string realAddress)
+    private void HandleProfileSaved((string name, string wallet) profileData)
     {
-        walletAddress = realAddress;
-        StateHasChanged();
-    }
-
-    [JSInvokable]
-    public void OnWalletDisconnected()
-    {
-        walletAddress = ""; isRegistered = false; userName = "Гость";
-        StateHasChanged();
-    }
-
-    private void SaveProfile()
-    {
-        if (string.IsNullOrWhiteSpace(inputName)) { alertMessage = "Пожалуйста, укажите имя!"; return; }
-        if (string.IsNullOrEmpty(walletAddress)) { alertMessage = "Сначала необходимо подключить TON кошелек!"; return; }
-        userName = inputName.Trim(); isRegistered = true;
-        alertMessage = "Профиль успешно обновлен!"; currentScreen = ScreenState.TownSquare;
+        userName = profileData.name;
+        walletAddress = profileData.wallet;
+        isRegistered = true;
+        alertMessage = "Профиль успешно обновлен!";
+        currentScreen = ScreenState.TownSquare;
     }
 
     private void HandleRequestAuth()
     {
-        previousScreen = ScreenState.ValleyOfLight; inputName = ""; currentScreen = ScreenState.ProfileMenu; StateHasChanged();
+        previousScreen = ScreenState.ValleyOfLight; 
+        inputName = ""; 
+        currentScreen = ScreenState.ProfileMenu; 
+        StateHasChanged();
     }
 
+    private string ShortenWallet(string addr) => addr.Length <= 10 ? addr : addr.Substring(0, 6) + "..." + addr.Substring(addr.Length - 4);
     private void ShowSoonAlert() => alertMessage = "Скоро";
-
-    public void Dispose() => objRef?.Dispose();
 }
