@@ -1,5 +1,6 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.JSInterop
+@using Match3Game.Core
 @inject IJSRuntime JS
 
 <div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
@@ -52,23 +53,53 @@
     [Parameter] public EventCallback<(string, string)> OnProfileSaved { get; set; }
 
     private string localName = "";
-    private string localWallet = "";
     private string? localAlert;
 
     protected override void OnParametersSet()
     {
         localName = Name;
-        localWallet = WalletAddress;
     }
 
-    private async Task ConnectViaTon() => await JS.InvokeVoidAsync("openTonConnectModal");
-    private async Task DisconnectTon() => await JS.InvokeVoidAsync("disconnectTonWallet");
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Просто готовим мост в фоне
+            await JS.InvokeVoidAsync("initTonConnect");
+            await CheckWalletStatus();
+        }
+    }
+
+    private async Task ConnectViaTon()
+    {
+        await JS.InvokeVoidAsync("openTonConnectModal");
+        // Небольшое ожидание и проверка адреса после закрытия окна
+        await Task.Delay(1000);
+        await CheckWalletStatus();
+    }
+
+    private async Task DisconnectTon()
+    {
+        await JS.InvokeVoidAsync("disconnectTonWallet");
+        await CheckWalletStatus();
+    }
+
+    private async Task CheckWalletStatus()
+    {
+        var currentAddr = await JS.InvokeAsync<string>("getTonWalletAddress");
+        if (currentAddr != WalletAddress)
+        {
+            await OnProfileSaved.InvokeAsync((localName, currentAddr));
+        }
+    }
 
     private async Task SubmitSave()
     {
         if (string.IsNullOrWhiteSpace(localName)) { localAlert = "Пожалуйста, укажите имя!"; return; }
-        if (string.IsNullOrEmpty(localWallet)) { localAlert = "Сначала необходимо подключить TON кошелек!"; return; }
         
-        await OnProfileSaved.InvokeAsync((localName.Trim(), localWallet));
+        var activeAddr = await JS.InvokeAsync<string>("getTonWalletAddress");
+        if (string.IsNullOrEmpty(activeAddr)) { localAlert = "Сначала необходимо подключить TON кошелек!"; return; }
+        
+        await OnProfileSaved.InvokeAsync((localName.Trim(), activeAddr));
     }
 }
