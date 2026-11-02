@@ -6,14 +6,26 @@
     <title>Abhiramburg Match3 Game</title>
     <!-- Базовый путь для GitHub Pages -->
     <base href="/abhiramburg/" />
-    <!-- Универсальные автономные пути Blazor WASM через тильду (обозначает корень wwwroot) -->
-    <link href="_content/Match3Game/css/bootstrap/bootstrap.min.css" rel="stylesheet" />
-    <link href="_content/Match3Game/css/app.css" rel="stylesheet" />
+    <!-- Оставляем только твой рабочий файл стилей игры -->
     <link href="css/match3.css" rel="stylesheet" />
+    <style>
+        /* Встроенный базовый сброс стилей для работы хаба без внешних тяжелых файлов */
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+    </style>
 </head>
-<body style="background-color: #1a1a1a;">
+<body>
     <div id="app">
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; color: white; font-family: sans-serif;">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; color: white;">
             <h2>Загрузка города...</h2>
         </div>
     </div>
