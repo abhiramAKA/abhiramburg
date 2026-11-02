@@ -24,34 +24,49 @@
     </div>
 
     <script src="_framework/blazor.webassembly.js"></script>
+    
+    <!-- Используем стабильную UI библиотеку TON Connect -->
     <script src="https://unpkg.com"></script>
 
     <script>
         let tonConnectUI = null;
-        window.tonWalletAddress = ""; // Глобальное хранилище адреса для Blazor
+        window.tonWalletAddress = ""; 
 
         window.initTonConnect = function () {
-            if (tonConnectUI) return;
+            if (tonConnectUI) return "Уже инициализировано";
+            try {
+                // Прямая передача манифеста объектом, чтобы не зависеть от сетевых файлов json
+                tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                    manifestUrl: "https://github.io",
+                    buttonRootId: null // Отключаем стандартную кнопку
+                });
 
-            tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-                manifestUrl: window.location.origin + '/abhiramburg/tonconnect-manifest.json'
-            });
-
-            tonConnectUI.onStatusChange(wallet => {
-                if (wallet && wallet.account) {
-                    window.tonWalletAddress = wallet.account.address;
-                } else {
-                    window.tonWalletAddress = "";
-                }
-            });
+                tonConnectUI.onStatusChange(wallet => {
+                    if (wallet && wallet.account) {
+                        window.tonWalletAddress = wallet.account.address;
+                    } else {
+                        window.tonWalletAddress = "";
+                    }
+                });
+                return "Успешная инициализация";
+            } catch (e) {
+                return "Ошибка инициализации: " + e.message;
+            }
         };
 
         window.openTonConnectModal = async function () {
             window.initTonConnect();
+            if (!tonConnectUI) {
+                alert("Критическая ошибка: TON Connect не создан");
+                return "No UI";
+            }
             try {
+                // Принудительно открываем окно выбора кошельков
                 await tonConnectUI.openModal();
+                return "Modal Opened";
             } catch (error) {
-                console.error("Ошибка кошелька:", error);
+                alert("Ошибка открытия кошелька: " + error.message);
+                return error.message;
             }
         };
 
@@ -59,7 +74,7 @@
             if (tonConnectUI && tonConnectUI.account) {
                 return tonConnectUI.account.address;
             }
-            return window.tonWalletAddress;
+            return window.tonWalletAddress || "";
         };
 
         window.disconnectTonWallet = async function () {
@@ -67,6 +82,7 @@
                 await tonConnectUI.disconnect();
                 window.tonWalletAddress = "";
             }
+            return "Disconnected";
         };
     </script>
 </body>
