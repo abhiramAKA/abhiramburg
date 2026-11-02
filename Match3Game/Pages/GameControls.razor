@@ -1,0 +1,16 @@
+@code {
+    [Parameter] public bool IsGameOver { get; set; }
+    [Parameter] public EventCallback OnShuffle { get; set; }
+    [Parameter] public EventCallback OnExit { get; set; }
+}
+
+<div style="display: flex; gap: 10px; width: 100%; margin-top: 15px;">
+    <button style="background-color: #e67e22; flex: 1; padding: 12px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white;" 
+            @onclick="OnShuffle" disabled="@IsGameOver">
+        🔀 Перемешать
+    </button>
+    <button style="background-color: #95a5a6; flex: 1; padding: 12px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white;" 
+            @onclick="OnExit">
+        🚪 В меню
+    </button>
+</div>
