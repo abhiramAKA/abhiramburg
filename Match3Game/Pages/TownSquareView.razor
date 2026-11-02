@@ -1,0 +1,16 @@
+<div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
+    <h1 style="color: #fff; font-size: 1.6rem; margin-bottom: 25px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Центральная площадь</h1>
+    <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 300px;">
+        <button style="background: #3498db; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer;" @onclick="OnGoToValley">🌅 Долина света</button>
+        <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="OnShowSoon">🔒 Таверна</button>
+        <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="OnShowSoon">🔒 Шахты</button>
+        <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="OnShowSoon">🔒 Мастерская</button>
+        <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="OnShowSoon">🔒 Ярмарка</button>
+        <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="OnShowSoon">🔒 Дракон</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnGoToValley { get; set; }
+    [Parameter] public EventCallback OnShowSoon { get; set; }
+}
