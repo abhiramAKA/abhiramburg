@@ -4,7 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Abhiramburg Match3 Game</title>
-    <base href="/" />
+    <!-- Исправленный базовый путь для корректной работы GitHub Pages -->
+    <base href="/abhiramburg/" />
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <link href="Match3Game.styles.css" rel="stylesheet" />
@@ -22,12 +23,11 @@
 
     <script src="_framework/blazor.webassembly.js"></script>
 
-    <!-- Скрипт для динамических путей на GitHub Pages -->
     <script type="text/javascript">
         (function(l) {
-            if (l.search[0] === '?') {
+            if (l.search === '?') {
                 var q = {}; l.search.slice(1).split('&').forEach(function(v) {
-                    var a = v.split('='); q[a[0]] = a.slice(1).join('=').toLowerCase();
+                    var a = v.split('='); q[a] = a.slice(1).join('=').toLowerCase();
                 });
                 if (q.p !== undefined) {
                     window.history.replaceState(null, null, l.pathname.slice(0, -1) + (q.p || '') + l.search);
@@ -36,10 +36,8 @@
         }(window.location));
     </script>
 
-    <!-- Официальная библиотека TON Connect UI -->
     <script src="https://unpkg.com"></script>
 
-    <!-- Изолированный JavaScript-мост для Blazor -->
     <script>
         let tonConnectUI = null;
 
@@ -47,7 +45,7 @@
             if (tonConnectUI) return;
 
             tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-                manifestUrl: window.location.origin + '/tonconnect-manifest.json'
+                manifestUrl: window.location.origin + '/abhiramburg/tonconnect-manifest.json'
             });
 
             tonConnectUI.onStatusChange(wallet => {
