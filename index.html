@@ -9,54 +9,28 @@
     <link rel="icon" type="image/x-icon" href="data:image/x-icon;,">
     <style>
         html, body {
-            margin: 0;
-            padding: 0;
-            background-color: #1a1a1a;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
+            margin: 0; padding: 0; background-color: #1a1a1a;
+            font-family: 'Segoe UI', sans-serif; color: white;
+            min-height: 100vh; display: flex; flex-direction: column;
         }
-        /* Принудительно скрываем системную панель ошибок Blazor, чтобы она не висела на экране */
-        #blazor-error-ui {
-            display: none !important;
-        }
+        #blazor-error-ui { display: none !important; }
     </style>
 </head>
 <body>
     <div id="app">
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; color: white;">
+        <div style="display: flex; min-height: 100vh; justify-content: center; align-items: center; color: white;">
             <h2>Загрузка города...</h2>
         </div>
     </div>
 
-    <div id="blazor-error-ui">
-        Произошла ошибка. <a href="" class="reload">Перезагрузить</a>
-    </div>
-
     <script src="_framework/blazor.webassembly.js"></script>
-
-    <script type="text/javascript">
-        (function(l) {
-            if (l.search === '?') {
-                var q = {}; l.search.slice(1).split('&').forEach(function(v) {
-                    var a = v.split('='); q[a] = a.slice(1).join('=').toLowerCase();
-                });
-                if (q.p !== undefined) {
-                    window.history.replaceState(null, null, l.pathname.slice(0, -1) + (q.p || '') + l.search);
-                }
-            }
-        }(window.location));
-    </script>
-
     <script src="https://unpkg.com"></script>
 
     <script>
         let tonConnectUI = null;
+        window.tonWalletAddress = ""; // Глобальное хранилище адреса для Blazor
 
-        window.initTonConnect = function (dotNetHelper) {
+        window.initTonConnect = function () {
             if (tonConnectUI) return;
 
             tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
@@ -65,25 +39,33 @@
 
             tonConnectUI.onStatusChange(wallet => {
                 if (wallet && wallet.account) {
-                    dotNetHelper.invokeMethodAsync('OnWalletConnected', wallet.account.address);
+                    window.tonWalletAddress = wallet.account.address;
                 } else {
-                    dotNetHelper.invokeMethodAsync('OnWalletDisconnected');
+                    window.tonWalletAddress = "";
                 }
             });
         };
 
         window.openTonConnectModal = async function () {
-            if (!tonConnectUI) return;
+            window.initTonConnect();
             try {
                 await tonConnectUI.openModal();
             } catch (error) {
-                console.error("Ошибка открытия TON Connect:", error);
+                console.error("Ошибка кошелька:", error);
             }
+        };
+
+        window.getTonWalletAddress = function () {
+            if (tonConnectUI && tonConnectUI.account) {
+                return tonConnectUI.account.address;
+            }
+            return window.tonWalletAddress;
         };
 
         window.disconnectTonWallet = async function () {
             if (tonConnectUI && tonConnectUI.connected) {
                 await tonConnectUI.disconnect();
+                window.tonWalletAddress = "";
             }
         };
     </script>
