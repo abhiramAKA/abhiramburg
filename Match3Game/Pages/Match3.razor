@@ -1,14 +1,270 @@
-@using Microsoft.AspNetCore.Components.Routing
-@using Microsoft.AspNetCore.Components.Web
+@using Match3Game.Core
+@inject IJSRuntime JS
 
-<Router AppAssembly="@typeof(Program).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-    <NotFound>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <p>Упс! Страница не найдена.</p>
-        </LayoutView>
-    </NotFound>
-</Router>
+<div class="game-wrapper">
+    <div class="game-stats">
+        <div class="stat-item">🏆 Счет: <span>@score</span></div>
+        <div class="stat-item @(movesLeft <= 5 ? "low-moves" : "")">🎯 Ходы: <span>@movesLeft</span></div>
+    </div>
+
+    @if (isGameOver)
+    {
+        <div class="game-over-overlay">
+            <h2>Игра окончена!</h2>
+            <p>Ваш итоговый результат: <strong>@score</strong></p>
+            <button class="action-btn restart-btn" @onclick="InitGame">Играть снова</button>
+            <button class="action-btn exit-btn" @onclick="ExitToMenu">В меню</button>
+        </div>
+    }
+
+    <div class="grid-container">
+        @for (int r = 0; r < rows; r++)
+        {
+            @for (int c = 0; c < cols; c++)
+            {
+                var row = r;
+                var col = c;
+                var tileId = grid[row, col];
+                var isSelected = selectedRow == row && selectedCol == col;
+                
+                <div class="grid-cell" @onclick="() => OnCellClick(row, col)">
+                    @if (tileId > 0)
+                    {
+                        <div class="tile-content @(isSelected ? "selected" : "")">
+                            @GetTileEmoji(tileId)
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+
+    <div class="control-panel">
+        <button class="action-btn shuffle-btn" @onclick="ShuffleGrid" disabled="@isGameOver">
+            🔀 Перемешать
+        </button>
+        <button class="action-btn back-menu-btn" @onclick="ExitToMenu">
+            🚪 Выйти в меню
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnGameOver { get; set; }
+
+    private int rows = 8;
+    private int cols = 8;
+    private int[,] grid = new int[8, 8];
+    
+    // Переходим на простые типы данных, чтобы избежать конфликтов Nullable
+    private int selectedRow = -1;
+    private int selectedCol = -1;
+    
+    private int score = 0;
+    private int movesLeft = 20;
+    private bool isGameOver = false;
+    private Random rand = new Random();
+
+    protected override void OnInitialized()
+    {
+        InitGame();
+    }
+
+    private void InitGame()
+    {
+        score = 0;
+        movesLeft = 20;
+        isGameOver = false;
+        ResetSelection();
+        GenerateValidGrid();
+    }
+
+    private void ResetSelection()
+    {
+        selectedRow = -1;
+        selectedCol = -1;
+    }
+
+    private void GenerateValidGrid()
+    {
+        do
+        {
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    grid[r, c] = rand.Next(1, 6);
+                }
+            }
+        } while (HasMatches());
+    }
+
+    private async Task OnCellClick(int r, int c)
+    {
+        if (isGameOver) return;
+
+        // Если еще ничего не выбрано
+        if (selectedRow == -1 && selectedCol == -1)
+        {
+            selectedRow = r;
+            selectedCol = c;
+        }
+        else
+        {
+            // Проверяем соседство через текущие переменные
+            if (IsAdjacent(selectedRow, selectedCol, r, c))
+            {
+                SwapTiles(selectedRow, selectedCol, r, c);
+                
+                if (HasMatches())
+                {
+                    movesLeft--;
+                    await ProcessMatches();
+                    
+                    if (movesLeft <= 0)
+                    {
+                        isGameOver = true;
+                    }
+                }
+                else
+                {
+                    // Возвращаем назад, если совпадения не случилось
+                    SwapTiles(selectedRow, selectedCol, r, c);
+                }
+            }
+            ResetSelection();
+        }
+    }
+
+    private bool IsAdjacent(int r1, int c1, int r2, int c2)
+    {
+        return (Math.Abs(r1 - r2) == 1 && c1 == c2) ||
+               (Math.Abs(c1 - c2) == 1 && r1 == r2);
+    }
+
+    private void SwapTiles(int r1, int c1, int r2, int c2)
+    {
+        int temp = grid[r1, c1];
+        grid[r1, c1] = grid[r2, c2];
+        grid[r2, c2] = temp;
+    }
+
+    private bool HasMatches()
+    {
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols - 2; c++)
+            {
+                if (grid[r, c] != 0 && grid[r, c] == grid[r, c + 1] && grid[r, c] == grid[r, c + 2])
+                    return true;
+            }
+        }
+        for (int c = 0; c < cols; c++)
+        {
+            for (int r = 0; r < rows - 2; r++)
+            {
+                if (grid[r, c] != 0 && grid[r, c] == grid[r + 1, c] && grid[r, c] == grid[r + 2, c])
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private async Task ProcessMatches()
+    {
+        while (HasMatches())
+        {
+            bool[,] toDestroy = new bool[rows, cols];
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols - 2; c++)
+                {
+                    if (grid[r, c] != 0 && grid[r, c] == grid[r, c + 1] && grid[r, c] == grid[r, c + 2])
+                    {
+                        toDestroy[r, c] = toDestroy[r, c + 1] = toDestroy[r, c + 2] = true;
+                    }
+                }
+            }
+
+            for (int c = 0; c < cols; c++)
+            {
+                for (int r = 0; r < rows - 2; r++)
+                {
+                    if (grid[r, c] != 0 && grid[r, c] == grid[r + 1, c] && grid[r, c] == grid[r + 2, c])
+                    {
+                        toDestroy[r, c] = toDestroy[r + 1, c] = toDestroy[r + 2, c] = true;
+                    }
+                }
+            }
+
+            int destroyedCount = 0;
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    if (toDestroy[r, c])
+                    {
+                        grid[r, c] = 0;
+                        destroyedCount++;
+                    }
+                }
+            }
+
+            score += destroyedCount * 10;
+            StateHasChanged();
+            await Task.Delay(250);
+
+            DropAndFill();
+            StateHasChanged();
+            await Task.Delay(200);
+        }
+    }
+
+    private void DropAndFill()
+    {
+        for (int c = 0; c < cols; c++)
+        {
+            int emptyRow = rows - 1;
+            for (int r = rows - 1; r >= 0; r--)
+            {
+                if (grid[r, c] != 0)
+                {
+                    grid[emptyRow, c] = grid[r, c];
+                    if (emptyRow != r) grid[r, c] = 0;
+                    emptyRow--;
+                }
+            }
+
+            for (int r = emptyRow; r >= 0; r--)
+            {
+                grid[r, c] = rand.Next(1, 6);
+            }
+        }
+    }
+
+    private void ShuffleGrid()
+    {
+        if (isGameOver) return;
+        GenerateValidGrid();
+        ResetSelection();
+    }
+
+    private async Task ExitToMenu()
+    {
+        await OnGameOver.InvokeAsync();
+    }
+
+    private string GetTileEmoji(int id)
+    {
+        return id switch
+        {
+            1 => "💎",
+            2 => "🔷",
+            3 => "💚",
+            4 => "🔶",
+            5 => "🔮",
+            _ => ""
+        };
+    }
+}
