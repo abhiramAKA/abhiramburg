@@ -1,0 +1,15 @@
+<div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
+    <h1 style="color: #fff; font-size: 1.6rem; margin-bottom: 25px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">🌅 Долина света</h1>
+    <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 300px;">
+        <button style="background: #2ecc71; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer;" @onclick="OnStartGame">🎮 Играть</button>
+        <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="OnShowSoon">🔒 Позвать друга</button>
+        <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="OnShowSoon">🔒 Лидеры</button>
+        <button style="background: #95a5a6; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px;" @onclick="OnGoToTown">⬅️ Назад в город</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnStartGame { get; set; }
+    [Parameter] public EventCallback OnGoToTown { get; set; }
+    [Parameter] public EventCallback OnShowSoon { get; set; }
+}
