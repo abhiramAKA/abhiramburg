@@ -113,10 +113,14 @@ else if (currentScreen == ScreenState.InGame)
 
     private DotNetObjectReference<GameMenu>? objRef;
 
-    protected override async Task OnInitializedAsync()
+    // ИСПРАВЛЕНО: Безопасный запуск после полной отрисовки скриптов в браузере
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        objRef = DotNetObjectReference.Create(this);
-        await JS.InvokeVoidAsync("initTonConnect", objRef);
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("initTonConnect", objRef);
+        }
     }
 
     private void ToggleProfile()
