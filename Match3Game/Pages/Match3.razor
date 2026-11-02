@@ -1,114 +1,264 @@
-@page "/"
 @using Match3Game.Core
+@inject IJSRuntime JS
 
-<div class="game-container">
-    <div class="score-board">Очки: <span class="score-value">@_model.Score</span></div>
-    
-    <button class="test-btn" @onclick="MixBoard">Перемешать поле</button>
+<div class="game-wrapper">
+    <div class="game-stats">
+        <div class="stat-item">🏆 Счет: <span>@score</span></div>
+        <div class="stat-item @(movesLeft <= 5 ? "low-moves" : "")">🎯 Ходы: <span>@movesLeft</span></div>
+    </div>
 
-    <div class="game-board" style="grid-template-rows: repeat(@GameConfig.Rows, 1fr); grid-template-columns: repeat(@GameConfig.Cols, 1fr);">
-        @for (int r = 0; r < GameConfig.Rows; r++)
+    @if (isGameOver)
+    {
+        <div class="game-over-overlay">
+            <h2>Игра окончена!</h2>
+            <p>Ваш итоговый результат: <strong>@score</strong></p>
+            <button class="action-btn restart-btn" @onclick="InitGame">Играть снова</button>
+            <button class="action-btn exit-btn" @onclick="ExitToMenu">В меню</button>
+        </div>
+    }
+
+    <div class="grid-container">
+        @for (int r = 0; r < rows; r++)
         {
-            for (int c = 0; c < GameConfig.Cols; c++)
+            @for (int c = 0; c < cols; c++)
             {
-                int row = r;
-                int col = c;
-                int tileType = _model.Grid[row, col];
-                bool isSelected = _selectedRow == row && _selectedCol == col;
-
-                <div @key="@($"tile-{row}-{col}")" 
-                     class="tile @(isSelected ? "selected" : "")" 
-                     @onclick="() => OnTileClick(row, col)">
-                    <span class="tile-content">@GetTileEmoji(tileType)</span>
+                var row = r;
+                var col = c;
+                var tileId = grid[row, col];
+                var isSelected = selectedTile != null && selectedTile.Row == row && selectedTile.Col == col;
+                
+                <div class="grid-cell" @onclick="() => OnCellClick(row, col)">
+                    @if (tileId > 0)
+                    {
+                        <div class="tile-content @(isSelected ? "selected" : "")">
+                            @GetTileEmoji(tileId)
+                        </div>
+                    }
                 </div>
             }
         }
     </div>
+
+    <div class="control-panel">
+        <button class="action-btn shuffle-btn" @onclick="ShuffleGrid" disabled="@isGameOver">
+            🔀 Перемешать
+        </button>
+        <button class="action-btn back-menu-btn" @onclick="ExitToMenu">
+            🚪 Выйти в меню
+        </button>
+    </div>
 </div>
 
 @code {
-    private GameModel _model = new();
-    private int? _selectedRow;
-    private int? _selectedCol;
-    private bool _isProcessing;
+    [Parameter] public EventCallback OnGameOver { get; set; }
+
+    private int rows = 8;
+    private int cols = 8;
+    private int[,] grid = new int[8, 8];
+    private TilePosition? selectedTile = null;
+    
+    private int score = 0;
+    private int movesLeft = 20; // Установлено ровно 20 ходов согласно заданию
+    private bool isGameOver = false;
+    private Random rand = new Random();
 
     protected override void OnInitialized()
     {
-        _model.InitGrid();
+        InitGame();
     }
 
-    private void MixBoard()
+    private void InitGame()
     {
-        _model.InitGrid();
-        StateHasChanged();
+        score = 0;
+        movesLeft = 20;
+        isGameOver = false;
+        GenerateValidGrid();
     }
 
-    private async Task OnTileClick(int row, int col)
+    private void GenerateValidGrid()
     {
-        if (_isProcessing) return;
-
-        if (_selectedRow == null || _selectedCol == null)
+        do
         {
-            _selectedRow = row;
-            _selectedCol = col;
-            StateHasChanged();
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    grid[r, c] = rand.Next(1, 6);
+                }
+            }
+        } while (HasMatches());
+    }
+
+    private async Task OnCellClick(int r, int c)
+    {
+        if (isGameOver) return;
+
+        var clickedTile = new TilePosition(r, c);
+
+        if (selectedTile == null)
+        {
+            selectedTile = clickedTile;
         }
         else
         {
-            var p1 = new TilePosition(_selectedRow.Value, _selectedCol.Value);
-            var p2 = new TilePosition(row, col);
-
-            _selectedRow = null;
-            _selectedCol = null;
-
-            if (_model.IsAdjacent(p1, p2))
+            if (IsAdjacent(selectedTile, clickedTile))
             {
-                _isProcessing = true;
+                SwapTiles(selectedTile, clickedTile);
                 
-                _model.Swap(p1, p2);
-                StateHasChanged();
-                await Task.Delay(250);
-                
-                var matches = _model.CheckMatches();
-
-                if (matches.Count > 0)
+                if (HasMatches())
                 {
-                    while (matches.Count > 0)
+                    movesLeft--;
+                    await ProcessMatches();
+                    
+                    if (movesLeft <= 0)
                     {
-                        _model.RemoveMatches(matches);
-                        StateHasChanged();
-                        await Task.Delay(250);
-
-                        _model.DropTiles();
-                        StateHasChanged();
-                        await Task.Delay(250);
-
-                        matches = _model.CheckMatches();
+                        isGameOver = true;
                     }
                 }
                 else
                 {
-                    _model.Swap(p1, p2);
-                    StateHasChanged();
+                    SwapTiles(selectedTile, clickedTile); // Возврат, если нет комбинаций
                 }
-                _isProcessing = false;
             }
-            else
+            selectedTile = null;
+        }
+    }
+
+    private bool IsAdjacent(TilePosition t1, TilePosition t2)
+    {
+        return (Math.Abs(t1.Row - t2.Row) == 1 && t1.Col == t2.Col) ||
+               (Math.Abs(t1.Col - t2.Col) == 1 && t1.Row == t2.Row);
+    }
+
+    private void SwapTiles(TilePosition t1, TilePosition t2)
+    {
+        int temp = grid[t1.Row, t1.Col];
+        grid[t1.Row, t1.Col] = grid[t2.Row, t2.Col];
+        grid[t2.Row, t2.Col] = temp;
+    }
+
+    private bool HasMatches()
+    {
+        // Проверка по горизонтали
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols - 2; c++)
             {
-                _selectedRow = row;
-                _selectedCol = col;
-                StateHasChanged();
+                if (grid[r, c] != 0 && grid[r, c] == grid[r, c + 1] && grid[r, c] == grid[r, c + 2])
+                    return true;
+            }
+        }
+        // Проверка по вертикали
+        for (int c = 0; c < cols; c++)
+        {
+            for (int r = 0; r < rows - 2; r++)
+            {
+                if (grid[r, c] != 0 && grid[r, c] == grid[r + 1, c] && grid[r, c] == grid[r + 2, c])
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private async Task ProcessMatches()
+    {
+        while (HasMatches())
+        {
+            bool[,] toDestroy = new bool[rows, cols];
+
+            // Маркировка горизонтальных
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols - 2; c++)
+                {
+                    if (grid[r, c] != 0 && grid[r, c] == grid[r, c + 1] && grid[r, c] == grid[r, c + 2])
+                    {
+                        toDestroy[r, c] = toDestroy[r, c + 1] = toDestroy[r, c + 2] = true;
+                    }
+                }
+            }
+
+            // Маркировка вертикальных
+            for (int c = 0; c < cols; c++)
+            {
+                for (int r = 0; r < rows - 2; r++)
+                {
+                    if (grid[r, c] != 0 && grid[r, c] == grid[r + 1, c] && grid[r, c] == grid[r + 2, c])
+                    {
+                        toDestroy[r, c] = toDestroy[r + 1, c] = toDestroy[r + 2, c] = true;
+                    }
+                }
+            }
+
+            // Подсчет очков
+            int destroyedCount = 0;
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    if (toDestroy[r, c])
+                    {
+                        grid[r, c] = 0;
+                        destroyedCount++;
+                    }
+                }
+            }
+
+            score += destroyedCount * 10;
+            StateHasChanged();
+            await Task.Delay(250); // Плавная задержка для визуального эффекта
+
+            // Сдвиг фишек вниз и заполнение новых
+            DropAndFill();
+            StateHasChanged();
+            await Task.Delay(200);
+        }
+    }
+
+    private void DropAndFill()
+    {
+        for (int c = 0; c < cols; c++)
+        {
+            int emptyRow = rows - 1;
+            for (int r = rows - 1; r >= 0; r--)
+            {
+                if (grid[r, c] != 0)
+                {
+                    grid[emptyRow, c] = grid[r, c];
+                    if (emptyRow != r) grid[r, c] = 0;
+                    emptyRow--;
+                }
+            }
+
+            for (int r = emptyRow; r >= 0; r--)
+            {
+                grid[r, c] = rand.Next(1, 6);
             }
         }
     }
 
-    private string GetTileEmoji(int type) => type switch
+    private void ShuffleGrid()
     {
-        1 => "🔴",
-        2 => "🔵",
-        3 => "🟢",
-        4 => "🟡",
-        5 => "🟣",
-        _ => ""
-    };
+        if (isGameOver) return;
+        GenerateValidGrid();
+        selectedTile = null;
+    }
+
+    private async Task ExitToMenu()
+    {
+        await OnGameOver.InvokeAsync();
+    }
+
+    private string GetTileEmoji(int id)
+    {
+        return id switch
+        {
+            1 => "💎",
+            2 => "🔷",
+            3 => "💚",
+            4 => "🔶",
+            5 => "🔮",
+            _ => ""
+        };
+    }
 }
