@@ -25,29 +25,11 @@
 
 @if (currentScreen == ScreenState.TownSquare)
 {
-    <div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
-        <h1 style="color: #fff; font-size: 1.6rem; margin-bottom: 25px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Центральная площадь</h1>
-        <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 300px;">
-            <button style="background: #3498db; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer;" @onclick="() => currentScreen = ScreenState.ValleyOfLight">🌅 Долина света</button>
-            <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="ShowSoonAlert">🔒 Таверна</button>
-            <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="ShowSoonAlert">🔒 Шахты</button>
-            <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="ShowSoonAlert">🔒 Мастерская</button>
-            <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="ShowSoonAlert">🔒 Ярмарка</button>
-            <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="ShowSoonAlert">🔒 Дракон</button>
-        </div>
-    </div>
+    <TownSquareView OnGoToValley="() => currentScreen = ScreenState.ValleyOfLight" OnShowSoon="ShowSoonAlert" />
 }
 else if (currentScreen == ScreenState.ValleyOfLight)
 {
-    <div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
-        <h1 style="color: #fff; font-size: 1.6rem; margin-bottom: 25px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">🌅 Долина света</h1>
-        <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 300px;">
-            <button style="background: #2ecc71; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer;" @onclick="() => currentScreen = ScreenState.InGame">🎮 Играть</button>
-            <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="ShowSoonAlert">🔒 Позвать друга</button>
-            <button style="background: #7f8c8d; color: #bdc3c7; filter: grayscale(0.6); padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px;" @onclick="ShowSoonAlert">🔒 Лидеры</button>
-            <button style="background: #95a5a6; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px;" @onclick="() => currentScreen = ScreenState.TownSquare">⬅️ Назад в город</button>
-        </div>
-    </div>
+    <ValleyOfLightView OnStartGame="() => currentScreen = ScreenState.InGame" OnGoToTown="() => currentScreen = ScreenState.TownSquare" OnShowSoon="ShowSoonAlert" />
 }
 else if (currentScreen == ScreenState.ProfileMenu)
 {
@@ -69,15 +51,10 @@ else if (currentScreen == ScreenState.ProfileMenu)
                 }
                 else
                 {
-                    <div style="background: #27ae60; padding: 10px; border-radius: 6px; font-size: 0.9rem; font-weight: bold; text-align: center;">
-                        ✅ Кошелек успешно привязан!
-                    </div>
-                    <button style="background: #c0392b; color: white; padding: 6px; font-size: 0.8rem; border: none; border-radius: 4px; cursor: pointer; margin-top: 5px;" @onclick="DisconnectTon">
-                        Отключить кошелек
-                    </button>
+                    <div style="background: #27ae60; padding: 10px; border-radius: 6px; font-size: 0.9rem; font-weight: bold; text-align: center;">✅ Кошелек привязан!</div>
+                    <button style="background: #c0392b; color: white; padding: 6px; font-size: 0.8rem; border: none; border-radius: 4px; cursor: pointer; margin-top: 5px;" @onclick="DisconnectTon">Отключить кошелек</button>
                 }
             </div>
-            
             <button style="background: #2ecc71; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px;" @onclick="SaveProfile">💾 Завершить настройку</button>
         </div>
     </div>
@@ -86,7 +63,6 @@ else if (currentScreen == ScreenState.InGame)
 {
     <Match3 IsWalletConnected="@isRegistered" OnGameOver="() => currentScreen = ScreenState.ValleyOfLight" OnRequestAuth="HandleRequestAuth" />
 }
-
 
 <HistoryModal IsOpen="@showHistory" OnClose="() => showHistory = false" />
 
@@ -104,21 +80,20 @@ else if (currentScreen == ScreenState.InGame)
     private enum ScreenState { TownSquare, ValleyOfLight, InGame, ProfileMenu }
     private ScreenState currentScreen = ScreenState.TownSquare;
     private ScreenState previousScreen = ScreenState.TownSquare;
-    private string alertMessage;
+    private string? alertMessage;
     private bool showHistory = false;
     private bool isRegistered = false;
     private string userName = "Гость";
     private string walletAddress = "";
     private string inputName = "";
 
-    private DotNetObjectReference<GameMenu>? objRef;
+    private DotNetObjectReference<object>? objRef;
 
-    // ИСПРАВЛЕНО: Безопасный запуск после полной отрисовки скриптов в браузере
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            objRef = DotNetObjectReference.Create(this);
+            objRef = DotNetObjectReference.Create<object>(this);
             await JS.InvokeVoidAsync("initTonConnect", objRef);
         }
     }
@@ -129,15 +104,8 @@ else if (currentScreen == ScreenState.InGame)
         else { previousScreen = currentScreen; inputName = isRegistered ? userName : ""; currentScreen = ScreenState.ProfileMenu; }
     }
 
-    private async Task ConnectViaTon()
-    {
-        await JS.InvokeVoidAsync("openTonConnectModal");
-    }
-
-    private async Task DisconnectTon()
-    {
-        await JS.InvokeVoidAsync("disconnectTonWallet");
-    }
+    private async Task ConnectViaTon() => await JS.InvokeVoidAsync("openTonConnectModal");
+    private async Task DisconnectTon() => await JS.InvokeVoidAsync("disconnectTonWallet");
 
     [JSInvokable]
     public void OnWalletConnected(string realAddress)
@@ -149,9 +117,7 @@ else if (currentScreen == ScreenState.InGame)
     [JSInvokable]
     public void OnWalletDisconnected()
     {
-        walletAddress = "";
-        isRegistered = false;
-        userName = "Гость";
+        walletAddress = ""; isRegistered = false; userName = "Гость";
         StateHasChanged();
     }
 
@@ -159,26 +125,17 @@ else if (currentScreen == ScreenState.InGame)
     {
         if (string.IsNullOrWhiteSpace(inputName)) { alertMessage = "Пожалуйста, укажите имя!"; return; }
         if (string.IsNullOrEmpty(walletAddress)) { alertMessage = "Сначала необходимо подключить TON кошелек!"; return; }
-        
-        userName = inputName.Trim();
-        isRegistered = true;
-        alertMessage = "Аккаунт успешно сохранен!"; 
-        currentScreen = ScreenState.TownSquare;
+        userName = inputName.Trim(); isRegistered = true;
+        alertMessage = "Аккаунт успешно сохранен!"; currentScreen = ScreenState.TownSquare;
     }
 
     private void HandleRequestAuth()
     {
-        previousScreen = ScreenState.ValleyOfLight; 
-        inputName = ""; 
-        currentScreen = ScreenState.ProfileMenu; 
-        StateHasChanged();
+        previousScreen = ScreenState.ValleyOfLight; inputName = ""; currentScreen = ScreenState.ProfileMenu; StateHasChanged();
     }
 
     private string ShortenWallet(string addr) => addr.Length <= 10 ? addr : addr.Substring(0, 6) + "..." + addr.Substring(addr.Length - 4);
     private void ShowSoonAlert() => alertMessage = "Скоро";
 
-    public void Dispose()
-    {
-        objRef?.Dispose();
-    }
+    public void Dispose() => objRef?.Dispose();
 }
