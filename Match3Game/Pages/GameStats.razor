@@ -1,0 +1,13 @@
+@code {
+    [Parameter] public int Score { get; set; }
+    [Parameter] public int MovesLeft { get; set; }
+}
+
+<div class="game-stats" style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px;">
+    <div style="background: #2c3e50; padding: 8px 15px; border-radius: 8px; font-weight: bold;">
+        🏆 Счет: @Score
+    </div>
+    <div style="background: #2c3e50; padding: 8px 15px; border-radius: 8px; font-weight: bold; @(MovesLeft <= 5 ? "color: #e74c3c;" : "")">
+        🎯 Ходы: @MovesLeft
+    </div>
+</div>
