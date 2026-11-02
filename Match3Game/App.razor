@@ -1,18 +1,44 @@
 @using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
 
 <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" />
     </Found>
     <NotFound>
-        <div class="main-layout-fallback">
-            <p>Страница не найдена.</p>
-        </div>
+        <p>Страница не найдена.</p>
     </NotFound>
 </Router>
 
+@code {
+    private DotNetObjectReference<App>? objRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+            // Инициализируем TON Connect один раз на глобальном уровне
+            await JS.InvokeVoidAsync("initTonConnect", objRef);
+        }
+    }
+
+    [JSInvokable]
+    public void OnWalletConnected(string realAddress)
+    {
+        // Передаем адрес в наше статическое состояние меню
+        Match3Game.Pages.GameMenu.UpdateWalletStatus(realAddress);
+    }
+
+    [JSInvokable]
+    public void OnWalletDisconnected()
+    {
+        Match3Game.Pages.GameMenu.ClearWalletStatus();
+    }
+}
+
 <style>
-    /* Базовый каркас приложения для корректного отображения сетки */
     html, body {
         margin: 0;
         padding: 0;
