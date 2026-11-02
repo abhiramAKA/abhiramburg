@@ -1,7 +1,6 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.JSInterop
 @inject IJSRuntime JS
-@implements IDisposable
 
 <div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
     <h1 style="color: #fff; font-size: 1.6rem; margin-bottom: 25px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">👤 Профиль игрока</h1>
@@ -15,7 +14,7 @@
         <div style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #34495e; padding-top: 15px; margin-top: 5px;">
             <label style="font-size: 0.9rem; color: #bdc3c7; font-weight: bold;">Криптокошелек Gram (TON):</label>
             
-            @if (string.IsNullOrEmpty(localWallet))
+            @if (string.IsNullOrEmpty(WalletAddress))
             {
                 <button style="background: #3498db; color: white; padding: 12px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" @onclick="ConnectViaTon">
                     💎 Подключить кошелек TON
@@ -25,7 +24,7 @@
             {
                 <div style="background: rgba(39, 174, 96, 0.15); border: 1px solid #27ae60; padding: 12px; border-radius: 8px; font-size: 0.85rem; text-align: left; word-break: break-all;">
                     <span style="color: #2ecc71; font-weight: bold; display: block; margin-bottom: 4px;">✅ Подключено:</span>
-                    <code style="color: #fff;">@localWallet</code>
+                    <code style="color: #fff;">@WalletAddress</code>
                 </div>
                 <button style="background: #c0392b; color: white; padding: 8px; font-size: 0.8rem; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; margin-top: 5px;" @onclick="DisconnectTon">
                     ❌ Отключить кошелек
@@ -56,40 +55,14 @@
     private string localWallet = "";
     private string? localAlert;
 
-    private DotNetObjectReference<UserProfileView>? objRef;
-
     protected override void OnParametersSet()
     {
         localName = Name;
         localWallet = WalletAddress;
     }
 
-    // Инициализация TON Connect происходит строго ТОЛЬКО при отрисовке этого компонента профиля
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            objRef = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("initTonConnect", objRef);
-        }
-    }
-
     private async Task ConnectViaTon() => await JS.InvokeVoidAsync("openTonConnectModal");
     private async Task DisconnectTon() => await JS.InvokeVoidAsync("disconnectTonWallet");
-
-    [JSInvokable]
-    public void OnWalletConnected(string realAddress)
-    {
-        localWallet = realAddress;
-        StateHasChanged();
-    }
-
-    [JSInvokable]
-    public void OnWalletDisconnected()
-    {
-        localWallet = "";
-        StateHasChanged();
-    }
 
     private async Task SubmitSave()
     {
@@ -97,10 +70,5 @@
         if (string.IsNullOrEmpty(localWallet)) { localAlert = "Сначала необходимо подключить TON кошелек!"; return; }
         
         await OnProfileSaved.InvokeAsync((localName.Trim(), localWallet));
-    }
-
-    public void Dispose()
-    {
-        objRef?.Dispose();
     }
 }
