@@ -25,7 +25,7 @@
 
     <script src="_framework/blazor.webassembly.js"></script>
     
-    <!-- Используем стабильную UI библиотеку TON Connect -->
+    <!-- Используем официальный проверенный CDN TON Connect UI версии 2.x -->
     <script src="https://unpkg.com"></script>
 
     <script>
@@ -35,10 +35,9 @@
         window.initTonConnect = function () {
             if (tonConnectUI) return "Уже инициализировано";
             try {
-                // Прямая передача манифеста объектом, чтобы не зависеть от сетевых файлов json
-                tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-                    manifestUrl: "https://github.io",
-                    buttonRootId: null // Отключаем стандартную кнопку
+                // ИСПРАВЛЕНО: Правильное создание объекта для TON Connect UI v2
+                tonConnectUI = new TonConnectUI.TonConnectUI({
+                    manifestUrl: "https://github.io"
                 });
 
                 tonConnectUI.onStatusChange(wallet => {
@@ -50,6 +49,7 @@
                 });
                 return "Успешная инициализация";
             } catch (e) {
+                console.error("Ошибка TON Connect:", e);
                 return "Ошибка инициализации: " + e.message;
             }
         };
@@ -61,7 +61,7 @@
                 return "No UI";
             }
             try {
-                // Принудительно открываем окно выбора кошельков
+                // Открываем настоящее окно выбора кошельков (Tonkeeper, MyTonWallet и др.)
                 await tonConnectUI.openModal();
                 return "Modal Opened";
             } catch (error) {
