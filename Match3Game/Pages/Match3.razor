@@ -2,6 +2,8 @@
 @using System
 @using System.Threading.Tasks
 @using Microsoft.AspNetCore.Components
+@using Match3Game.Pages
+@using Match3Game.Core
 
 <div class="game-wrapper" style="display: flex; flex-direction: column; align-items: center; max-width: 400px; margin: 0 auto; padding: 10px; position: relative;">
     
@@ -28,29 +30,45 @@
         </div>
     }
 
-    <GameGrid Rows="@rows" Cols="@cols" Grid="@grid" SelectedRow="@selectedRow" SelectedCol="@selectedCol" OnCellClick="HandleCellClick" />
+    <!-- Проверяем, инициализирован ли массив, чтобы избежать падения страницы -->
+    @if (grid != null)
+    {
+        <GameGrid Rows="@rows" Cols="@cols" Grid="@grid" SelectedRow="@selectedRow" SelectedCol="@selectedCol" OnCellClick="HandleCellClick" />
+    }
 
     <GameControls IsGameOver="@isGameOver" OnShuffle="ShuffleGrid" OnExit="ExitToMenu" />
 </div>
 
 @code {
-    [Parameter] public EventCallback<int> OnGameOverWithScore { get; set; }
+    [Parameter] public EventCallback OnGameOver { get; set; }
     [Parameter] public EventCallback OnRequestAuth { get; set; }
     [Parameter] public bool IsWalletConnected { get; set; }
 
-    private int rows = 8; private int cols = 8;
+    private int rows = 8; 
+    private int cols = 8;
+    
+    // Сразу жёстко задаём размеры двумерного массива, чтобы не было NullReferenceException
     private int[,] grid = new int[8, 8];
-    private int selectedRow = -1; private int selectedCol = -1;
-    private int score = 0; private int movesLeft = 20;
+    
+    private int selectedRow = -1; 
+    private int selectedCol = -1;
+    private int score = 0; 
+    private int movesLeft = 20;
     private bool isGameOver = false;
     private Random rand = new Random();
 
-    protected override void OnInitialized() => InitGame();
+    protected override void OnInitialized() 
+    {
+        InitGame();
+    }
 
     private void InitGame()
     {
-        score = 0; movesLeft = 20; isGameOver = false;
-        ResetSelection(); GenerateValidGrid();
+        score = 0; 
+        movesLeft = 20; 
+        isGameOver = false;
+        ResetSelection(); 
+        GenerateValidGrid();
     }
 
     private void ResetSelection() { selectedRow = -1; selectedCol = -1; }
@@ -138,5 +156,10 @@
 
     private void ShuffleGrid() { if (!isGameOver) { GenerateValidGrid(); ResetSelection(); } }
     private async Task GoToAuth() => await OnRequestAuth.InvokeAsync();
-    private async Task ExitToMenu() => await OnGameOverWithScore.InvokeAsync(score);
+    
+    private async Task ExitToMenu() 
+    { 
+        GameHistoryService.AddRecord(score);
+        await OnGameOver.InvokeAsync(); 
+    }
 }
