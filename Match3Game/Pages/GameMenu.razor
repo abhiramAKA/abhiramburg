@@ -1,74 +1,85 @@
-@using Microsoft.AspNetCore.Components
-@using Microsoft.JSInterop
+@page "/"
+@using Match3Game.Pages
+@using Match3Game.Core
 @inject IJSRuntime JS
 
-<div style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
-    <h1 style="color: #fff; font-size: 1.6rem; margin-bottom: 25px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">👤 Профиль игрока</h1>
-    <div style="background: #2c3e50; border: 2px solid #34495e; border-radius: 12px; padding: 20px; width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 15px; color: white;">
-        
-        <div style="display: flex; flex-direction: column; gap: 5px;">
-            <label style="font-size: 0.9rem; color: #f1c40f; font-weight: bold;">Имя в игре:</label>
-            <input type="text" @bind="localName" placeholder="Введите ваше имя..." maxlength="20" style="padding: 10px; border-radius: 6px; border: 1px solid #4a6572; background: #1a1a1a; color: white;" />
-        </div>
-        
-        <div style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #34495e; padding-top: 15px; margin-top: 5px;">
-            <label style="font-size: 0.9rem; color: #bdc3c7; font-weight: bold;">Криптокошелек Gram (TON):</label>
-            
-            @if (string.IsNullOrEmpty(WalletAddress))
-            {
-                <button style="background: #3498db; color: white; padding: 12px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" @onclick="ConnectViaTon">
-                    💎 Подключить кошелек TON
-                </button>
-            }
-            else
-            {
-                <div style="background: rgba(39, 174, 96, 0.15); border: 1px solid #27ae60; padding: 12px; border-radius: 8px; font-size: 0.85rem; text-align: left; word-break: break-all;">
-                    <span style="color: #2ecc71; font-weight: bold; display: block; margin-bottom: 4px;">✅ Подключено:</span>
-                    <code style="color: #fff;">@WalletAddress</code>
-                </div>
-                <button style="background: #c0392b; color: white; padding: 8px; font-size: 0.8rem; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; margin-top: 5px;" @onclick="DisconnectTon">
-                    ❌ Отключить кошелек
-                </button>
-            }
-        </div>
-        
-        <button style="background: #2ecc71; color: white; padding: 14px 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.2);" @onclick="SubmitSave">💾 Сохранить изменения</button>
-    </div>
-</div>
-
-@if (!string.IsNullOrEmpty(localAlert))
+@if (currentScreen != ScreenState.InGame)
 {
-    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+    <div class="info-block-1" style="background: linear-gradient(135deg, #2c3e50, #34495e); color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 2px solid #4a6572;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button style="background: #34495e; border: 1px solid #4a6572; color: white; font-size: 1.1rem; padding: 4px 8px; border-radius: 6px; cursor: pointer;" @onclick="() => showHistory = true">👤</button>
+                <h3 style="margin: 0; font-size: 1.1rem; color: #f1c40f;">Игрок: @GameHistoryService.UserName</h3>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <p style="margin: 0; font-size: 0.95rem;">Игр: <strong>@GameHistoryService.GetTotalGames()</strong></p>
+                <button style="background: #f1c40f; color: #2c3e50; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 0.85rem; cursor: pointer;" @onclick="ToggleProfile">
+                    @(currentScreen == ScreenState.ProfileMenu ? "⬅️ В город" : "⚙️ Профиль")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (currentScreen == ScreenState.TownSquare)
+{
+    <TownSquareView OnGoToValley="() => currentScreen = ScreenState.ValleyOfLight" OnShowSoon="ShowSoonAlert" />
+}
+else if (currentScreen == ScreenState.ValleyOfLight)
+{
+    <ValleyOfLightView OnStartGame="() => currentScreen = ScreenState.InGame" OnGoToTown="() => currentScreen = ScreenState.TownSquare" OnShowSoon="ShowSoonAlert" />
+}
+else if (currentScreen == ScreenState.ProfileMenu)
+{
+    <UserProfileView 
+        Name="@inputName" 
+        WalletAddress="@GameHistoryService.WalletAddress" 
+        OnProfileSaved="HandleProfileSaved" />
+}
+else if (currentScreen == ScreenState.InGame)
+{
+    <Match3 IsWalletConnected="@GameHistoryService.IsRegistered" OnGameOver="() => currentScreen = ScreenState.ValleyOfLight" OnRequestAuth="HandleRequestAuth" />
+}
+
+<HistoryModal IsOpen="@showHistory" OnClose="() => showHistory = false" />
+
+@if (!string.IsNullOrEmpty(alertMessage))
+{
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999;">
         <div style="background: #2c3e50; color: white; padding: 25px 40px; border-radius: 15px; text-align: center; border: 2px solid #f1c40f;">
-            <p style="font-size: 1.1rem; margin: 0 0 20px 0; font-weight: bold;">@localAlert</p>
-            <button style="background: #f1c40f; color: #2c3e50; border: none; padding: 8px 25px; font-weight: bold; border-radius: 5px; cursor: pointer;" @onclick="() => localAlert = null">OK</button>
+            <p style="font-size: 1.3rem; margin: 0 0 20px 0; font-weight: bold;">@alertMessage</p>
+            <button style="background: #f1c40f; color: #2c3e50; border: none; padding: 8px 25px; font-weight: bold; border-radius: 5px; cursor: pointer;" @onclick="() => alertMessage = null">OK</button>
         </div>
     </div>
 }
 
 @code {
-    [Parameter] public string Name { get; set; } = "";
-    [Parameter] public string WalletAddress { get; set; } = "";
-    [Parameter] public EventCallback<(string, string)> OnProfileSaved { get; set; }
+    private enum ScreenState { TownSquare, ValleyOfLight, InGame, ProfileMenu }
+    private ScreenState currentScreen = ScreenState.TownSquare;
+    private ScreenState previousScreen = ScreenState.TownSquare;
+    private string? alertMessage;
+    private bool showHistory = false;
+    private string inputName = "";
 
-    private string localName = "";
-    private string localWallet = "";
-    private string? localAlert;
-
-    protected override void OnParametersSet()
+    private void ToggleProfile()
     {
-        localName = Name;
-        localWallet = WalletAddress;
+        if (currentScreen == ScreenState.ProfileMenu) currentScreen = previousScreen;
+        else { previousScreen = currentScreen; inputName = GameHistoryService.IsRegistered ? GameHistoryService.UserName : ""; currentScreen = ScreenState.ProfileMenu; }
     }
 
-    private async Task ConnectViaTon() => await JS.InvokeVoidAsync("openTonConnectModal");
-    private async Task DisconnectTon() => await JS.InvokeVoidAsync("disconnectTonWallet");
-
-    private async Task SubmitSave()
+    private void HandleProfileSaved((string name, string wallet) profileData)
     {
-        if (string.IsNullOrWhiteSpace(localName)) { localAlert = "Пожалуйста, укажите имя!"; return; }
-        if (string.IsNullOrEmpty(localWallet)) { localAlert = "Сначала необходимо подключить TON кошелек!"; return; }
-        
-        await OnProfileSaved.InvokeAsync((localName.Trim(), localWallet));
+        GameHistoryService.UserName = profileData.name;
+        GameHistoryService.WalletAddress = profileData.wallet;
+        GameHistoryService.IsRegistered = true;
+        alertMessage = "Профиль успешно обновлен!";
+        currentScreen = ScreenState.TownSquare;
     }
+
+    private void HandleRequestAuth()
+    {
+        previousScreen = ScreenState.ValleyOfLight; inputName = ""; currentScreen = ScreenState.ProfileMenu; StateHasChanged();
+    }
+
+    private void ShowSoonAlert() => alertMessage = "Скоро";
 }
