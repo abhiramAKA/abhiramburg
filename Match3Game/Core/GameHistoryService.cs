@@ -1,58 +1,28 @@
-@using Microsoft.AspNetCore.Components.Routing
-@using Microsoft.JSInterop
-@using Match3Game.Core
-@inject IJSRuntime JS
+using System.Collections.Generic;
 
-<Router AppAssembly="@typeof(Program).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" />
-    </Found>
-    <NotFound>
-        <p>Страница не найдена.</p>
-    </NotFound>
-</Router>
-
-@code {
-    private DotNetObjectReference<App>? objRef;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+namespace Match3Game.Core
+{
+    public static class GameHistoryService
     {
-        if (firstRender)
+        private static readonly List<int> _history = new List<int>();
+        
+        public static string WalletAddress { get; set; } = "";
+        public static string UserName { get; set; } = "Гость";
+        public static bool IsRegistered { get; set; } = false;
+
+        public static void AddRecord(int score)
         {
-            objRef = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("initTonConnect", objRef);
+            _history.Add(score);
+        }
+
+        public static List<int> GetHistory()
+        {
+            return _history;
+        }
+
+        public static int GetTotalGames()
+        {
+            return _history.Count;
         }
     }
-
-    [JSInvokable]
-    public void OnWalletConnected(string realAddress)
-    {
-        GameHistoryService.WalletAddress = realAddress;
-    }
-
-    [JSInvokable]
-    public void OnWalletDisconnected()
-    {
-        GameHistoryService.WalletAddress = "";
-        GameHistoryService.IsRegistered = false;
-        GameHistoryService.UserName = "Гость";
-    }
-
-    public void Dispose()
-    {
-        objRef?.Dispose();
-    }
 }
-
-<style>
-    html, body {
-        margin: 0;
-        padding: 0;
-        background-color: #1a1a1a;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        color: white;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-</style>
