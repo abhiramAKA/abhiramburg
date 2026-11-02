@@ -1,205 +1,143 @@
-@page "/"
+@page "/match3"
+@using System
+@using System.Threading.Tasks
+@using Microsoft.AspNetCore.Components
 @using Match3Game.Pages
 
-<!-- Информационный блок №1 показывается ТОЛЬКО когда игрок находится в меню площади или долины -->
-@if (currentScreen == ScreenState.TownSquare || currentScreen == ScreenState.ValleyOfLight)
-{
-    <div class="info-block-1">
-        <h3>📊 Информационный блок №1</h3>
-        <p>Всего сыграно игр 3-в-ряд: <strong>@TotalGamesPlayed</strong></p>
-    </div>
-}
+<div class="game-wrapper" style="display: flex; flex-direction: column; align-items: center; max-width: 400px; margin: 0 auto; padding: 10px; position: relative;">
+    
+    <GameStats Score="@score" MovesLeft="@movesLeft" />
 
-@if (currentScreen == ScreenState.TownSquare)
-{
-    <!-- ЭКРАН 1: ЦЕНТРАЛЬНАЯ ПЛОЩАДЬ -->
-    <div class="menu-container">
-        <h1 class="screen-title">Центральная площадь</h1>
+    @if (isGameOver)
+    {
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.98); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; color: white; padding: 25px; box-sizing: border-box; text-align: center;">
+            <h2 style="color: #e74c3c; margin: 0 0 10px 0;">Игра окончена!</h2>
+            <p style="font-size: 1.2rem; margin: 0 0 15px 0;">Результат: <strong style="color: #f1c40f;">@score</strong></p>
+            
+            @if (!IsWalletConnected)
+            {
+                <div style="background: rgba(0,0,0,0.25); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px dashed #f1c40f;">
+                    <p style="margin: 0 0 12px 0; color: #bdc3c7; font-size: 0.95rem;">Для сохранения прогресса авторизуйтесь с помощью криптокошелька Грам.</p>
+                    <button style="background-color: #3498db; padding: 10px 15px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; color: white;" @onclick="GoToAuth">
+                        👤 Создать профиль и привязать
+                    </button>
+                </div>
+            }
 
-        <div class="buttons-grid">
-            <!-- Активная кнопка -->
-            <button class="menu-btn active-btn" @onclick="GoToValleyOfLight">
-                🌅 Долина света
-            </button>
-
-            <!-- Неактивные кнопки с замочками -->
-            <button class="menu-btn locked-btn" @onclick="ShowSoonAlert">
-                🔒 Таверна
-            </button>
-            <button class="menu-btn locked-btn" @onclick="ShowSoonAlert">
-                🔒 Шахты
-            </button>
-            <button class="menu-btn locked-btn" @onclick="ShowSoonAlert">
-                🔒 Мастерская
-            </button>
-            <button class="menu-btn locked-btn" @onclick="ShowSoonAlert">
-                🔒 Ярмарка
-            </button>
-            <button class="menu-btn locked-btn" @onclick="ShowSoonAlert">
-                🔒 Дракон
-            </button>
+            <button style="background-color: #2ecc71; margin-bottom: 10px; width: 220px; padding: 12px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white;" @onclick="InitGame">Играть снова</button>
+            <button style="background-color: #7f8c8d; width: 220px; padding: 12px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white;" @onclick="ExitToMenu">Вернуться в город</button>
         </div>
-    </div>
-}
-else if (currentScreen == ScreenState.ValleyOfLight)
-{
-    <!-- ЭКРАН 2: ДОЛИНА СВЕТА -->
-    <div class="menu-container">
-        <h1 class="screen-title">🌅 Долина света</h1>
+    }
 
-        <div class="buttons-grid">
-            <!-- Активная кнопка -->
-            <button class="menu-btn play-btn" @onclick="StartGame">
-                🎮 Играть
-            </button>
+    <GameGrid Rows="@rows" Cols="@cols" Grid="@grid" SelectedRow="@selectedRow" SelectedCol="@selectedCol" OnCellClick="HandleCellClick" />
 
-            <!-- Неактивные кнопки -->
-            <button class="menu-btn locked-btn" @onclick="ShowSoonAlert">
-                🔒 Позвать друга
-            </button>
-            <button class="menu-btn locked-btn" @onclick="ShowSoonAlert">
-                🔒 Лидеры
-            </button>
-
-            <!-- Кнопка Назад на площадь -->
-            <button class="menu-btn back-btn" @onclick="GoToTownSquare">
-                ⬅️ Назад в город
-            </button>
-        </div>
-    </div>
-}
-else if (currentScreen == ScreenState.InGame)
-{
-    <!-- ЭКРАН 3: ИГРА 3 В РЯД (Информационный блок скрыт) -->
-    <Match3 OnGameOver="HandleGameOver" />
-}
-
-@if (!string.IsNullOrEmpty(alertMessage))
-{
-    <div class="custom-alert">
-        <div class="alert-content">
-            <p>@alertMessage</p>
-            <button class="close-alert-btn" @onclick="CloseAlert">OK</button>
-        </div>
-    </div>
-}
+    <GameControls IsGameOver="@isGameOver" OnShuffle="ShuffleGrid" OnExit="ExitToMenu" />
+</div>
 
 @code {
-    private enum ScreenState { TownSquare, ValleyOfLight, InGame }
-    private ScreenState currentScreen = ScreenState.TownSquare;
-    private string alertMessage = "";
-    
-    // Переменная для подсчета сыгранных игр за сессию
-    public static int TotalGamesPlayed { get; set; } = 0;
+    [Parameter] public EventCallback<int> OnGameOverWithScore { get; set; }
+    [Parameter] public EventCallback OnRequestAuth { get; set; }
+    [Parameter] public bool IsWalletConnected { get; set; }
 
-    private void GoToValleyOfLight() => currentScreen = ScreenState.ValleyOfLight;
-    private void GoToTownSquare() => currentScreen = ScreenState.TownSquare;
-    private void StartGame() => currentScreen = ScreenState.InGame;
+    private int rows = 8; private int cols = 8;
+    private int[,] grid = new int[8, 8];
+    private int selectedRow = -1; private int selectedCol = -1;
+    private int score = 0; private int movesLeft = 20;
+    private bool isGameOver = false;
+    private Random rand = new Random();
 
-    private void ShowSoonAlert()
+    protected override void OnInitialized() => InitGame();
+
+    private void InitGame()
     {
-        alertMessage = "Скоро";
+        score = 0; movesLeft = 20; isGameOver = false;
+        ResetSelection(); GenerateValidGrid();
     }
 
-    private void CloseAlert()
+    private void ResetSelection() { selectedRow = -1; selectedCol = -1; }
+
+    private void GenerateValidGrid()
     {
-        alertMessage = "";
+        do {
+            for (int r = 0; r < rows; r++)
+                for (int c = 0; c < cols; c++)
+                    grid[r, c] = rand.Next(1, 6);
+        } while (HasMatches());
     }
 
-    private void HandleGameOver()
+    private async Task HandleCellClick((int r, int c) coord)
     {
-        TotalGamesPlayed++;
-        currentScreen = ScreenState.ValleyOfLight;
-        StateHasChanged();
+        if (isGameOver) return;
+        if (selectedRow == -1 && selectedCol == -1) { selectedRow = coord.r; selectedCol = coord.c; }
+        else {
+            if (IsAdjacent(selectedRow, selectedCol, coord.r, coord.c)) {
+                SwapTiles(selectedRow, selectedCol, coord.r, coord.c);
+                if (HasMatches()) {
+                    movesLeft--; await ProcessMatches();
+                    if (movesLeft <= 0) isGameOver = true;
+                } else SwapTiles(selectedRow, selectedCol, coord.r, coord.c);
+            }
+            ResetSelection();
+        }
     }
+
+    private bool IsAdjacent(int r1, int c1, int r2, int c2) =>
+        (Math.Abs(r1 - r2) == 1 && c1 == c2) || (Math.Abs(c1 - c2) == 1 && r1 == r2);
+
+    private void SwapTiles(int r1, int c1, int r2, int c2)
+    {
+        int temp = grid[r1, c1]; grid[r1, c1] = grid[r2, c2]; grid[r2, c2] = temp;
+    }
+
+    private bool HasMatches()
+    {
+        for (int r = 0; r < rows; r++)
+            for (int c = 0; c < cols - 2; c++)
+                if (grid[r, c] != 0 && grid[r, c] == grid[r, c + 1] && grid[r, c] == grid[r, c + 2]) return true;
+        for (int c = 0; c < cols; c++)
+            for (int r = 0; r < rows - 2; r++)
+                if (grid[r, c] != 0 && grid[r, c] == grid[r + 1, c] && grid[r, c] == grid[r + 2, c]) return true;
+        return false;
+    }
+
+    private async Task ProcessMatches()
+    {
+        while (HasMatches()) {
+            bool[,] toDestroy = new bool[8, 8];
+            for (int r = 0; r < rows; r++)
+                for (int c = 0; c < cols - 2; c++)
+                    if (grid[r, c] != 0 && grid[r, c] == grid[r, c + 1] && grid[r, c] == grid[r, c + 2])
+                        toDestroy[r, c] = toDestroy[r, c + 1] = toDestroy[r, c + 2] = true;
+            for (int c = 0; c < cols; c++)
+                for (int r = 0; r < rows - 2; r++)
+                    if (grid[r, c] != 0 && grid[r, c] == grid[r + 1, c] && grid[r, c] == grid[r + 2, c])
+                        toDestroy[r, c] = toDestroy[r + 1, c] = toDestroy[r + 2, c] = true;
+
+            int destroyed = 0;
+            for (int r = 0; r < rows; r++)
+                for (int c = 0; c < cols; c++)
+                    if (toDestroy[r, c]) { grid[r, c] = 0; destroyed++; }
+
+            score += destroyed * 10; StateHasChanged(); await Task.Delay(250);
+            DropAndFill(); StateHasChanged(); await Task.Delay(200);
+        }
+    }
+
+    private void DropAndFill()
+    {
+        for (int c = 0; c < cols; c++) {
+            int emptyRow = rows - 1;
+            for (int r = rows - 1; r >= 0; r--)
+                if (grid[r, c] != 0) {
+                    grid[emptyRow, c] = grid[r, c];
+                    if (emptyRow != r) grid[r, c] = 0;
+                    emptyRow--;
+                }
+            for (int r = emptyRow; r >= 0; r--) grid[r, c] = rand.Next(1, 6);
+        }
+    }
+
+    private void ShuffleGrid() { if (!isGameOver) { GenerateValidGrid(); ResetSelection(); } }
+    private async Task GoToAuth() => await OnRequestAuth.InvokeAsync();
+    private async Task ExitToMenu() => await OnGameOverWithScore.InvokeAsync(score);
 }
-
-<style>
-    .info-block-1 {
-        background: linear-gradient(135deg, #2c3e50, #34495e);
-        color: #fff;
-        padding: 15px;
-        border-radius: 12px;
-        margin-bottom: 20px;
-        text-align: center;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        border: 2px solid #4a6572;
-    }
-    .info-block-1 h3 { margin: 0 0 5px 0; font-size: 1.1rem; color: #f1c40f; }
-    .info-block-1 p { margin: 0; font-size: 1rem; }
-
-    .menu-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 10px;
-    }
-    .screen-title {
-        color: #fff;
-        font-size: 1.6rem;
-        margin-bottom: 25px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        text-align: center;
-    }
-    .buttons-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        width: 100%;
-        max-width: 300px;
-    }
-    .menu-btn {
-        padding: 14px 20px;
-        font-size: 1.1rem;
-        font-weight: bold;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: transform 0.1s, filter 0.2s;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        text-align: center;
-    }
-    .menu-btn:active { transform: scale(0.97); }
-    
-    .active-btn { background: #3498db; color: white; }
-    .play-btn { background: #2ecc71; color: white; }
-    .back-btn { background: #95a5a6; color: white; margin-top: 10px; }
-    
-    .locked-btn { 
-        background: #7f8c8d; 
-        color: #bdc3c7; 
-        filter: grayscale(0.6);
-        position: relative;
-    }
-
-    .custom-alert {
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.7);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-    }
-    .alert-content {
-        background: #2c3e50;
-        color: white;
-        padding: 25px 40px;
-        border-radius: 15px;
-        text-align: center;
-        border: 2px solid #f1c40f;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    }
-    .alert-content p { font-size: 1.3rem; margin: 0 0 20px 0; font-weight: bold; }
-    .close-alert-btn {
-        background: #f1c40f;
-        color: #2c3e50;
-        border: none;
-        padding: 8px 25px;
-        font-size: 1rem;
-        font-weight: bold;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-</style>
