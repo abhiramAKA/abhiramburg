@@ -2,17 +2,77 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Match3 Game</title>
-    <script>
-        var path = window.location.pathname;
-        if (!path.endsWith('/')) { path += '/'; }
-        document.write('<base href="' + path + '" />');
-    </script>
-    <link rel="stylesheet" href="css/match3.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Abhiramburg Match3 Game</title>
+    <base href="/" />
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/app.css" rel="stylesheet" />
+    <link href="Match3Game.styles.css" rel="stylesheet" />
 </head>
-<body>
-    <div id="app">Загрузка игры...</div>
+<body style="background-color: #1a1a1a;">
+    <div id="app">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; color: white; font-family: sans-serif;">
+            <h2>Загрузка города...</h2>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui">
+        Произошла ошибка. <a href="" class="reload">Перезагрузить</a>
+    </div>
+
     <script src="_framework/blazor.webassembly.js"></script>
+
+    <!-- Скрипт для динамических путей на GitHub Pages -->
+    <script type="text/javascript">
+        (function(l) {
+            if (l.search[0] === '?') {
+                var q = {}; l.search.slice(1).split('&').forEach(function(v) {
+                    var a = v.split('='); q[a[0]] = a.slice(1).join('=').toLowerCase();
+                });
+                if (q.p !== undefined) {
+                    window.history.replaceState(null, null, l.pathname.slice(0, -1) + (q.p || '') + l.search);
+                }
+            }
+        }(window.location));
+    </script>
+
+    <!-- Официальная библиотека TON Connect UI -->
+    <script src="https://unpkg.com"></script>
+
+    <!-- Изолированный JavaScript-мост для Blazor -->
+    <script>
+        let tonConnectUI = null;
+
+        window.initTonConnect = function (dotNetHelper) {
+            if (tonConnectUI) return;
+
+            tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                manifestUrl: window.location.origin + '/tonconnect-manifest.json'
+            });
+
+            tonConnectUI.onStatusChange(wallet => {
+                if (wallet && wallet.account) {
+                    dotNetHelper.invokeMethodAsync('OnWalletConnected', wallet.account.address);
+                } else {
+                    dotNetHelper.invokeMethodAsync('OnWalletDisconnected');
+                }
+            });
+        };
+
+        window.openTonConnectModal = async function () {
+            if (!tonConnectUI) return;
+            try {
+                await tonConnectUI.openModal();
+            } catch (error) {
+                console.error("Ошибка открытия TON Connect:", error);
+            }
+        };
+
+        window.disconnectTonWallet = async function () {
+            if (tonConnectUI && tonConnectUI.connected) {
+                await tonConnectUI.disconnect();
+            }
+        };
+    </script>
 </body>
 </html>
