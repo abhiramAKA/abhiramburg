@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Match3Game",
   "resources": {
-    "hash": "sha256-bLmLFNIRpjfvbPqFAgIdsGf30IMznwTCpBqrMKsKvhE=",
+    "hash": "sha256-C/+LAW11TcP/S2H8lAay+z3LHF5zzv5IMlZpFTPuAmU=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-1DK+nm58uZjvv7U2c/UlUp1zFjeBZnqXHFHBX/W1igo="
     },
@@ -42,12 +42,12 @@
       "System.Net.Primitives.wasm": "sha256-V+/gtxun/vCwtnYyTgOhmQWCr5pzY9CppnRuAuVxUU8=",
       "System.Private.Uri.wasm": "sha256-qDw0IFeUms38R3Y5FAZAQ0PeTlyd7otlVFYwVi4/toc=",
       "System.Runtime.InteropServices.JavaScript.wasm": "sha256-hvXCmj+3O+egn3trmobcfZk6yoaILzJ4abMsXgUWkHQ=",
-      "System.Runtime.wasm": "sha256-Jml9Zamnvam/OQ2rqQ9D3azDazTtWAu03O7LIcBPg1s=",
+      "System.Runtime.wasm": "sha256-3VuhOACyjEPd2jAm5h4M9ZEzCjm50+/UoCbzaGpO6Fs=",
       "System.Text.Encodings.Web.wasm": "sha256-smeNv2OJ6VEtoLSemGLut8KT0qpSAQzLoIy5TS4OIRE=",
       "System.Text.Json.wasm": "sha256-vSzrEfhKCRETSkoKaoTYM3IGVFTmm9fvQtGa6hqlJ+8=",
       "System.Text.RegularExpressions.wasm": "sha256-e6A4KEzVsxVjwjSJNDSTUEcSQFgZP700+U8BC+I3Pio=",
       "System.Private.CoreLib.wasm": "sha256-vbdzT3Cwf/qDi1wBzpECN4E/IPsKRCjFihNLpt4qcHM=",
-      "Match3Game.wasm": "sha256-bAF4agZAN4jRqQx6Iowz229iR7MynK7TO8pRMiG5RWs="
+      "Match3Game.wasm": "sha256-6zKaxUHFlQqwyoEV8Yyba2Ko3LEK3E6En1HOur2sf3o="
     }
   },
   "cacheBootResources": true,
