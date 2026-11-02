@@ -5,23 +5,24 @@
 @using Microsoft.JSInterop
 @inject IJSRuntime JS
 
-<div class="game-wrapper">
-    <div class="game-stats">
-        <div class="stat-item">🏆 Счет: <span>@score</span></div>
-        <div class="stat-item @(movesLeft <= 5 ? "low-moves" : "")">🎯 Ходы: <span>@movesLeft</span></div>
+<div class="game-wrapper" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; max-width: 400px; margin: 0 auto; padding: 10px; position: relative;">
+    <div class="game-stats" style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px;">
+        <div class="stat-item" style="background: #2c3e50; padding: 8px 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: 1px solid #34495e;">🏆 Счет: <span>@score</span></div>
+        <div class="stat-item @(movesLeft <= 5 ? "low-moves" : "")" style="background: #2c3e50; padding: 8px 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: 1px solid #34495e; @(movesLeft <= 5 ? "color: #e74c3c; border-color: #e74c3c;" : "")">🎯 Ходы: <span>@movesLeft</span></div>
     </div>
 
     @if (isGameOver)
     {
-        <div class="game-over-overlay">
-            <h2>Игра окончена!</h2>
+        <div class="game-over-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; color: white; text-align: center; padding: 20px; box-sizing: border-box;">
+            <h2 style="color: #e74c3c; margin-bottom: 10px;">Игра окончена!</h2>
             <p>Ваш итоговый результат: <strong>@score</strong></p>
-            <button class="action-btn restart-btn" @onclick="InitGame">Играть снова</button>
-            <button class="action-btn exit-btn" @onclick="ExitToMenu">В меню</button>
+            <button class="action-btn restart-btn" style="background-color: #2ecc71; margin-bottom: 10px; width: 200px; padding: 12px; font-size: 1rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.2);" @onclick="InitGame">Играть снова</button>
+            <button class="action-btn exit-btn" style="background-color: #7f8c8d; width: 200px; padding: 12px; font-size: 1rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.2);" @onclick="ExitToMenu">В меню</button>
         </div>
     }
 
-    <div class="grid-container">
+    <!-- Намертво фиксированная сетка через инлайновые стили -->
+    <div class="grid-container" style="display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); gap: 4px; background-color: #2c3e50; padding: 6px; border-radius: 12px; width: 100%; aspect-ratio: 1 / 1; box-shadow: 0 8px 20px rgba(0,0,0,0.5); box-sizing: border-box;">
         @for (int r = 0; r < rows; r++)
         {
             @for (int c = 0; c < cols; c++)
@@ -31,10 +32,10 @@
                 var tileId = grid[row, col];
                 var isSelected = (selectedRow == row && selectedCol == col);
                 
-                <div class="grid-cell" @onclick="() => OnCellClick(row, col)">
+                <div class="grid-cell" style="background-color: #34495e; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; position: relative; aspect-ratio: 1 / 1;" @onclick="() => OnCellClick(row, col)">
                     @if (tileId > 0)
                     {
-                        <div class="tile-content @(isSelected ? "selected" : "")">
+                        <div class="tile-content @(isSelected ? "selected" : "")" style="font-size: 2rem; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; transition: transform 0.1s ease; @(isSelected ? "transform: scale(0.85); border: 2px solid #f1c40f; border-radius: 6px; background-color: rgba(241, 196, 15, 0.2);" : "")">
                             @GetTileEmoji(tileId)
                         </div>
                     }
@@ -43,11 +44,11 @@
         }
     </div>
 
-    <div class="control-panel">
-        <button class="action-btn shuffle-btn" @onclick="ShuffleGrid" disabled="@isGameOver">
+    <div class="control-panel" style="display: flex; gap: 10px; width: 100%; margin-top: 15px;">
+        <button class="action-btn shuffle-btn" style="background-color: #e67e22; flex: 1; padding: 12px; font-size: 1rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.2);" @onclick="ShuffleGrid" disabled="@isGameOver">
             🔀 Перемешать
         </button>
-        <button class="action-btn back-menu-btn" @onclick="ExitToMenu">
+        <button class="action-btn back-menu-btn" style="background-color: #95a5a6; flex: 1; padding: 12px; font-size: 1rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.2);" @onclick="ExitToMenu">
             🚪 Выйти в меню
         </button>
     </div>
@@ -268,111 +269,3 @@
         };
     }
 }
-
-<style>
-    .game-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        max-width: 400px;
-        margin: 0 auto;
-        padding: 10px;
-        position: relative;
-    }
-    .game-stats {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        margin-bottom: 15px;
-    }
-    .stat-item {
-        background: #2c3e50;
-        padding: 8px 15px;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: bold;
-        border: 1px solid #34495e;
-    }
-    .low-moves {
-        color: #e74c3c;
-        border-color: #e74c3c;
-    }
-
-    .grid-container {
-        display: grid;
-        grid-template-columns: repeat(8, 1fr);
-        grid-template-rows: repeat(8, 1fr);
-        gap: 4px;
-        background-color: #2c3e50;
-        padding: 6px;
-        border-radius: 12px;
-        width: 100%;
-        aspect-ratio: 1 / 1;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-        box-sizing: border-box;
-    }
-    .grid-cell {
-        background-color: #34495e;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        user-select: none;
-        position: relative;
-        aspect-ratio: 1 / 1;
-    }
-    .tile-content {
-        font-size: 2rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
-        transition: transform 0.1s ease;
-    }
-    .tile-content.selected {
-        transform: scale(0.85);
-        border: 2px solid #f1c40f;
-        border-radius: 6px;
-        background-color: rgba(241, 196, 15, 0.2);
-    }
-    .control-panel {
-        display: flex;
-        gap: 10px;
-        width: 100%;
-        margin-top: 15px;
-    }
-    .action-btn {
-        flex: 1;
-        padding: 12px;
-        font-size: 1rem;
-        font-weight: bold;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        color: white;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    }
-    .shuffle-btn { background-color: #e67e22; }
-    .back-menu-btn { background-color: #95a5a6; }
-
-    .game-over-overlay {
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(44, 62, 80, 0.95);
-        z-index: 10;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        border-radius: 12px;
-        color: white;
-        text-align: center;
-        padding: 20px;
-        box-sizing: border-box;
-    }
-    .game-over-overlay h2 { color: #e74c3c; margin-bottom: 10px; }
-    .restart-btn { background-color: #2ecc71; margin-bottom: 10px; width: 200px; }
