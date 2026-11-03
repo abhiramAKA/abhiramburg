@@ -9,7 +9,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 8px;">
                 <button style="background: #34495e; border: 1px solid #4a6572; color: white; font-size: 1.1rem; padding: 4px 8px; border-radius: 6px; cursor: pointer;" @onclick="() => showHistory = true">👤</button>
-                <h3 style="margin: 0; font-size: 1.1rem; color: #f1c40f;">Игрок: @GameHistoryService.UserName</h3>
+                <h3 style="margin: 0; font-size: 1.1rem; color: #f1c40f;">Профиль: @GameHistoryService.UserName</h3>
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <p style="margin: 0; font-size: 0.95rem;">Игр: <strong>@GameHistoryService.GetTotalGames()</strong></p>
@@ -32,7 +32,7 @@ else if (currentScreen == ScreenState.ValleyOfLight)
 else if (currentScreen == ScreenState.ProfileMenu)
 {
     <UserProfileView 
-        Name="@inputName" 
+        Name="@GameHistoryService.UserName" 
         WalletAddress="@GameHistoryService.WalletAddress" 
         OnProfileSaved="HandleProfileSaved" />
 }
@@ -59,26 +59,26 @@ else if (currentScreen == ScreenState.InGame)
     private ScreenState previousScreen = ScreenState.TownSquare;
     private string? alertMessage;
     private bool showHistory = false;
-    private string inputName = "";
 
     private void ToggleProfile()
     {
         if (currentScreen == ScreenState.ProfileMenu) currentScreen = previousScreen;
-        else { previousScreen = currentScreen; inputName = GameHistoryService.IsRegistered ? GameHistoryService.UserName : ""; currentScreen = ScreenState.ProfileMenu; }
+        else { previousScreen = currentScreen; currentScreen = ScreenState.ProfileMenu; }
     }
 
-    private void HandleProfileSaved((string name, string wallet) profileData)
+    private void HandleProfileSaved((string name, string email) profileData)
     {
         GameHistoryService.UserName = profileData.name;
-        GameHistoryService.WalletAddress = profileData.wallet;
-        GameHistoryService.IsRegistered = true;
-        alertMessage = "Профиль успешно обновлен!";
-        currentScreen = ScreenState.TownSquare;
+        GameHistoryService.WalletAddress = profileData.email; // Храним email в этой переменной
+        GameHistoryService.IsRegistered = !string.IsNullOrEmpty(profileData.email);
+        StateHasChanged();
     }
 
     private void HandleRequestAuth()
     {
-        previousScreen = ScreenState.ValleyOfLight; inputName = ""; currentScreen = ScreenState.ProfileMenu; StateHasChanged();
+        previousScreen = ScreenState.ValleyOfLight; 
+        currentScreen = ScreenState.ProfileMenu; 
+        StateHasChanged();
     }
 
     private void ShowSoonAlert() => alertMessage = "Скоро";
