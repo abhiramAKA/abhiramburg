@@ -1,15 +1,279 @@
-    <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ -->
-    <div id="main-menu" class="game-window">
-        <h1 style="line-height: 1.2;">
-            КХАМАЧ<br>
-            <span style="font-size: 14px; color: #8a7350; letter-spacing: 1px; text-transform: none; display: block; margin-top: 5px;">
-                Легенды Абхирамбурга
-            </span>
-        </h1>
-        
-        <button class="menu-btn" onclick="showScreen('battle-screen')">⚔️ В БОЙ (Три в ряд)</button>
-        <button class="menu-btn" onclick="showScreen('forge-screen')">⚒️ Кузница предметов</button>
-        <button class="menu-btn" onclick="showScreen('alchemy-screen')">🧪 Лаборатория Алхимика</button>
-        <button class="menu-btn" onclick="showScreen('squad-screen')">👤 Мой Отряд</button>
-        <button class="menu-btn disabled">🏆 PvP Арена (Скоро)</button>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>КХАМАЧ: Легенды Абхирамбурга</title>
+    <style>
+        /* Базовые настройки экрана */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #050508;
+            font-family: 'Georgia', serif;
+            color: #e0e0e0;
+        }
+
+        /* 🌌 МАГИЧЕСКИЙ ЖИВОЙ ФОН (Искры костра) */
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Общий контейнер интерфейса поверх фона */
+        #game-interface {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        /* 🏰 РУНИЧЕСКОЕ ГОТИЧЕСКОЕ ОКНО */
+        .game-window {
+            width: 90vw;
+            max-width: 460px;
+            background: radial-gradient(circle, #1a1512 0%, #0d0a08 100%);
+            border: 4px solid #1a1613;
+            outline: 2px solid #8a7350;
+            outline-offset: -3px;
+            box-shadow: 
+                0 0 40px rgba(0, 0, 0, 0.95), 
+                inset 0 0 30px rgba(0, 0, 0, 0.8),
+                0 0 20px rgba(138, 115, 80, 0.2);
+            border-radius: 2px;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        /* 🔥 СТИЛЬ НАЗВАНИЯ ИГРЫ */
+        h1 {
+            font-size: 36px;
+            color: #e6c280;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin: 0 0 5px 0;
+            font-weight: 900;
+            text-shadow: 
+                0px 2px 4px rgba(0, 0, 0, 1), 
+                0 0 20px rgba(230, 194, 128, 0.4);
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #8a7350;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            display: block;
+            border-bottom: 1px dashed #4a3f2c;
+            padding-bottom: 20px;
+        }
+
+        /* ⚔️ КНОПКИ С ЭФФЕКТОМ СИЯНИЯ */
+        .menu-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin: 16px 0;
+            font-size: 15px;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #cdb38c;
+            background: linear-gradient(to bottom, #2d2621 0%, #171311 100%);
+            border: 1px solid #544432;
+            box-shadow: 
+                inset 0 1px 3px rgba(255,255,255,0.1),
+                0 5px 10px rgba(0,0,0,0.6);
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            text-shadow: 2px 2px 3px #000;
+            box-sizing: border-box;
+        }
+
+        /* Эффект золотого сияния при наведении */
+        .menu-btn:hover {
+            color: #fff;
+            background: linear-gradient(to bottom, #3d332c 0%, #211b18 100%);
+            border-color: #cbb281;
+            box-shadow: 
+                0 0 15px rgba(203, 178, 129, 0.5),
+                inset 0 0 8px rgba(203, 178, 129, 0.3);
+            letter-spacing: 1.5px;
+        }
+
+        .menu-btn:active {
+            transform: scale(0.99);
+        }
+
+        .menu-btn.disabled {
+            color: #4a453f;
+            background: #0f0d0b;
+            border-color: #26211c;
+            cursor: not-allowed;
+            box-shadow: none;
+            text-shadow: none;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .back-btn {
+            margin-top: 30px;
+            background: linear-gradient(to bottom, #421e1e 0%, #241010 100%);
+            border-color: #6e3131;
+            color: #e6aaaa;
+        }
+        .back-btn:hover {
+            background: linear-gradient(to bottom, #542525 0%, #301414 100%);
+            border-color: #a84444;
+            box-shadow: 0 0 15px rgba(168, 68, 68, 0.4);
+            color: #fff;
+        }
+
+        p {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #bfae96;
+        }
+        h2 {
+            color: #e6c280;
+            font-size: 24px;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Живой задний план -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Основной интерфейс -->
+    <div id="game-interface">
+
+        <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ -->
+        <div id="main-menu" class="game-window">
+            <h1>КХАМАЧ</h1>
+            <span class="subtitle">Легенды Абхирамбурга</span>
+            
+            <button class="menu-btn" onclick="showScreen('battle-screen')">⚔️ В БОЙ (Три в ряд)</button>
+            <button class="menu-btn" onclick="showScreen('forge-screen')">⚒️ Кузница предметов</button>
+            <button class="menu-btn" onclick="showScreen('alchemy-screen')">🧪 Лаборатория Алхимика</button>
+            <button class="menu-btn" onclick="showScreen('squad-screen')">👤 Мой Отряд</button>
+            <button class="menu-btn disabled">🏆 PvP Арена (Заблокировано)</button>
+        </div>
+
+        <!-- ЭКРАН 2: КУЗНИЦА -->
+        <div id="forge-screen" class="game-window screen">
+            <h2>⚒️ Древнее Горнило</h2>
+            <p>В полумраке кузницы тяжело вздыхают мехи. Старый мастер готов принять трофеи из черева великого ящера. Из чешуи и хребтовых костей он скует доспех, не знающий износа, а из клыка — клинок, разящий без промаха.</p>
+            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
+        </div>
+
+        <!-- ЭКРАН 3: АЛХИМИЯ -->
+        <div id="alchemy-screen" class="game-window screen">
+            <h2>🧪 Тайный Очаг</h2>
+            <p>Свитки, покрытые пылью веков, и склянки со светящимися эссенциями заполняют полки. Алхимик Абхирамбурга способен дистиллировать кровь Дракона в чистый опыт для ваших верных воинов или превратить прах в золото.</p>
+            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
+        </div>
+
+        <!-- ЭКРАН 4: ОТРЯД -->
+        <div id="squad-screen" class="game-window screen">
+            <h2>👤 Ваше Воинство</h2>
+            <p>Ваш отряд замер у походного костра в ожидании приказов. Сила Кхамача растет с каждой битвой. Здесь вы сможете распределять вехи развития, повышать классы бойцов и снаряжать их в дорогу.</p>
+            <p style="text-align: center; color: #e6c280; margin-top: 20px;">
+                <b>Предводитель:</b> Рыцарь смерти (1 ур)<br>
+                ⚔️ Атака: 25 | ❤️ Жизнь: 120
+            </p>
+            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
+        </div>
+
+        <!-- ЭКРАН 5: БОЕВАЯ АРЕНА (Заглушка) -->
+        <div id="battle-screen" class="game-window screen">
+            <h2>⚔️ Логово Чудовища</h2>
+            <p>Земля содрогается от поступи древнего змея. Скоро здесь появится боевое поле, и каждая собранная триада камней обрушит ярость вашего отряда на врага.</p>
+            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Отступить</button>
+        </div>
+
     </div>
+
+    <!-- СКРИПТ КРАСИВОГО АНИМИРОВАННОГО ФОНА -->
+    <script>
+        function showScreen(screenId) {
+            const screens = document.querySelectorAll('.game-window');
+            screens.forEach(screen => screen.style.display = 'none');
+
+            const activeScreen = document.getElementById(screenId);
+            if (activeScreen) {
+                if(screenId === 'main-menu') {
+                    activeScreen.style.display = 'block';
+                } else {
+                    activeScreen.style.display = 'block';
+                }
+            }
+        }
+
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const particles = [];
+        for (let i = 0; i < 40; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height + height,
+                speed: 0.5 + Math.random() * 1,
+                radius: 1 + Math.random() * 2,
+                alpha: 0.2 + Math.random() * 0.5,
+                drift: (Math.random() - 0.5) * 0.3
+            });
+        }
+
+        function drawBackground() {
+            const grad = ctx.createRadialGradient(width/2, height/2, 10, width/2, height/2, Math.max(width, height));
+            grad.addColorStop(0, '#161210');
+            grad.addColorStop(0.6, '#080605');
+            grad.addColorStop(1, '#020202');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+
+            for (let p of particles) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(230, 140, 40, ${p.alpha})`;
+                ctx.fill();
+
+                p.y -= p.speed;
+                p.x += p.drift;
+
+                if (p.y < -10) {
+                    p.y = height + 10;
+                    p.x = Math.random() * width;
+                }
+            }
+            requestAnimationFrame(drawBackground);
+        }
+        drawBackground();
+    </script>
+</body>
+</html>
