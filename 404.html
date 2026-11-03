@@ -25,64 +25,76 @@
 
     <script src="_framework/blazor.webassembly.js"></script>
     
-    <!-- Используем официальный проверенный CDN TON Connect UI версии 2.x -->
-    <script src="https://unpkg.com"></script>
+    <!-- Официальный скрипт авторизации Google -->
+    <script src="https://google.com" async defer></script>
 
     <script>
-        let tonConnectUI = null;
-        window.tonWalletAddress = ""; 
+        window.googleUserData = null;
 
-        window.initTonConnect = function () {
-            if (tonConnectUI) return "Уже инициализировано";
+        // Функция обратного вызова при успешном входе через Google
+        function handleCredentialResponse(response) {
             try {
-                // ИСПРАВЛЕНО: Правильное создание объекта для TON Connect UI v2
-                tonConnectUI = new TonConnectUI.TonConnectUI({
-                    manifestUrl: "https://github.io"
-                });
+                // Декодируем JWT-токен, который прислал Google, чтобы достать имя пользователя
+                const base64Url = response.credential.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(window.atatob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
 
-                tonConnectUI.onStatusChange(wallet => {
-                    if (wallet && wallet.account) {
-                        window.tonWalletAddress = wallet.account.address;
-                    } else {
-                        window.tonWalletAddress = "";
-                    }
-                });
-                return "Успешная инициализация";
+                const user = JSON.parse(jsonPayload);
+                window.googleUserData = {
+                    name: user.name,
+                    email: user.email,
+                    id: user.sub
+                };
+
+                console.log("Успешный вход Google:", window.googleUserData.name);
             } catch (e) {
-                console.error("Ошибка TON Connect:", e);
-                return "Ошибка инициализации: " + e.message;
+                console.error("Ошибка декодирования профиля Google:", e);
             }
-        };
+        }
 
-        window.openTonConnectModal = async function () {
-            window.initTonConnect();
-            if (!tonConnectUI) {
-                alert("Критическая ошибка: TON Connect не создан");
-                return "No UI";
-            }
+        window.initGoogleAuth = function () {
+            if (!window.google || !window.google.accounts) return "Библиотека Google еще загружается...";
+            
             try {
-                // Открываем настоящее окно выбора кошельков (Tonkeeper, MyTonWallet и др.)
-                await tonConnectUI.openModal();
-                return "Modal Opened";
-            } catch (error) {
-                alert("Ошибка открытия кошелька: " + error.message);
-                return error.message;
+                // Инициализируем клиент Google (используем тестовый Client ID)
+                google.accounts.id.initialize({
+                    client_id: "://googleusercontent.com",
+                    callback: handleCredentialResponse
+                });
+
+                // Отрисовываем красивую стандартную кнопку Google в специальный контейнер
+                const btnContainer = document.getElementById("google-button-container");
+                if (btnContainer) {
+                    google.accounts.id.renderButton(
+                        btnContainer,
+                        { theme: "filled_blue", size: "large", width: 260 }
+                    );
+                }
+                return "Google Init Success";
+            } catch (e) {
+                return "Ошибка Google Init: " + e.message;
             }
         };
 
-        window.getTonWalletAddress = function () {
-            if (tonConnectUI && tonConnectUI.account) {
-                return tonConnectUI.account.address;
-            }
-            return window.tonWalletAddress || "";
+        window.getGoogleUser = function () {
+            return window.googleUserData ? JSON.stringify(window.googleUserData) : "";
         };
 
-        window.disconnectTonWallet = async function () {
-            if (tonConnectUI && tonConnectUI.connected) {
-                await tonConnectUI.disconnect();
-                window.tonWalletAddress = "";
+        window.logoutGoogleUser = function () {
+            window.googleUserData = null;
+            if (window.google && window.google.accounts) {
+                google.accounts.id.disableAutoSelect();
             }
-            return "Disconnected";
+            return "Logged Out";
+        };
+
+        // Заглушка функции atob для безопасной обработки спецсимволов кириллицы
+        window.atatob = function(str) {
+            return decodeURIComponent(Array.prototype.map.call(window.atob(str), function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
         };
     </script>
 </body>
