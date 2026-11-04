@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ОЧИЩЕННОЕ ЯДРО ЛОГИКИ) (v0.6.0-beta.10)
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ОЧИЩЕННОЕ ЯДРО ЛОГИКИ) (v0.6.0-beta.16)
    ========================================================================== */
 
 let isBoardLocked = false;
@@ -59,7 +59,6 @@ function renderBoardDOM(isIntro = false, newRunesCoords = []) {
             
             cell.addEventListener('click', handleCellClick);
             
-            // Настраиваем жесты ввода из подключенного модуля ввода
             if (typeof setupInputListeners === 'function') {
                 setupInputListeners(cell);
             }
