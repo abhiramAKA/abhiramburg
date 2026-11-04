@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.17)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.18)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.17";
+const GAME_VERSION = "v0.6.0-beta.18";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -25,7 +25,7 @@ let combatData = {
 let match3BoardData = [];
 let selectedCell = null;
 
-// Тексты игровых правил и контента (вынесено из разметки HTML)
+// Тексты правил и справочника рун
 const GAME_TEXTS = {
     mainInfo: `
         <p><strong>Система Очков Действия:</strong> Вам дается 3 ОД на раунд. Каждый обмен рун на поле тратит 1 ОД.</p>
@@ -145,7 +145,7 @@ function setupCombatHelpListeners() {
             
             const helpScreen = document.getElementById('combat-help-screen');
             if (helpScreen) {
-                helpScreen.style.display = 'flex';
+                helpScreen.style.display = 'flex'; // Показываем оверлей при нажатии на ❓
             }
         });
     }
@@ -154,7 +154,7 @@ function setupCombatHelpListeners() {
         closeCombatHelpBtn.addEventListener('click', () => {
             const helpScreen = document.getElementById('combat-help-screen');
             if (helpScreen) {
-                helpScreen.style.display = 'none';
+                helpScreen.style.display = 'none'; // Полностью убираем оверлей при закрытии
             }
         });
     }
