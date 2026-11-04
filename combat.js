@@ -1,10 +1,14 @@
-// Боевое ядро рейда с поддержкой каскадных комбо
+// Боевое ядро рейда с безопасной инициализацией
 let combatData = {};
 
 function setupBattleSession() {
     if (!combatData.currentRound) {
         reviveAndRestart();
     } else {
+        // Гарантируем, что если поле исчезло из верстки, мы перерисуем его контейнер
+        if (!document.getElementById('match3-board')) {
+            rebuildActionArea();
+        }
         refreshBattleUI();
     }
 }
@@ -26,12 +30,20 @@ function reviveAndRestart() {
     if(document.getElementById('restart-combat-btn')) document.getElementById('restart-combat-btn').style.display = 'none';
     document.getElementById('battle-log-box').innerHTML = '<div class="log-row system">⚔️ Вы вступили в Логово. Передвигайте фишки. Доступны каскадные цепные реакции!</div>';
     
-    generateValidBoard();
+    // Пересоздаем разметку поля
     rebuildActionArea();
+    // Генерируем кости
+    generateValidBoard();
+    // Заполняем интерфейс данными
     refreshBattleUI();
 }
 
 function refreshBattleUI() {
+    // Безопасная проверка: если контейнер поля пропал из DOM, восстанавливаем его
+    if (!document.getElementById('match3-board')) {
+        rebuildActionArea();
+    }
+
     document.getElementById('boss-name').innerText = combatData.dragonBoss.name;
     const hpPercent = Math.max(0, (combatData.dragonBoss.hp / combatData.dragonBoss.maxHp) * 100);
     document.getElementById('boss-hp-fill').style.width = hpPercent + '%';
@@ -62,11 +74,9 @@ function appendToLog(message, type = 'player') {
     logBox.scrollTop = logBox.scrollHeight;
 }
 
-// Рекурсивная функция обработки комбо и каскадов
 function executeComboRules(matches, isFirstCascade = true) {
     let protectionActive = false;
 
-    // Оповещение о каскаде в логе
     if (!isFirstCascade) {
         appendToLog("✨ КАСКАД! Упавшие руны создали новую комбинацию!", "system");
     }
@@ -102,27 +112,22 @@ function executeComboRules(matches, isFirstCascade = true) {
         }
     });
 
-    // Применяем гравитацию (сдвиг фишек)
     applyBoardGravity(matches);
     refreshBattleUI();
 
-    // Проверяем, не возникло ли новых автоматических линий после падения рун
     let nextMatches = checkMatches();
 
     if (nextMatches.length > 0 && combatData.dragonBoss.hp > 0) {
-        // Если новые комбо найдены, запускаем следующий каскад с задержкой в 600мс
         setTimeout(() => {
             executeComboRules(nextMatches, false);
         }, 600);
     } else {
-        // Каскады завершились -> наступает ход Дракона (только если это был основной ход игрока)
         handleDragonTurn(protectionActive);
     }
 }
 
-// Логика завершения хода и атаки дракона
 function handleDragonTurn(protectionActive) {
-    isProcessingGrid = false; // Разблокируем поле для следующего хода игрока
+    isProcessingGrid = false;
 
     if (combatData.dragonBoss.hp <= 0) {
         refreshBattleUI();
