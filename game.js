@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (v0.6.0-beta.8)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.9)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.8";
+const GAME_VERSION = "v0.6.0-beta.9";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -16,6 +16,7 @@ let combatData = {
     currentRound: 1,
     squad: [
         { name: "Воин", hp: 120, maxHP: 120, class: "warrior", role: "⚔️", icon: "⚔️" },
+        { name: "Маг", hp: 80, maxHP: 80, class: "mage", role: "⚡️", icon: "⚡️" },
         { name: "Клирик", hp: 90, maxHP: 90, class: "cleric", role: "💚", icon: "💚" }
     ]
 };
@@ -27,7 +28,7 @@ let selectedCell = null;
 const MODE_DESCRIPTIONS = {
     forge: {
         title: "⚒️ ДРЕВНЯЯ КУЗНИЦА",
-        text: "Священное место, где из осколков побеждённых монстров и застывшей лавы можно выковывать мифическое снаряжение для Воина и Клирика. Повышает базовую атаку и открывает пассивные навыки рун."
+        text: "Священное место, где из осколков побеждённых монстров и застывшей лавы можно выковывать мифическое снаряжение для Воина, Мага и Клирика. Повышает базовую атаку и открывает пассивные навыки рун."
     },
     alchemy: {
         title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ",
@@ -57,7 +58,6 @@ function showScreen(screenId) {
     screens.forEach(id => {
         const screenEl = document.getElementById(id);
         if (screenEl) {
-            // Экраны справок боевой зоны обрабатываются отдельно, чтобы не закрывать поле
             screenEl.style.display = (id === screenId) ? 'flex' : 'none';
         }
     });
@@ -128,14 +128,14 @@ function setupCombatHelpListeners() {
     if (combatHelpBtn) {
         combatHelpBtn.addEventListener('click', () => {
             const helpScreen = document.getElementById('combat-help-screen');
-            if (helpScreen) helpScreen.style.display = 'flex'; // Показываем поверх боевого экрана
+            if (helpScreen) helpScreen.style.display = 'flex';
         });
     }
     
     if (closeCombatHelpBtn) {
         closeCombatHelpBtn.addEventListener('click', () => {
             const helpScreen = document.getElementById('combat-help-screen');
-            if (helpScreen) helpScreen.style.display = 'none'; // Скрываем
+            if (helpScreen) helpScreen.style.display = 'none';
         });
     }
 }
