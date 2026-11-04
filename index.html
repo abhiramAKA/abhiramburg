@@ -28,7 +28,7 @@
 
             <!-- ИНДИКАТОР ВЕРСИИ НА ГЛАВНОМ ЭКРАНЕ -->
             <div style="margin-top: 25px; font-size: 11px; color: #4a3f2c; letter-spacing: 1px; font-family: monospace;">
-                ВЕРСИЯ: <span class="version-link" onclick="loadAndShowChangelog()">v0.4.1</span>
+                ВЕРСИЯ: <span class="version-link" onclick="loadAndShowChangelog()">v0.4.2</span>
             </div>
         </div>
 
@@ -83,7 +83,7 @@
             <div style="font-size: 12px; color: #8a7350; margin-bottom: 5px; text-align: left;">Матрица отряда:</div>
             <div id="squad-battle-grid" class="squad-grid"></div>
 
-            <!-- Контейнер для динамического поля Match-3 (установили жесткую заглушку) -->
+            <!-- Контейнер для динамического поля Match-3 -->
             <div id="combat-action-area">
                 <button id="step-combat-btn" class="menu-btn" onclick="processCombatTurn()">⚡ Собрать комбинацию (Match-3)</button>
             </div>
@@ -105,7 +105,6 @@
     <script src="match3.js"></script>
     <script src="combat.js"></script>
     <script>
-        // Функция переключения экранов
         function showScreen(screenId) {
             const screens = document.querySelectorAll('.game-window');
             screens.forEach(screen => screen.style.display = 'none');
@@ -114,13 +113,11 @@
             if (activeScreen) {
                 activeScreen.style.display = 'block';
                 if (screenId === 'battle-screen') {
-                    // Даем браузеру 20 миллисекунд, чтобы отрендерить окно, прежде чем строить сетку
                     setTimeout(setupBattleSession, 20);
                 }
             }
         }
 
-        // Автоматическая подгрузка истории обновлений из JSON
         function loadAndShowChangelog() {
             showScreen('changelog-screen');
             const listContainer = document.getElementById('changelog-list');
