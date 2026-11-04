@@ -26,10 +26,43 @@
             <button class="menu-btn" onclick="showScreen('squad-screen')">👤 Мой Отряд</button>
             <button class="menu-btn disabled">🏆 PvP Арена (Заблокировано)</button>
 
-            <!-- ИНДИКАТОР ВЕРСИИ НА ГЛАВНОМ ЭКРАНЕ -->
+            <!-- ИНДИКАТОР ВЕРСИИ НА ГЛАВНОМ ЭКРАНЕ (ТЕПЕРЬ КЛИКАБЕЛЬНЫЙ) -->
             <div style="margin-top: 25px; font-size: 11px; color: #4a3f2c; letter-spacing: 1px; font-family: monospace;">
-                ВЕРСИЯ: <span style="color: #8a7350; font-weight: bold;">v0.2.0</span> (Match-3 MVP Адаптивная)
+                ВЕРСИЯ: <span class="version-link" onclick="showScreen('changelog-screen')">v0.2.1</span>
             </div>
+        </div>
+
+        <!-- ЭКРАН: ИСТОРИЯ ОБНОВЛЕНИЙ (CHANGELOG) -->
+        <div id="changelog-screen" class="game-window screen">
+            <h2>📜 Летопись изменений</h2>
+            <div class="changelog-container">
+                <div class="changelog-item">
+                    <div class="changelog-version">v0.2.1</div>
+                    <ul>
+                        <li>Создана встроенная «Летопись изменений», открывающаяся при клике на номер версии.</li>
+                        <li>Убрана лишняя надпись «Match 3» рядом с версией на главном экране.</li>
+                    </ul>
+                </div>
+                <div class="changelog-item">
+                    <div class="changelog-version">v0.2.0</div>
+                    <ul>
+                        <li>Интерфейс адаптирован под экраны смартфонов: добавлены ограничения по высоте окон (<span style="color: #cdb38c;">max-height: 96vh</span>).</li>
+                        <li>Высота лога боя оптимизирована до 90px для исключения вертикального скролла экрана.</li>
+                        <li>Размер фишек поля Match-3 уменьшен до 20px, поле переведено на гибкую адаптивную сетку.</li>
+                        <li>На главный экран выведен индикатор текущей версии игры для борьбы с кэшированием.</li>
+                    </ul>
+                </div>
+                <div class="changelog-item">
+                    <div class="changelog-version">v0.1.0</div>
+                    <ul>
+                        <li>Разработка базовой архитектуры MVP и структуры главного меню.</li>
+                        <li>Создание экранов Кузницы, Алхимии и Настроек отряда.</li>
+                        <li>Интеграция пошагового текстового боевого ядра и симуляции Match-3 логики боя.</li>
+                        <li>Добавлен анимированный живой фон с искрами костра.</li>
+                    </ul>
+                </div>
+            </div>
+            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Назад в меню</button>
         </div>
 
         <!-- ЭКРАН 2: КУЗНИЦА -->
