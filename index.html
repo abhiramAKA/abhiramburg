@@ -27,8 +27,8 @@
             <button class="menu-btn disabled">🏆 PvP Арена (Заблокировано)</button>
 
             <!-- ИНДИКАТОР ВЕРСИИ НА ГЛАВНОМ ЭКРАНЕ -->
-            <div style="margin-top: 25px; font-size: 11px; color: #4a3f2c; letter-spacing: 1px; font-family: monospace;">
-                ВЕРСИЯ: <span class="version-link" onclick="loadAndShowChangelog()">v0.4.2</span>
+            <div style="margin-top: auto; padding-top: 15px; font-size: 11px; color: #4a3f2c; letter-spacing: 1px; font-family: monospace;">
+                ВЕРСИЯ: <span class="version-link" onclick="loadAndShowChangelog()">v0.4.4</span>
             </div>
         </div>
 
@@ -72,7 +72,7 @@
             
             <!-- Панель Босса -->
             <div class="boss-plate">
-                <div style="display: flex; justify-content: space-between; font-size: 14px;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span id="boss-name" style="color:#e6aaaa; font-weight:bold;">Древний Змей</span>
                     <span id="boss-hp-text">500/500 HP</span>
                 </div>
@@ -80,11 +80,10 @@
             </div>
 
             <!-- Сетка отряда -->
-            <div style="font-size: 12px; color: #8a7350; margin-bottom: 5px; text-align: left;">Матрица отряда:</div>
             <div id="squad-battle-grid" class="squad-grid"></div>
 
             <!-- Контейнер для динамического поля Match-3 -->
-            <div id="combat-action-area">
+            <div id="combat-action-area" style="flex-shrink: 0; display: flex; justify-content: center; align-items: center;">
                 <button id="step-combat-btn" class="menu-btn" onclick="processCombatTurn()">⚡ Собрать комбинацию (Match-3)</button>
             </div>
 
@@ -94,7 +93,7 @@
             </div>
 
             <!-- Управление -->
-            <button id="restart-combat-btn" class="menu-btn" onclick="reviveAndRestart()" style="display: none;">🔄 Начать новую битву</button>
+            <button id="restart-combat-btn" class="menu-btn" onclick="reviveAndRestart()" style="display: none; margin: 4px 0;">🔄 Начать новую битву</button>
             <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Отступить в лагерь</button>
         </div>
 
@@ -107,45 +106,29 @@
     <script>
         function showScreen(screenId) {
             const screens = document.querySelectorAll('.game-window');
-            screens.forEach(screen => screen.style.display = 'none');
+            screens.forEach(screen => {
+                screen.style.display = 'none';
+                screen.style.visibility = 'hidden';
+            });
 
             const activeScreen = document.getElementById(screenId);
             if (activeScreen) {
-                activeScreen.style.display = 'block';
+                // Если это под-экран, включаем flex-режим для выравнивания кнопки
+                if (screenId === 'main-menu') {
+                    activeScreen.style.display = 'flex';
+                } else {
+                    activeScreen.style.display = 'flex';
+                }
+                activeScreen.style.visibility = 'visible';
+                
                 if (screenId === 'battle-screen') {
                     setTimeout(setupBattleSession, 20);
                 }
             }
         }
-
-        function loadAndShowChangelog() {
-            showScreen('changelog-screen');
-            const listContainer = document.getElementById('changelog-list');
-            
-            fetch('changelog.json')
-                .then(response => response.json())
-                .then(data => {
-                    listContainer.innerHTML = '';
-                    data.forEach(item => {
-                        const block = document.createElement('div');
-                        block.className = 'changelog-item';
-                        
-                        let pointsHTML = '';
-                        item.changes.forEach(text => {
-                            pointsHTML += `<li>${text}</li>`;
-                        });
-
-                        block.innerHTML = `
-                            <div class="changelog-version">${item.version}</div>
-                            <ul>${pointsHTML}</ul>
-                        `;
-                        listContainer.appendChild(block);
-                    });
-                })
-                .catch(err => {
-                    listContainer.innerHTML = '<div style="color: #a84444; font-size:12px; padding:10px;">Не удалось прочесть свиток обновлений.</div>';
-                });
-        }
+        
+        // Первичная инициализация главного экрана при старте
+        window.onload = () => { showScreen('main-menu'); };
     </script>
 </body>
 </html>
