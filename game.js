@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.16)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.17)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.16";
+const GAME_VERSION = "v0.6.0-beta.17";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -145,7 +145,6 @@ function setupCombatHelpListeners() {
             
             const helpScreen = document.getElementById('combat-help-screen');
             if (helpScreen) {
-                helpScreen.classList.add('mobile-fullscreen');
                 helpScreen.style.display = 'flex';
             }
         });
@@ -156,7 +155,6 @@ function setupCombatHelpListeners() {
             const helpScreen = document.getElementById('combat-help-screen');
             if (helpScreen) {
                 helpScreen.style.display = 'none';
-                helpScreen.classList.remove('mobile-fullscreen');
             }
         });
     }
