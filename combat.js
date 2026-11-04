@@ -1,42 +1,27 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК РЕЙДОВ (v0.6.0-alpha.2)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК РЕЙДОВ (v0.6.0-alpha.5)
    ========================================================================== */
 
-let combatData = {
-    dragonHP: 1000,
-    dragonMaxHP: 1000,
-    playerAP: 3,
-    playerMaxAP: 3,
-    currentRound: 1,
-    squad: [
-        { name: "Воин", hp: 120, maxHP: 120, class: "warrior", role: "Атака/Щит" },
-        { name: "Клирик", hp: 90, maxHP: 90, class: "cleric", role: "Лечение" }
-    ]
-};
-
-// Динамическая сборка интерфейса Дракона (Соблюдение Strict Module Separation)
+// Динамическая сборка интерфейса Дракона
 function buildDragonDOM() {
     const raidZone = document.getElementById('dragon-raid-zone');
     if (!raidZone) return;
 
-    // Полностью очищаем зону перед созданием, чтобы избежать дубликатов
     raidZone.innerHTML = '';
 
-    // Создаем контейнер
     const container = document.createElement('div');
     container.className = 'dragon-container';
+    container.style.width = '100%';
+    container.style.height = '150px';
 
-    // Создаем модель дракона
     const model = document.createElement('div');
     model.id = 'dragon-model';
     model.className = 'dragon-idle';
 
-    // Создаем слой эффекта огненного дыхания
     const fireFx = document.createElement('div');
     fireFx.id = 'dragon-fire-fx';
     fireFx.className = 'fire-breath-fx';
 
-    // Собираем структуру воедино
     container.appendChild(model);
     container.appendChild(fireFx);
     raidZone.appendChild(container);
@@ -44,15 +29,22 @@ function buildDragonDOM() {
 
 // Запуск боевого режима
 function startCombatSession() {
+    // Сброс параметров перед боем
     combatData.dragonHP = 1000;
     combatData.playerAP = 3;
     combatData.currentRound = 1;
     combatData.squad.forEach(hero => hero.hp = hero.maxHP);
     
-    // Сначала динамически строим Дракона, затем обновляем интерфейсы
+    // Последовательная сборка экрана рейда
     buildDragonDOM();
     updateCombatInterfaceDOM();
-    initMatch3Board();
+    
+    // Запуск генерации игрового поля из модуля match3.js
+    if (typeof initMatch3Board === 'function') {
+        initMatch3Board();
+    } else {
+        console.error("Ошибка: функция initMatch3Board не найдена в памяти!");
+    }
 }
 
 // Применение собранных комбинаций рун игроком
@@ -90,13 +82,11 @@ function executeDragonTurnAI() {
     const dragonModel = document.getElementById('dragon-model');
     const fireFx = document.getElementById('dragon-fire-fx');
 
-    // АКТИВАЦИЯ АНИМАЦИИ АТАКИ
     if (dragonModel) {
         dragonModel.classList.remove('dragon-idle');
         dragonModel.classList.add('dragon-attacking');
     }
 
-    // Проверка на фазу массового Дыхания Рока (Каждый 3-й раунд)
     if (combatData.currentRound % 3 === 0) {
         if (fireFx) fireFx.classList.add('active');
         
@@ -113,7 +103,6 @@ function executeDragonTurnAI() {
 
     updateCombatInterfaceDOM();
     
-    // Фаза завершения хода Дракона (через 1.5 секунды сброс в режим ожидания)
     setTimeout(() => {
         if (dragonModel) {
             dragonModel.classList.remove('dragon-attacking');
@@ -166,7 +155,7 @@ function updateCombatInterfaceDOM() {
     }
 }
 
-// Проверка исхода рейда (Победа / Поражение)
+// Проверка исхода рейда
 function checkBattleResolution() {
     if (combatData.dragonHP <= 0) {
         alert("ВЕЛИКАЯ ПОБЕДА! Дракон повержен, руны Горнила принадлежат вам!");
