@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>КХАМАЧ — Восхождение Рейдов</title>
-    <link rel="stylesheet" href="styles.css?v=beta11">
+    <link rel="stylesheet" href="styles.css?v=beta12">
 </head>
 <body>
     <!-- Холст для искр костра -->
@@ -55,16 +55,18 @@
         </div>
 
         <!-- ================= СПРАВОЧНИК РУН И БОЯ (В БОЮ) ================= -->
-        <div id="combat-help-screen" class="game-window" style="display: none; max-width: 440px; padding: 15px; z-index: 200;">
-            <h2>ГОРНИЛО РУН</h2>
-            <span class="subtitle">Тайные Знания Магов</span>
-            <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>🔥 Руна Огня:</strong> Наносит Дракону сокрушительный урон (15 ед. за камень).</p>
-            <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>⚡️ Руна Молнии:</strong> Пробивает чешую Дракона чистой магией (10 ед. за камень).</p>
-            <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>🛡️ Руна Защиты:</strong> Накапливает щиты отряда (12 ед. за камень). Щит полностью принимает на себя входящие атаки босса.</p>
-            <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>💚 Руна Жизни:</strong> Моментально исцеляет Воина, Мага и Клирика (8 ед. за камень).</p>
-            <p style="text-align: left; font-size: 13px; margin-bottom: 15px;"><strong>💀 Руна Смерти:</strong> Непредсказуемая тёмная энергия подземелий.</p>
-            <p style="border-top: 1px dashed #4a3f2c; padding-top: 10px; font-size: 13px;"><strong>⚔️ Тактика боя:</strong> Соберите мощное комбо за 3 Очка Действия. Когда ОД закончатся, Дракон Некросмут проведёт яростную контратаку по вашему отряду!</p>
-            <button id="close-combat-help-btn" class="menu-btn back-btn" style="margin-top: 10px;">Вернуться в бой</button>
+        <div id="combat-help-screen" class="game-window combat-help-popup" style="display: none;">
+            <div class="combat-help-content">
+                <h2>ГОРНИЛО РУН</h2>
+                <span class="subtitle">Тайные Знания Магов</span>
+                <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>🔥 Руна Огня:</strong> Наносит Дракону сокрушительный урон (15 ед. за камень).</p>
+                <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>⚡️ Руна Молнии:</strong> Пробивает чешую Дракона чистой магией (10 ед. за камень).</p>
+                <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>🛡️ Руна Защиты:</strong> Накапливает щиты отряда (12 ед. за камень). Щит полностью принимает на себя входящие атаки босса.</p>
+                <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>💚 Руна Жизни:</strong> Моментально исцеляет Воина, Мага и Клирика (8 ед. за камень).</p>
+                <p style="text-align: left; font-size: 13px; margin-bottom: 15px;"><strong>💀 Руна Смерти:</strong> Непредсказуемая тёмная энергия подземелий.</p>
+                <p style="border-top: 1px dashed #4a3f2c; padding-top: 10px; font-size: 13px; text-align: left;"><strong>⚔️ Тактика боя:</strong> Соберите мощное комбо за 3 Очка Действия. Когда ОД закончатся, Дракон Некросмут проведёт яростную контратаку по вашему отряду!</p>
+                <button id="close-combat-help-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в бой</button>
+            </div>
         </div>
 
         <!-- ================= БОЕВОЙ ЭКРАН (ОКНО РЕЙДА) ================= -->
@@ -77,7 +79,6 @@
             <div id="boss-panel" style="margin-bottom: 4px; padding: 4px; position: relative;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
                     <div id="boss-name" style="font-size: 12px; margin: 0;">ДРАКОН НЕКРОСМУТ</div>
-                    <!-- ИСПРАВЛЕНО: Кнопка помощи прямо в верхнем углу боевой панели босса -->
                     <button id="combat-help-btn" class="info-btn" style="width: 24px; height: 24px; font-size: 12px; box-shadow: none; border-radius: 4px;">❓</button>
                 </div>
                 <div class="hp-bar-container" style="height: 10px;">
@@ -92,7 +93,7 @@
                     <div id="combat-round-display">Раунд: 1</div>
                     <div id="combat-ap-display">Очки Действия: 3 / 3</div>
                 </div>
-                <!-- Индикатор набранного щита -->
+                <!-- Indikator schita -->
                 <div id="combat-shield-display" style="display: none; text-align: center; color: #4a90e2; font-weight: bold; font-size: 11px; border-top: 1px dashed #3a3025; padding-top: 2px;">🛡️ Защита отряда: +0</div>
             </div>
 
@@ -114,7 +115,7 @@
 
     </div>
 
-    <!-- ПРАВИЛЬНЫЙ ПОРЯДОК ПОДКЛЮЧЕНИЯ МОДУЛЕЙ -->
+    <!-- ПОРЯДОК ПОДКЛЮЧЕНИЯ МОДУЛЕЙ -->
     <script src="game.js"></script>
     <script src="background.js"></script>
     <script src="match3-fx.js"></script>
@@ -124,7 +125,7 @@
     
     <!-- Подпись новой версии проекта на главном экране -->
     <div style="position: fixed; bottom: 4px; right: 8px; font-size: 10px; color: #5a4f3f; z-index: 100; font-family: monospace; pointer-events: none;">
-        v0.6.0-beta.11
+        v0.6.0-beta.12
     </div>
 </body>
 </html>
