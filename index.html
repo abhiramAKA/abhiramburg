@@ -8,6 +8,9 @@
 </head>
 <body>
 
+    <!-- Живой задний план (Искры костра) -->
+    <canvas id="bg-canvas" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; background: #0c0806;"></canvas>
+
     <!-- Главный контейнер игры (Mobile-First) -->
     <div id="game-container">
         
@@ -70,7 +73,7 @@
         </footer>
     </div>
 
-    <!-- Порядок подключения критически важен: game.js инициализирует базовые данные и структуру -->
+    <!-- Загрузка скриптов в строгой последовательности -->
     <script src="game.js?v=0.5.1"></script>
     <script src="background.js?v=0.5.1"></script>
     <script src="match3.js?v=0.5.1"></script>
