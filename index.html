@@ -2,123 +2,137 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>КХАМАЧ: Легенды Абхирамбурга</title>
-    <link rel="stylesheet" href="styles.css?v=0.4.4">
+    <link rel="stylesheet" href="styles.css?v=0.5.0">
 </head>
 <body>
-    <canvas id="bg-canvas"></canvas>
-    <div id="game-interface">
-        <div id="main-menu" class="game-window">
+
+    <!-- Главный контейнер игры (Mobile-First) -->
+    <div id="game-container">
+        
+        <!-- Шапка игры -->
+        <header id="game-header">
             <h1>КХАМАЧ</h1>
-            <span class="subtitle">Легенды Абхирамбурга</span>
-            <button class="menu-btn" onclick="showScreen('battle-screen')">⚔️ Дракон </button>
-            <button class="menu-btn" onclick="showScreen('forge-screen')">⚒️ Кузнец </button>
-            <button class="menu-btn" onclick="showScreen('alchemy-screen')">🧪 Алхимик</button>
-            <button class="menu-btn" onclick="showScreen('squad-screen')">👤 Мой Отряд</button>
-            <button class="menu-btn disabled">🏆 PvP Арена (Заблокировано)</button>
-            <div style="margin-top: auto; padding-top: 15px; font-size: 11px; color: #4a3f2c; letter-spacing: 1px; font-family: monospace;">
-                ВЕРСИЯ: <span class="version-link" onclick="loadAndShowChangelog()">v0.4.4</span>
+            <div id="sub-title">Легенды Абхирамбурга</div>
+        </header>
+
+        <!-- Основная рабочая область (Экраны переключаются динамически через JS) -->
+        <main id="game-screen-area">
+            
+            <!-- Экран лагеря (Главное меню) -->
+            <div id="screen-camp" class="game-screen">
+                <div class="menu-banner">Лагерь Ордена</div>
+                <button class="btn-main" onclick="showScreen('screen-battle')">⚔️ Отправиться в Рейд</button>
+                <button class="btn-main font-locked" disabled>🔨 Горнило (v0.6.0)</button>
+                <button class="btn-main font-locked" disabled>🧪 Алхимия (v0.6.0)</button>
             </div>
-        </div>
 
-        <div id="changelog-screen" class="game-window screen">
-            <h2>📜 Летопись изменений</h2>
-            <div id="changelog-list" class="changelog-container">
-                <div style="text-align: center; color: #8a7350; padding-top: 20px;">Загрузка свитков...</div>
-            </div>
-            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Назад в меню</button>
-        </div>
-
-        <div id="forge-screen" class="game-window screen">
-            <h2>⚒️ Древнее Горнило</h2>
-            <p>В полумраке кузницы тяжело вздыхают мехи. Старый мастер готовит экипировку из трофеев дракона.</p>
-            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
-        </div>
-
-        <div id="alchemy-screen" class="game-window screen">
-            <h2>🧪 Тайный Очаг</h2>
-            <p>Свитки и склянки с эссенциями помогают трансформировать ресурсы в опыт и золото.</p>
-            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
-        </div>
-
-        <div id="squad-screen" class="game-window screen">
-            <h2>👤 Ваше Воинство</h2>
-            <p style="text-align: center; color: #e6c280; margin-top: 20px;">
-                <b>Предводитель:</b> Рыцарь смерти (1 ур)<br>
-                ⚔️ Атака: 25 | ❤️ Жизнь: 120
-            </p>
-            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
-        </div>
-
-        <div id="battle-screen" class="game-window screen">
-            <h2>⚔️ Логово Дракона</h2>
-            <div class="boss-plate">
-                <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                    <span id="boss-name" style="color:#e6aaaa; font-weight:bold;">Древний Змей</span>
-                    <span id="boss-hp-text">500/500 HP</span>
+            <!-- Экран боевой сессии (Рейд на Дракона) -->
+            <div id="screen-battle" class="game-screen" style="display: none;">
+                <!-- Инфо-панель Босса -->
+                <div id="boss-panel">
+                    <div id="boss-name">🔥 Огненный Дракон (Тир 1)</div>
+                    <div class="hp-bar-container">
+                        <div id="boss-hp-bar" class="hp-bar" style="width: 100%;"></div>
+                        <span id="boss-hp-text">500 / 500 ОЗ</span>
+                    </div>
                 </div>
-                <div class="hp-bar"><div id="boss-hp-fill" class="hp-fill"></div></div>
+
+                <!-- Матрица отряда (Disciples 2 стиль) -->
+                <div id="squad-matrix">
+                    <!-- Заполняется динамически из combat.js -->
+                </div>
+
+                <!-- Зона Match-3 игрового поля -->
+                <div id="combat-action-area">
+                    <!-- Заполняется динамически из match3.js -->
+                </div>
+
+                <!-- Текстовый пошаговый лог боя -->
+                <div id="combat-log-container">
+                    <div id="combat-log"></div>
+                </div>
+
+                <!-- Нижняя панель управления боем -->
+                <div id="battle-controls">
+                    <button class="btn-retreat" onclick="showScreen('screen-camp')">🏃 Отступить в лагерь</button>
+                </div>
             </div>
-            <div id="squad-battle-grid" class="squad-grid"></div>
-            <div id="combat-action-area" style="flex-shrink: 0; display: flex; justify-content: center; align-items: center;">
-                <button id="step-combat-btn" class="menu-btn" onclick="processCombatTurn()">⚡ Собрать комбинацию (Match-3)</button>
-            </div>
-            <div id="battle-log-box" class="battle-log-container">
-                Приветствуем в Абхирамбурге! Нажмите «Собрать комбинацию», чтобы начать атаку.
-            </div>
-            <button id="restart-combat-btn" class="menu-btn" onclick="reviveAndRestart()" style="display: none; margin: 4px 0;">🔄 Начать новую битву</button>
-            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Отступить в лагерь</button>
-        </div>
+
+        </main>
+
+        <!-- Подвал с фиксированной версией -->
+        <footer id="game-footer">
+            <span>Клиент: v0.5.0</span>
+        </footer>
     </div>
 
-    <script src="background.js?v=0.4.4"></script>
-    <script src="match3.js?v=0.4.4"></script>
-    <script src="combat.js?v=0.4.4"></script>
+    <!-- Подключение модулей логики (с защитой от кэширования браузером) -->
+    <script src="background.js?v=0.5.0"></script>
+    <script src="match3.js?v=0.5.0"></script>
+    <script src="combat.js?v=0.5.0"></script>
+
     <script>
+        // Глобальный объект данных для сохранения состояния MVP
+        const combatData = {
+            board: [],
+            heroes: [
+                { id: 1, name: "Воитель", hp: 150, maxHp: 150, role: "фронт-лево" },
+                { id: 2, name: "Танк", hp: 120, maxHp: 120, role: "фронт-право" },
+                { id: 3, name: "Маг", hp: 80, maxHp: 80, role: "тыл-лево" },
+                { id: 4, name: "Рекрут", hp: 70, maxHp: 70, role: "тыл-право" }
+            ],
+            dragonBoss: { name: "Огненный Дракон", hp: 500, maxHp: 500 }
+        };
+
+        // Переключение экранов
         function showScreen(screenId) {
-            const screens = document.querySelectorAll('.game-window');
-            screens.forEach(screen => {
-                screen.style.display = 'none';
-                screen.style.visibility = 'hidden';
-            });
-            const activeScreen = document.getElementById(screenId);
-            if (activeScreen) {
-                activeScreen.style.display = 'flex';
-                activeScreen.style.visibility = 'visible';
-                if (screenId === 'battle-screen') {
-                    setTimeout(setupBattleSession, 20);
+            document.querySelectorAll('.game-screen').forEach(s => s.style.display = 'none');
+            const target = document.getElementById(screenId);
+            if (target) {
+                target.style.display = 'flex';
+                
+                // Переинициализация боя при заходе в рейд
+                if (screenId === 'screen-battle') {
+                    setTimeout(() => {
+                        rebuildActionArea();
+                        generateValidBoard();
+                        renderMatch3Board();
+                        if (typeof initCombatLog === 'function') initCombatLog();
+                        if (typeof renderSquad === 'function') renderSquad();
+                    }, 20);
                 }
             }
         }
-        
-        function loadAndShowChangelog() {
-            showScreen('changelog-screen');
-            const listContainer = document.getElementById('changelog-list');
-            fetch('changelog.json?t=' + Date.now())
-                .then(response => response.json())
-                .then(data => {
-                    listContainer.innerHTML = '';
-                    data.forEach(item => {
-                        const block = document.createElement('div');
-                        block.className = 'changelog-item';
-                        let pointsHTML = '';
-                        item.changes.forEach(text => {
-                            pointsHTML += `<li>${text}</li>`;
-                        });
-                        block.innerHTML = `
-                            <div class="changelog-version">${item.version}</div>
-                            <ul>${pointsHTML}</ul>
-                        `;
-                        listContainer.appendChild(block);
-                    });
-                })
-                .catch(err => {
-                    listContainer.innerHTML = '<div style="color: #a84444; font-size:12px; padding:10px;">Не удалось прочесть свиток обновлений.</div>';
-                });
-        }
 
-        window.onload = () => { showScreen('main-menu'); };
+        document.addEventListener('DOMContentLoaded', () => {
+             showScreen('screen-camp');
+        });
+        
+        function appendToLog(text, type) {
+            const log = document.getElementById('combat-log');
+            if (!log) return;
+            const msg = document.createElement('div');
+            msg.className = `log-msg msg-${type}`;
+            msg.innerText = text;
+            log.appendChild(msg);
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function refreshBattleUI() {
+            renderMatch3Board();
+            if (typeof renderSquad === 'function') renderSquad();
+            
+            // Обновление полоски ХП босса
+            const bossHpBar = document.getElementById('boss-hp-bar');
+            const bossHpText = document.getElementById('boss-hp-text');
+            if (bossHpBar && bossHpText) {
+                const pct = Math.max(0, (combatData.dragonBoss.hp / combatData.dragonBoss.maxHp) * 100);
+                bossHpBar.style.width = pct + '%';
+                bossHpText.innerText = `${Math.max(0, combatData.dragonBoss.hp)} / ${combatData.dragonBoss.maxHp} ОЗ`;
+            }
+        }
     </script>
 </body>
 </html>
