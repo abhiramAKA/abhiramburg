@@ -1,4 +1,4 @@
-// Модуль игрового поля Match-3 (5х5)
+// Модуль игрового поля Match-3 (5х5) с алгоритмом гравитации
 const TILE_TYPES = ['🔥', '💀', '🛡️', '🧪', '💎'];
 let selectedTile = null;
 
@@ -13,9 +13,9 @@ function rebuildActionArea() {
 // Генерация стартового поля без изначальных готовых линий
 function generateValidBoard() {
     do {
-        combatData.board = [];
+        combatData.board =;
         for (let r = 0; r < 5; r++) {
-            combatData.board[r] = [];
+            combatData.board[r] =;
             for (let c = 0; c < 5; c++) {
                 combatData.board[r][c] = TILE_TYPES[Math.floor(Math.random() * TILE_TYPES.length)];
             }
@@ -23,7 +23,7 @@ function generateValidBoard() {
     } while (checkMatches().length > 0);
 }
 
-// Отрисовка сетки поля в HTML (с уменьшенным размером фишек)
+// Отрисовка сетки поля в HTML
 function renderMatch3Board() {
     const boardContainer = document.getElementById('match3-board');
     if (!boardContainer) return;
@@ -37,7 +37,7 @@ function renderMatch3Board() {
                 font-size: 20px; background: #1c1510; border: 1px solid #3a2e22;
                 cursor: pointer; border-radius: 4px; user-select: none; transition: all 0.2s;
             `;
-            tile.innerText = combatData.board[r][c];
+            tile.innerText = combatData.board[r][c] || ''; // Отображаем пустоту, если клетка очищена
 
             if (selectedTile && selectedTile.row === r && selectedTile.col === c) {
                 tile.style.background = '#4a3e31';
@@ -75,6 +75,7 @@ function handleTileClick(r, c) {
                 selectedTile = null;
                 executeComboRules(matches); // Передаем собранные комбинации в боевое ядро
             } else {
+                // Если совпадений нет — возвращаем назад
                 combatData.board[r][c] = combatData.board[prevR][prevC];
                 combatData.board[prevR][prevC] = temp;
                 selectedTile = null;
@@ -90,7 +91,8 @@ function handleTileClick(r, c) {
 
 // Поиск горизонтальных и вертикальных линий 3-в-ряд
 function checkMatches() {
-    let foundMatches = [];
+    let foundMatches =;
+    // Горизонтальные линии
     for (let r = 0; r < 5; r++) {
         for (let c = 0; c < 3; c++) {
             let t1 = combatData.board[r][c];
@@ -99,6 +101,7 @@ function checkMatches() {
             }
         }
     }
+    // Вертикальные линии
     for (let c = 0; c < 5; c++) {
         for (let r = 0; r < 3; r++) {
             let t1 = combatData.board[r][c];
@@ -108,4 +111,38 @@ function checkMatches() {
         }
     }
     return foundMatches;
+}
+
+// АЛГОРИТМ ГРАВИТАЦИИ И СДВИГА РУН ВНИЗ
+function applyBoardGravity(matches) {
+    // 1. Помечаем уничтоженные клетки как null
+    matches.forEach(match => {
+        match.coords.forEach(coord => {
+            const [r, c] = coord;
+            combatData.board[r][c] = null;
+        });
+    });
+
+    // 2. Проходим по каждому столбцу снизу вверх
+    for (let c = 0; c < 5; c++) {
+        // Массив для сбора выживших фишек в столбце
+        let columnGems =;
+        for (let r = 4; r >= 0; r--) {
+            if (combatData.board[r][c] !== null) {
+                columnGems.push(combatData.board[r][c]);
+            }
+        }
+        
+        // Заполняем оставшиеся пустые места сверху новыми случайными рунами
+        while (columnGems.length < 5) {
+            columnGems.push(TILE_TYPES[Math.floor(Math.random() * TILE_TYPES.length)]);
+        }
+
+        // Записываем обновленный столбец обратно в матрицу поля (снизу вверх)
+        let index = 0;
+        for (let r = 4; r >= 0; r--) {
+            combatData.board[r][c] = columnGems[index];
+            index++;
+        }
+    }
 }
