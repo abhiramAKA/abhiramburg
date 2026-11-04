@@ -1,12 +1,36 @@
-/* Исправленная сетка 8х8, которая теперь будет открываться корректно */
+/* ==========================================================================
+   4. СЕТКА ИГРОВОГО ПОЛЯ MATCH-3 (РАСШИРЕНИЕ 8х8)
+   ========================================================================== */
+
 .match3-board {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
     gap: 4px;
     width: 100%;
+    max-width: 410px; /* Идеальный размер для мобильного MVP */
     aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    background: rgba(15, 12, 10, 0.85);
+    border: 2px solid #544432;
+    border-radius: 4px;
+    padding: 4px;
+    box-sizing: border-box;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9);
 }
-/* Стили падающих рун и частиц взрыва */
-.rune-cell { ... }
-.particle-fx { ... }
+
+/* Стили ячеек рун */
+.rune-cell {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    box-sizing: border-box;
+}
+
+.rune-cell:active {
+    transform: scale(0.9);
+}
