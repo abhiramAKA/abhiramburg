@@ -1,8 +1,8 @@
-// Модуль игрового поля Match-3 (5х5) с алгоритмом гравитации
+// Модуль игрового поля Match-3 (5х5) с алгоритмом гравитации и каскадов
 const TILE_TYPES = ['🔥', '💀', '🛡️', '🧪', '💎'];
 let selectedTile = null;
+let isProcessingGrid = false; // Блокировка поля во время анимации каскадов
 
-// Перестраиваем интерфейс под компактную мобильную сетку
 function rebuildActionArea() {
     const btn = document.getElementById('step-combat-btn');
     if (btn) {
@@ -10,12 +10,11 @@ function rebuildActionArea() {
     }
 }
 
-// Генерация стартового поля без изначальных готовых линий
 function generateValidBoard() {
     do {
-        combatData.board =;
+        combatData.board = [];
         for (let r = 0; r < 5; r++) {
-            combatData.board[r] =;
+            combatData.board[r] = [];
             for (let c = 0; c < 5; c++) {
                 combatData.board[r][c] = TILE_TYPES[Math.floor(Math.random() * TILE_TYPES.length)];
             }
@@ -23,7 +22,6 @@ function generateValidBoard() {
     } while (checkMatches().length > 0);
 }
 
-// Отрисовка сетки поля в HTML
 function renderMatch3Board() {
     const boardContainer = document.getElementById('match3-board');
     if (!boardContainer) return;
@@ -37,7 +35,12 @@ function renderMatch3Board() {
                 font-size: 20px; background: #1c1510; border: 1px solid #3a2e22;
                 cursor: pointer; border-radius: 4px; user-select: none; transition: all 0.2s;
             `;
-            tile.innerText = combatData.board[r][c] || ''; // Отображаем пустоту, если клетка очищена
+            tile.innerText = combatData.board[r][c] || '';
+
+            if (isProcessingGrid) {
+                tile.style.cursor = 'not-allowed';
+                tile.style.opacity = '0.8';
+            }
 
             if (selectedTile && selectedTile.row === r && selectedTile.col === c) {
                 tile.style.background = '#4a3e31';
@@ -45,16 +48,17 @@ function renderMatch3Board() {
                 tile.style.transform = 'scale(0.92)';
             }
 
-            tile.onclick = () => handleTileClick(r, c);
+            tile.onclick = () => {
+                if (!isProcessingGrid) handleTileClick(r, c);
+            };
             boardContainer.appendChild(tile);
         }
     }
 }
 
-// Обработка нажатий на фишки и их обмен местами
 function handleTileClick(r, c) {
     const aliveHeroes = combatData.heroes.filter(h => h.hp > 0);
-    if (combatData.dragonBoss.hp <= 0 || aliveHeroes.length === 0) return;
+    if (combatData.dragonBoss.hp <= 0 || aliveHeroes.length === 0 || isProcessingGrid) return;
 
     if (!selectedTile) {
         selectedTile = { row: r, col: c };
@@ -65,6 +69,7 @@ function handleTileClick(r, c) {
         const isNeighbor = (Math.abs(prevR - r) === 1 && prevC === c) || (Math.abs(prevC - c) === 1 && prevR === r);
 
         if (isNeighbor) {
+            isProcessingGrid = true; // Блокируем новые нажатия
             let temp = combatData.board[prevR][prevC];
             combatData.board[prevR][prevC] = combatData.board[r][c];
             combatData.board[r][c] = temp;
@@ -73,12 +78,12 @@ function handleTileClick(r, c) {
 
             if (matches.length > 0) {
                 selectedTile = null;
-                executeComboRules(matches); // Передаем собранные комбинации в боевое ядро
+                executeComboRules(matches, true); // Запускаем боевой ход (true = первый ход)
             } else {
-                // Если совпадений нет — возвращаем назад
                 combatData.board[r][c] = combatData.board[prevR][prevC];
                 combatData.board[prevR][prevC] = temp;
                 selectedTile = null;
+                isProcessingGrid = false;
                 appendToLog("💨 Руны вернулись назад — комбинация не собрана.", "system");
                 refreshBattleUI();
             }
@@ -89,10 +94,8 @@ function handleTileClick(r, c) {
     }
 }
 
-// Поиск горизонтальных и вертикальных линий 3-в-ряд
 function checkMatches() {
-    let foundMatches =;
-    // Горизонтальные линии
+    let foundMatches = [];
     for (let r = 0; r < 5; r++) {
         for (let c = 0; c < 3; c++) {
             let t1 = combatData.board[r][c];
@@ -101,7 +104,6 @@ function checkMatches() {
             }
         }
     }
-    // Вертикальные линии
     for (let c = 0; c < 5; c++) {
         for (let r = 0; r < 3; r++) {
             let t1 = combatData.board[r][c];
@@ -113,9 +115,7 @@ function checkMatches() {
     return foundMatches;
 }
 
-// АЛГОРИТМ ГРАВИТАЦИИ И СДВИГА РУН ВНИЗ
 function applyBoardGravity(matches) {
-    // 1. Помечаем уничтоженные клетки как null
     matches.forEach(match => {
         match.coords.forEach(coord => {
             const [r, c] = coord;
@@ -123,22 +123,18 @@ function applyBoardGravity(matches) {
         });
     });
 
-    // 2. Проходим по каждому столбцу снизу вверх
     for (let c = 0; c < 5; c++) {
-        // Массив для сбора выживших фишек в столбце
-        let columnGems =;
+        let columnGems = [];
         for (let r = 4; r >= 0; r--) {
             if (combatData.board[r][c] !== null) {
                 columnGems.push(combatData.board[r][c]);
             }
         }
         
-        // Заполняем оставшиеся пустые места сверху новыми случайными рунами
         while (columnGems.length < 5) {
             columnGems.push(TILE_TYPES[Math.floor(Math.random() * TILE_TYPES.length)]);
         }
 
-        // Записываем обновленный столбец обратно в матрицу поля (снизу вверх)
         let index = 0;
         for (let r = 4; r >= 0; r--) {
             combatData.board[r][c] = columnGems[index];
