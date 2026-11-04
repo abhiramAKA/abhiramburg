@@ -10,13 +10,13 @@ function initMatch3Board() {
     if (!boardContainer) return;
     
     boardContainer.innerHTML = '';
-    match3BoardData =;
+    match3BoardData = []; // ИСПРАВЛЕНО: добавлено []
     isBoardLocked = false;
     selectedCell = null;
     if (typeof resetSwipeTracker === 'function') resetSwipeTracker();
     
     for (let r = 0; r < BOARD_ROWS; r++) {
-        match3BoardData[r] =;
+        match3BoardData[r] = []; // ИСПРАВЛЕНО: добавлено []
         for (let c = 0; c < BOARD_COLS; c++) {
             let allowedTypes = RUNE_TYPES.filter(type => {
                 if (r >= 2 && match3BoardData[r-1][c] === type && match3BoardData[r-2][c] === type) return false;
@@ -27,10 +27,10 @@ function initMatch3Board() {
             match3BoardData[r][c] = randomType;
         }
     }
-    renderBoardDOM(true);
+    renderBoardDOM(true, []); // ИСПРАВЛЕНО: добавлен пустой массив дефолтных координат
 }
 
-function renderBoardDOM(isIntro = false, newRunesCoords =) {
+function renderBoardDOM(isIntro = false, newRunesCoords = []) { // ИСПРАВЛЕНО: добавлено = []
     const boardContainer = document.getElementById('match3-board-container');
     if (!boardContainer) return;
     boardContainer.innerHTML = '';
@@ -53,7 +53,7 @@ function renderBoardDOM(isIntro = false, newRunesCoords =) {
                         playMatch3Sound('intro');
                     }
                 }, delay * 1000);
-            } else if (newRunesCoords.some(coord => coord.row === r && coord.col === c)) {
+            } else if (newRunesCoords && newRunesCoords.some(coord => coord.row === r && coord.col === c)) {
                 cell.classList.add('rune-fall');
             }
             
@@ -159,7 +159,7 @@ function checkMatchesAndExecute() {
         if (typeof triggerMatch3Haptic === 'function') triggerMatch3Haptic(60);
         
         let executionEffects = { '🔥': 0, '🛡️': 0, '💚': 0, '⚡️': 0, '💀': 0 };
-        let newRunesCoords =;
+        let newRunesCoords = []; // ИСПРАВЛЕНО: добавлено []
         
         for (let r = 0; r < BOARD_ROWS; r++) {
             for (let c = 0; c < BOARD_COLS; c++) {
