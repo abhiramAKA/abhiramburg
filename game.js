@@ -27,7 +27,6 @@ function showScreen(screenId) {
             combatData.heroes.forEach(h => h.hp = h.maxHp); 
             
             setTimeout(() => {
-                // Принудительно вызываем именно новые пересобранные методы под 8х8
                 if (typeof rebuildActionArea === 'function') rebuildActionArea();
                 if (typeof generateValidBoard === 'function') generateValidBoard();
                 if (typeof renderMatch3Board === 'function') renderMatch3Board();
@@ -71,12 +70,11 @@ function refreshBattleUI() {
     updateStatusPanel(currentStatus, combatData.ap === 0);
 }
 
-// Безопасный запуск игры и фонового костра после полной прогрузки тегов
+// Запуск игры
 document.addEventListener('DOMContentLoaded', () => {
-    // Если скрипт background.js загрузился, но уснул — будим его через принудительный ресайз
+    showScreen('screen-camp');
+    // Принудительно инициализируем и адаптируем холст фонового костра под размеры экрана
     setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
-    }, 100);
-    
-    showScreen('screen-camp');
+    }, 150);
 });
