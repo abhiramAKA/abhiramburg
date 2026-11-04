@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>КХАМАЧ — Восхождение Рейдов</title>
-    <link rel="stylesheet" href="styles.css?v=beta6">
+    <link rel="stylesheet" href="styles.css?v=beta7">
 </head>
 <body>
     <!-- Холст для искр костра -->
@@ -24,19 +24,19 @@
                 <button id="info-btn" class="info-btn">❓</button>
             </div>
             <div class="menu-row">
-                <button id="to-forge-btn" class="menu-btn disabled" disabled>Кузница</button>
+                <button id="to-forge-btn" class="menu-btn">Кузница</button>
             </div>
             <div class="menu-row">
-                <button id="to-alchemy-btn" class="menu-btn disabled" disabled>Алхимия</button>
+                <button id="to-alchemy-btn" class="menu-btn">Алхимия</button>
             </div>
             <div class="menu-row">
-                <button id="to-squad-btn" class="menu-btn disabled" disabled>Отряд</button>
+                <button id="to-squad-btn" class="menu-btn">Отряд</button>
             </div>
             
             <div id="game-version" class="version-footer">Сброс кэша...</div>
         </div>
 
-        <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ ================= -->
+        <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ МЕНЮ ================= -->
         <div id="info-screen" class="game-window" style="display: none;">
             <h2>КОНТЕКСТНАЯ СПРАВКА</h2>
             <span class="subtitle">Правила выживания</span>
@@ -46,15 +46,40 @@
             <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
         </div>
 
+        <!-- ================= ОКНО ОПИСАНИЯ РЕЖИМОВ (МЕНЮ) ================= -->
+        <div id="mode-desc-screen" class="game-window" style="display: none;">
+            <h2 id="mode-desc-title">РЕЖИМ ИГРЫ</h2>
+            <span class="subtitle">Грядущие расширения</span>
+            <p id="mode-desc-text">Описание режима загружается...</p>
+            <button id="close-mode-desc-btn" class="menu-btn back-btn">Назад в меню</button>
+        </div>
+
+        <!-- ================= СПРАВОЧНИК РУН И БОЯ (В БОЮ) ================= -->
+        <div id="combat-help-screen" class="game-window" style="display: none; max-width: 440px; padding: 15px; z-index: 200;">
+            <h2>ГОРНИЛО РУН</h2>
+            <span class="subtitle">Тайные Знания Магов</span>
+            <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>🔥 Руна Огня:</strong> Наносит Дракону сокрушительный урон (15 ед. за камень).</p>
+            <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>⚡️ Руна Молнии:</strong> Пробивает чешую Дракона чистой магией (10 ед. за камень).</p>
+            <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>🛡️ Руна Защиты:</strong> Накапливает щиты отряда (будет задействовано в следующих версиях).</p>
+            <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>💚 Руна Жизни:</strong> Моментально исцеляет Воина и Клирика (8 ед. за камень).</p>
+            <p style="text-align: left; font-size: 13px; margin-bottom: 15px;"><strong>💀 Руна Смерти:</strong> Непредсказуемая тёмная энергия подземелий.</p>
+            <p style="border-top: 1px dashed #4a3f2c; padding-top: 10px; font-size: 13px;"><strong>⚔️ Тактика боя:</strong> Соберите мощное комбо за 3 Очка Действия. Когда ОД закончатся, Дракон Некросмут проведёт яростную контратаку по вашему отряду!</p>
+            <button id="close-combat-help-btn" class="menu-btn back-btn" style="margin-top: 10px;">Вернуться в бой</button>
+        </div>
+
         <!-- ================= БОЕВОЙ ЭКРАН (ОКНО РЕЙДА) ================= -->
         <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 10px 15px;">
             
             <!-- Динамическая зона дракона -->
-            <div id="dragon-raid-zone"></div>
+            <div id="dragon-raid-zone" style="position: relative;"></div>
 
             <!-- ПАНЕЛЬ БОССА (ЗДОРОВЬЕ) -->
-            <div id="boss-panel" style="margin-bottom: 4px; padding: 4px;">
-                <div id="boss-name" style="font-size: 12px; margin-bottom: 2px;">ДРАКОН НЕКРОСМУТ</div>
+            <div id="boss-panel" style="margin-bottom: 4px; padding: 4px; position: relative;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                    <div id="boss-name" style="font-size: 12px; margin: 0;">ДРАКОН НЕКРОСМУТ</div>
+                    <!-- Вопросик для вызова справки по рунам прямо в бою -->
+                    <button id="combat-help-btn" class="info-btn" style="width: 24px; height: 24px; font-size: 12px; box-shadow: none; border-radius: 4px;">❓</button>
+                </div>
                 <div class="hp-bar-container" style="height: 10px;">
                     <div id="boss-hp-bar" class="hp-bar" style="width: 100%;"></div>
                     <div id="boss-hp-text" style="font-size: 9px; line-height: 10px;">1000 / 1000</div>
@@ -94,7 +119,7 @@
     
     <!-- Подпись новой версии проекта на главном экране -->
     <div style="position: fixed; bottom: 4px; right: 8px; font-size: 10px; color: #5a4f3f; z-index: 100; font-family: monospace; pointer-events: none;">
-        v0.6.0-beta.6
+        v0.6.0-beta.7
     </div>
 </body>
 </html>
