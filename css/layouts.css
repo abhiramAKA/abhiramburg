@@ -1,0 +1,18 @@
+.screen-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+/* Стили для неактивных готических экранов будущих фич */
+.future-screen-description {
+    font-style: italic;
+    color: #8a7355;
+    padding: 20px;
+}
+/* Холст для искр костра background.js */
+#campfire-canvas {
+    position: absolute;
+    z-index: -1;
+}
