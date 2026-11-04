@@ -1,6 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (v0.6.0-alpha.9)
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (v0.6.0-beta)
    ========================================================================== */
+
+let isBoardLocked = false; // Блокировка кликов во время анимации
 
 // Инициализация игрового поля
 function initMatch3Board() {
@@ -9,6 +11,7 @@ function initMatch3Board() {
     
     boardContainer.innerHTML = '';
     match3BoardData = [];
+    isBoardLocked = false;
     
     // Генерация матрицы строго 8х8 без готовых комбинаций 3-в-ряд
     for (let r = 0; r < BOARD_ROWS; r++) {
@@ -24,11 +27,11 @@ function initMatch3Board() {
         }
     }
     
-    renderBoardDOM();
+    renderBoardDOM(true); // Рендерим с анимацией падения при первом запуске
 }
 
 // Отрисовка рун в контейнер
-function renderBoardDOM() {
+function renderBoardDOM(animateFall = false, newRunesCoords = []) {
     const boardContainer = document.getElementById('match3-board-container');
     if (!boardContainer) return;
     boardContainer.innerHTML = '';
@@ -41,6 +44,13 @@ function renderBoardDOM() {
             cell.dataset.col = c;
             cell.innerText = match3BoardData[r][c];
             
+            // Проверяем, нужно ли добавить анимацию гравитации (падения)
+            if (animateFall) {
+                cell.classList.add('rune-fall');
+            } else if (newRunesCoords.some(coord => coord.row === r && coord.col === c)) {
+                cell.classList.add('rune-fall');
+            }
+            
             cell.addEventListener('click', handleCellClick);
             boardContainer.appendChild(cell);
         }
@@ -49,7 +59,7 @@ function renderBoardDOM() {
 
 // Обработка клика по рунам
 function handleCellClick(e) {
-    if (combatData.playerAP <= 0) return;
+    if (combatData.playerAP <= 0 || isBoardLocked) return;
     
     const cell = e.currentTarget;
     const r = parseInt(cell.dataset.row);
@@ -57,7 +67,7 @@ function handleCellClick(e) {
     
     if (!selectedCell) {
         selectedCell = { row: r, col: c };
-        cell.style.background = 'rgba(230, 194, 128, 0.3)';
+        cell.style.backgroundColor = 'rgba(230, 194, 128, 0.3)';
     } else {
         const prevR = selectedCell.row;
         const prevC = selectedCell.col;
@@ -66,18 +76,29 @@ function handleCellClick(e) {
         
         if (isNeighbor) {
             swapRunes(prevR, prevC, r, c);
+        } else {
+            // Если кликнули не на соседа, просто перевыбираем ячейку
+            renderBoardDOM();
+            selectedCell = { row: r, col: c };
+            const currentCell = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+            if (currentCell) currentCell.style.backgroundColor = 'rgba(230, 194, 128, 0.3)';
+            return;
         }
         
         selectedCell = null;
-        renderBoardDOM();
     }
 }
 
 // Своп (обмен местами)
 function swapRunes(r1, c1, r2, c2) {
+    isBoardLocked = true;
+    
     let temp = match3BoardData[r1][c1];
     match3BoardData[r1][c1] = match3BoardData[r2][c2];
     match3BoardData[r2][c2] = temp;
+    
+    // Временная визуальная отрисовка перед проверкой матчей
+    renderBoardDOM();
     
     let hasMatches = checkMatchesAndExecute();
     
@@ -90,6 +111,10 @@ function swapRunes(r1, c1, r2, c2) {
         temp = match3BoardData[r1][c1];
         match3BoardData[r1][c1] = match3BoardData[r2][c2];
         match3BoardData[r2][c2] = temp;
+        setTimeout(() => {
+            renderBoardDOM();
+            isBoardLocked = false;
+        }, 150);
     }
 }
 
@@ -119,23 +144,53 @@ function checkMatchesAndExecute() {
     }
     
     if (found) {
+        isBoardLocked = true;
         let executionEffects = { '🔥': 0, '🛡️': 0, '💚': 0, '⚡️': 0, '💀': 0 };
+        let newRunesCoords = [];
         
+        // Сначала вешаем CSS класс взрыва на совпавшие DOM-элементы
         for (let r = 0; r < BOARD_ROWS; r++) {
             for (let c = 0; c < BOARD_COLS; c++) {
                 if (matchedMatrix[r][c]) {
+                    const cellEl = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                    if (cellEl) {
+                        cellEl.classList.add('rune-explode');
+                    }
                     let type = match3BoardData[r][c];
                     executionEffects[type]++;
-                    match3BoardData[r][c] = RUNE_TYPES[Math.floor(Math.random() * RUNE_TYPES.length)];
                 }
             }
         }
         
-        if (typeof applyRuneCombination === 'function') {
-            applyRuneCombination(executionEffects);
-        }
-        
-        checkMatchesAndExecute();
+        // Ждем окончания анимации взрыва (250мс) перед обновлением данных и падением
+        setTimeout(() => {
+            for (let r = 0; r < BOARD_ROWS; r++) {
+                for (let c = 0; c < BOARD_COLS; c++) {
+                    if (matchedMatrix[r][c]) {
+                        match3BoardData[r][c] = RUNE_TYPES[Math.floor(Math.random() * RUNE_TYPES.length)];
+                        newRunesCoords.push({ row: r, col: c });
+                    }
+                }
+            }
+            
+            if (typeof applyRuneCombination === 'function') {
+                applyRuneCombination(executionEffects);
+            }
+            
+            // Рендерим поле с новыми рунами и вешаем на них анимацию падения
+            renderBoardDOM(false, newRunesCoords);
+            
+            // Даем время на завершение анимации падения (350мс) перед следующей итерацией матчей
+            setTimeout(() => {
+                let chainMatched = checkMatchesAndExecute();
+                if (!chainMatched) {
+                    isBoardLocked = false;
+                }
+            }, 350);
+            
+        }, 250);
+    } else {
+        isBoardLocked = false;
     }
     
     return found;
