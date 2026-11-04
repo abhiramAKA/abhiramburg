@@ -1,4 +1,4 @@
-// Боевое ядро рейда и состояния характеристик
+// Боевое ядро рейда с поддержкой каскадных комбо
 let combatData = {};
 
 function setupBattleSession() {
@@ -19,25 +19,24 @@ function reviveAndRestart() {
             { id: 3, name: "Чародей", role: "Маг", hp: 80, maxHp: 80, slot: "Тыл-Лево", isRecruit: false },
             { id: 4, name: "Рекрут лагеря", role: "Рекрут", hp: 70, maxHp: 70, slot: "Тыл-Право", isRecruit: true }
         ],
-        board:
+        board: []
     };
 
+    isProcessingGrid = false;
     if(document.getElementById('restart-combat-btn')) document.getElementById('restart-combat-btn').style.display = 'none';
-    document.getElementById('battle-log-box').innerHTML = '<div class="log-row system">⚔️ Вы вступили в Логово. Передвигайте соседние фишки на поле 5х5, чтобы наносить урон!</div>';
+    document.getElementById('battle-log-box').innerHTML = '<div class="log-row system">⚔️ Вы вступили в Логово. Передвигайте фишки. Доступны каскадные цепные реакции!</div>';
     
-    generateValidBoard(); // Вызов из модуля match3.js
-    rebuildActionArea();  // Вызов из модуля match3.js
+    generateValidBoard();
+    rebuildActionArea();
     refreshBattleUI();
 }
 
 function refreshBattleUI() {
-    // Рендер здоровья босса
     document.getElementById('boss-name').innerText = combatData.dragonBoss.name;
     const hpPercent = Math.max(0, (combatData.dragonBoss.hp / combatData.dragonBoss.maxHp) * 100);
     document.getElementById('boss-hp-fill').style.width = hpPercent + '%';
     document.getElementById('boss-hp-text').innerText = `${Math.max(0, combatData.dragonBoss.hp)}/${combatData.dragonBoss.maxHp} HP`;
 
-    // Рендер карточек отряда
     const gridContainer = document.getElementById('squad-battle-grid');
     gridContainer.innerHTML = '';
     combatData.heroes.forEach(hero => {
@@ -51,8 +50,7 @@ function refreshBattleUI() {
         gridContainer.appendChild(card);
     });
 
-    // Рендер самого игрового поля
-    renderMatch3Board(); // Вызов из модуля match3.js
+    renderMatch3Board();
 }
 
 function appendToLog(message, type = 'player') {
@@ -64,9 +62,14 @@ function appendToLog(message, type = 'player') {
     logBox.scrollTop = logBox.scrollHeight;
 }
 
-// Применение боевых эффектов собранных комбинаций
-function executeComboRules(matches) {
+// Рекурсивная функция обработки комбо и каскадов
+function executeComboRules(matches, isFirstCascade = true) {
     let protectionActive = false;
+
+    // Оповещение о каскаде в логе
+    if (!isFirstCascade) {
+        appendToLog("✨ КАСКАД! Упавшие руны создали новую комбинацию!", "system");
+    }
 
     matches.forEach(match => {
         switch(match.type) {
@@ -87,7 +90,7 @@ function executeComboRules(matches) {
                 if(wounded.length > 0) {
                     let targetHero = wounded[Math.floor(Math.random() * wounded.length)];
                     targetHero.hp = Math.min(targetHero.maxHp, targetHero.hp + 25);
-                    appendToLog(`🧪 Алхимия! Целебный состав восстановил 25 ОЗ герою ${targetHero.name}.`, "player");
+                    appendToLog(`🧪 Алхимия! Настой восстановил 25 ОЗ герою ${targetHero.name}.`, "player");
                 } else {
                     appendToLog("🧪 Алхимия! Отряд полностью здоров, лечить некого.", "player");
                 }
@@ -99,8 +102,27 @@ function executeComboRules(matches) {
         }
     });
 
-    // ПРИМЕНЯЕМ ГРАВИТАЦИЮ И СДВИГ ФИШЕК ВМЕСТО СТАРОЙ МГНОВЕННОЙ ЗАМЕНЫ
+    // Применяем гравитацию (сдвиг фишек)
     applyBoardGravity(matches);
+    refreshBattleUI();
+
+    // Проверяем, не возникло ли новых автоматических линий после падения рун
+    let nextMatches = checkMatches();
+
+    if (nextMatches.length > 0 && combatData.dragonBoss.hp > 0) {
+        // Если новые комбо найдены, запускаем следующий каскад с задержкой в 600мс
+        setTimeout(() => {
+            executeComboRules(nextMatches, false);
+        }, 600);
+    } else {
+        // Каскады завершились -> наступает ход Дракона (только если это был основной ход игрока)
+        handleDragonTurn(protectionActive);
+    }
+}
+
+// Логика завершения хода и атаки дракона
+function handleDragonTurn(protectionActive) {
+    isProcessingGrid = false; // Разблокируем поле для следующего хода игрока
 
     if (combatData.dragonBoss.hp <= 0) {
         refreshBattleUI();
@@ -109,7 +131,6 @@ function executeComboRules(matches) {
         return;
     }
 
-    // Ответный ход Дракона
     const aliveHeroes = combatData.heroes.filter(h => h.hp > 0);
     if (aliveHeroes.length > 0) {
         if (combatData.currentRound % 3 === 0) {
