@@ -4,80 +4,277 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>КХАМАЧ: Легенды Абхирамбурга</title>
-    <link rel="stylesheet" href="styles.css?v=0.5.5">
-</head>
-<body style="margin: 0; padding: 0; background: #0c0806; overflow: hidden;">
+    <style>
+        /* Вчерашние оригинальные готические настройки экрана */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #050508;
+            font-family: 'Georgia', serif;
+            color: #e0e0e0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        /* 🌌 МАГИЧЕСКИЙ ЖИВОЙ ФОН (Искры костра) */
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        /* Общий контейнер интерфейса поверх фона */
+        #game-interface {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.4);
+        }
+        /* 🏰 РУНИЧЕСКОЕ ГОТИЧЕСКОЕ ОКНО */
+        .game-window {
+            width: 90vw;
+            max-width: 460px;
+            background: radial-gradient(circle, #1a1512 0%, #0d0a08 100%);
+            border: 4px solid #1a1613;
+            outline: 2px solid #8a7350;
+            outline-offset: -3px;
+            box-shadow: 
+                0 0 40px rgba(0, 0, 0, 0.95), 
+                inset 0 0 30px rgba(0, 0, 0, 0.8),
+                0 0 20px rgba(138, 115, 80, 0.2);
+            border-radius: 2px;
+            padding: 30px 25px;
+            text-align: center;
+            position: relative;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+        /* 🔥 СТИЛЬ НАЗВАНИЯ ИГРЫ */
+        h1 {
+            font-size: 36px;
+            color: #e6c280;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin: 0 0 5px 0;
+            font-weight: 900;
+            text-shadow: 
+                0px 2px 4px rgba(0, 0, 0, 1), 
+                0 0 20px rgba(230, 194, 128, 0.4);
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #8a7350;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            display: block;
+            border-bottom: 1px dashed #4a3f2c;
+            padding-bottom: 15px;
+        }
+        h2 {
+            color: #e6c280;
+            font-size: 24px;
+            margin-bottom: 20px;
+            margin-top: 0;
+            text-shadow: 0px 2px 4px rgba(0, 0, 0, 1);
+        }
+        p {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #bfae96;
+            margin-bottom: 20px;
+        }
+        /* ⚔️ КНОПКИ С ЭФФЕКТОМ СИЯНИЯ */
+        .menu-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin: 12px 0;
+            font-size: 15px;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #cdb38c;
+            background: linear-gradient(to bottom, #2d2621 0%, #171311 100%);
+            border: 1px solid #544432;
+            box-shadow: 
+                inset 0 1px 3px rgba(255,255,255,0.1),
+                0 5px 10px rgba(0,0,0,0.6);
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            text-shadow: 2px 2px 3px #000;
+            box-sizing: border-box;
+        }
+        .menu-btn:hover {
+            color: #fff;
+            background: linear-gradient(to bottom, #3d332c 0%, #211b18 100%);
+            border-color: #cbb281;
+            box-shadow: 
+                0 0 15px rgba(203, 178, 129, 0.5),
+                inset 0 0 8px rgba(203, 178, 129, 0.3);
+            letter-spacing: 1.5px;
+        }
+        .menu-btn:active {
+            transform: scale(0.99);
+        }
+        .menu-btn.disabled {
+            color: #4a453f;
+            background: #0f0d0b;
+            border-color: #26211c;
+            cursor: not-allowed;
+            box-shadow: none;
+            text-shadow: none;
+        }
+        .back-btn {
+            margin-top: 15px;
+            background: linear-gradient(to bottom, #421e1e 0%, #241010 100%);
+            border-color: #6e3131;
+            color: #e6aaaa;
+        }
+        .back-btn:hover {
+            background: linear-gradient(to bottom, #542525 0%, #301414 100%);
+            border-color: #a84444;
+            box-shadow: 0 0 15px rgba(168, 68, 68, 0.4);
+            color: #fff;
+        }
 
-    <!-- Живой задний план (Искры костра) -->
-    <canvas id="bg-canvas" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; display: block;"></canvas>
-
-    <!-- Главный контейнер игры (Mobile-First) -->
-    <div id="game-container">
+        /* 📊 СТИЛИ ДЛЯ ИНТЕРФЕЙСА БОЯ 8х8 (Адаптированы под готику) */
+        #boss-panel {
+            background: rgba(20, 10, 10, 0.7);
+            border: 1px solid #5c2323;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 2px;
+        }
+        #boss-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ff6666;
+            margin-bottom: 4px;
+            text-shadow: 1px 1px 2px #000;
+        }
+        .hp-bar-container {
+            width: 100%;
+            height: 14px;
+            background: #221111;
+            border: 1px solid #441111;
+            position: relative;
+            overflow: hidden;
+        }
+        .hp-bar {
+            height: 100%;
+            background: linear-gradient(to right, #990000, #ff3333);
+            transition: width 0.3s ease-out;
+        }
+        #boss-hp-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 0;
+            left: 0;
+            font-size: 11px;
+            line-height: 14px;
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
+        }
+        #battle-status-panel {
+            background: rgba(23, 19, 17, 0.9);
+            border: 1px solid #544432;
+            padding: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #cdb38c;
+        }
+        #squad-matrix {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            margin-bottom: 8px;
+        }
         
-        <!-- Шапка игры -->
-        <header id="game-header">
+        /* Фиксированный подвал с автоматической версией */
+        .version-footer {
+            position: absolute;
+            bottom: 6px;
+            left: 0;
+            width: 100%;
+            font-size: 11px;
+            color: #4a453f;
+            text-align: center;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Оригинальный живой задний план -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Основной интерфейс поверх фона -->
+    <div id="game-interface">
+
+        <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ -->
+        <div id="main-menu" class="game-window">
             <h1>КХАМАЧ</h1>
-            <div id="sub-title">Легенды Абхирамбурга</div>
-        </header>
-
-        <!-- Основная рабочая область -->
-        <main id="game-screen-area">
+            <span class="subtitle">Легенды Абхирамбурга</span>
             
-            <!-- Экран лагеря (Главное меню) -->
-            <div id="screen-camp" class="game-screen">
-                <div class="menu-banner">Лагерь <span style="color: #e6c280;">Ордена</span></div>
-                <button class="btn-main" onclick="showScreen('screen-battle')">⚔️ Отправиться в Рейд</button>
-                <button class="btn-main font-locked" onclick="alert('🔨 Горнило (v0.6.0)\n\nЗдесь откроется кузница Ордена. Вы сможете перековывать и улучшать экипировку за ресурсы, добытые в рейдах на Драконов.')">🔨 Горнило (v0.6.0)</button>
-                <button class="btn-main font-locked" onclick="alert('🧪 Алхимия (v0.6.0)\n\nЗдесь откроется Алхимическая Лаборатория. Вы сможете проводить Ритуал Рун, варить боевые зелья и преобразовывать энергию Харизмы.')">🧪 Алхимия (v0.6.0)</button>
+            <button class="menu-btn" onclick="showScreen('battle-screen')">⚔️ В БОЙ (Три в ряд)</button>
+            <button class="menu-btn" onclick="showScreen('forge-screen')">⚒️ Кузница предметов</button>
+            <button class="menu-btn" onclick="showScreen('alchemy-screen')">🧪 Лаборатория Алхимика</button>
+            <button class="menu-btn" onclick="showScreen('squad-screen')">👤 Мой Отряд</button>
+            <button class="menu-btn disabled">🏆 PvP Арена (Заблокировано)</button>
+            
+            <div class="version-footer">Клиент: v0.5.5</div>
+        </div>
+
+        <!-- ЭКРАН 2: КУЗНИЦА -->
+        <div id="forge-screen" class="game-window" style="display: none;">
+            <h2>⚒️ Древнее Горнило</h2>
+            <p>В полумраке кузницы тяжело вздыхают мехи. Старый мастер готов принять трофеи из чрева великого ящера. Из чешуи и хребтовых костей он скует доспех, не знающий износа, а из клыка — клинок, разящий без промаха.</p>
+            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
+            
+            <div class="version-footer">Клиент: v0.5.5</div>
+        </div>
+
+        <!-- ЭКРАН 3: АЛХИМИЯ -->
+        <div id="alchemy-screen" class="game-window" style="display: none;">
+            <h2>🧪 Тайный Очаг</h2>
+            <p>Свитки, покрытые пылью веков, и склянки со светящимися эссенциями заполняют полки. Алхимик Абхирамбурга способен дистиллировать кровь Дракона в чистый опыт для ваших верных воинов или превратить прах в золото.</p>
+            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
+            
+            <div class="version-footer">Cliff: v0.5.5</div>
+        </div>
+
+        <!-- ЭКРАН 4: ОТРЯД -->
+        <div id="squad-screen" class="game-window" style="display: none;">
+            <h2>👤 Воинство Ордена</h2>
+            <p>Здесь вы сможете управлять характеристиками защитников Абхирамбурга, распределять очки величия и настраивать построение отряда в боевой матрице.</p>
+            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
+            
+            <div class="version-footer">Клиент: v0.5.5</div>
+        </div>
+
+        <!-- ЭКРАН БОЯ (Интегрировано под 8х8 и ОД) -->
+        <div id="battle-screen" class="game-window" style="display: none;">
+            <!-- Инфо-панель Босса -->
+            <div id="boss-panel">
+                <div id="boss-name">🔥 Огненный Дракон (Тир 1)</div>
+                <div class="hp-bar-container">
+                    <div id="boss-hp-bar" class="hp-bar" style="width: 100%;"></div>
+                    <span id="boss-hp-text">500 / 500 ОЗ</span>
+                </div>
             </div>
 
-            <!-- Экран боевой сессии (Рейд на Дракона) -->
-            <div id="screen-battle" class="game-screen" style="display: none;">
-                
-                <!-- Инфо-панель Босса -->
-                <div id="boss-panel">
-                    <div id="boss-name">🔥 Огненный Дракон (Тир 1)</div>
-                    <div class="hp-bar-container">
-                        <div id="boss-hp-bar" class="hp-bar" style="width: 100%;"></div>
-                        <span id="boss-hp-text">500 / 500 ОЗ</span>
-                    </div>
-                </div>
-
-                <!-- Панель статуса раунда и Очков Действия -->
-                <div id="battle-status-panel" style="width: 100%; max-width: 320px; margin: 4px auto; background: rgba(28, 21, 16, 0.85); border: 1px solid #4a3e31; border-radius: 4px; padding: 6px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #e6c280;">
-                    <div id="battle-status-text" style="text-shadow: 1px 1px 1px #000; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">⚔️ Загрузка боя...</div>
-                    <div id="battle-ap-display" style="font-weight: bold; background: #2a2015; padding: 2px 6px; border-radius: 3px; border: 1px solid #635341; color: #5dade2;">⚡ ОД: 3 / 3</div>
-                </div>
-
-                <!-- Матрица отряда -->
-                <div id="squad-matrix">
-                    <!-- Заполняется динамически из combat.js -->
-                </div>
-
-                <!-- Зона Match-3 игрового поля -->
-                <div id="combat-action-area">
-                    <!-- Заполняется динамически из match3.js -->
-                </div>
-
-                <!-- Нижняя панель управления боем -->
-                <div id="battle-controls">
-                    <button class="btn-retreat" onclick="showScreen('screen-camp')">🏃 Отступить в лагерь</button>
-                </div>
-            </div>
-
-        </main>
-
-        <!-- Подвал с фиксированной версией -->
-        <footer id="game-footer">
-            <span>Клиент: v0.5.5</span>
-        </footer>
-    </div>
-
-    <!-- Загрузка скриптов в строгой последовательности сброса кэша -->
-    <script src="game.js?v=0.5.5"></script>
-    <script src="background.js?v=0.5.5"></script>
-    <script src="match3.js?v=0.5.5"></script>
-    <script src="combat.js?v=0.5.5"></script>
-
-</body>
-</html>
