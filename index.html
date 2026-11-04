@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>КХАМАЧ — Восхождение Рейдов</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- Принудительный сброс кэша для CSS-стилей -->
+    <link rel="stylesheet" href="styles.css?v=0.6.0-alpha.6">
 </head>
 <body>
     <!-- Холст для автономного модуля атмосферы (искры костра) -->
@@ -14,7 +15,7 @@
     <div id="game-interface">
         
         <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
-        <div id="main-menu" class="game-window">
+        <div id="main-menu" class="game-window" style="display: flex;">
             <h1>КХАМАЧ</h1>
             <span class="subtitle">Рейды в Горнило Рун</span>
             <p>Древний Дракон пробудился в недрах подземелья. Соберите свой отряд, куйте руны власти и сокрушите огнедышащую тварь в пошаговой тактической битве.</p>
@@ -33,7 +34,7 @@
                 <button id="to-squad-btn" class="menu-btn disabled" disabled>Отряд</button>
             </div>
             
-            <div id="game-version" class="version-footer">v0.6.0-alpha.2</div>
+            <div id="game-version" class="version-footer">v0.6.0-alpha.6</div>
         </div>
 
         <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ ================= -->
@@ -82,10 +83,10 @@
 
     </div>
 
-    <!-- ПОДКЛЮЧЕНИЕ СТРИКТ-МОДУЛЕЙ ИГРЫ -->
-    <script src="background.js"></script>
-    <script src="game.js"></script>
-    <script src="match3.js"></script>
-    <script src="combat.js"></script>
+    <!-- Принудительный сброс кэша для JS-модулей -->
+    <script src="background.js?v=0.6.0-alpha.6"></script>
+    <script src="game.js?v=0.6.0-alpha.6"></script>
+    <script src="match3.js?v=0.6.0-alpha.6"></script>
+    <script src="combat.js?v=0.6.0-alpha.6"></script>
 </body>
 </html>
