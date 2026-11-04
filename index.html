@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>КХАМАЧ: Легенды Абхирамбурга</title>
-    <link rel="stylesheet" href="styles.css?v=0.5.0">
+    <link rel="stylesheet" href="styles.css?v=0.5.1">
 </head>
 <body>
 
@@ -17,12 +17,12 @@
             <div id="sub-title">Легенды Абхирамбурга</div>
         </header>
 
-        <!-- Основная рабочая область (Экраны переключаются динамически через JS) -->
+        <!-- Основная рабочая область -->
         <main id="game-screen-area">
             
             <!-- Экран лагеря (Главное меню) -->
             <div id="screen-camp" class="game-screen">
-                <div class="menu-banner">Лагерь Ордена</div>
+                <div class="menu-banner">Лагерь <span style="color: #e6c280;">Ордена</span></div>
                 <button class="btn-main" onclick="showScreen('screen-battle')">⚔️ Отправиться в Рейд</button>
                 <button class="btn-main font-locked" disabled>🔨 Горнило (v0.6.0)</button>
                 <button class="btn-main font-locked" disabled>🧪 Алхимия (v0.6.0)</button>
@@ -30,6 +30,7 @@
 
             <!-- Экран боевой сессии (Рейд на Дракона) -->
             <div id="screen-battle" class="game-screen" style="display: none;">
+                
                 <!-- Инфо-панель Босса -->
                 <div id="boss-panel">
                     <div id="boss-name">🔥 Огненный Дракон (Тир 1)</div>
@@ -39,19 +40,20 @@
                     </div>
                 </div>
 
-                <!-- Матрица отряда (Disciples 2 стиль) -->
+                <!-- Панель статуса раунда и Очков Действия -->
+                <div id="battle-status-panel" style="width: 100%; max-width: 320px; margin: 4px auto; background: rgba(28, 21, 16, 0.85); border: 1px solid #4a3e31; border-radius: 4px; padding: 6px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #e6c280;">
+                    <div id="battle-status-text" style="text-shadow: 1px 1px 1px #000; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">⚔️ Загрузка боя...</div>
+                    <div id="battle-ap-display" style="font-weight: bold; background: #2a2015; padding: 2px 6px; border-radius: 3px; border: 1px solid #635341; color: #5dade2;">⚡ ОД: 3 / 3</div>
+                </div>
+
+                <!-- Матрица отряда -->
                 <div id="squad-matrix">
                     <!-- Заполняется динамически из combat.js -->
                 </div>
 
-                <!-- Зона Match-3 игрового поля -->
+                <!-- Зона Match-3 игрового поля (8х8) -->
                 <div id="combat-action-area">
                     <!-- Заполняется динамически из match3.js -->
-                </div>
-
-                <!-- Текстовый пошаговый лог боя -->
-                <div id="combat-log-container">
-                    <div id="combat-log"></div>
                 </div>
 
                 <!-- Нижняя панель управления боем -->
@@ -64,75 +66,15 @@
 
         <!-- Подвал с фиксированной версией -->
         <footer id="game-footer">
-            <span>Клиент: v0.5.0</span>
+            <span>Клиент: v0.5.1</span>
         </footer>
     </div>
 
-    <!-- Подключение модулей логики (с защитой от кэширования браузером) -->
-    <script src="background.js?v=0.5.0"></script>
-    <script src="match3.js?v=0.5.0"></script>
-    <script src="combat.js?v=0.5.0"></script>
+    <!-- Порядок подключения критически важен: game.js инициализирует базовые данные и структуру -->
+    <script src="game.js?v=0.5.1"></script>
+    <script src="background.js?v=0.5.1"></script>
+    <script src="match3.js?v=0.5.1"></script>
+    <script src="combat.js?v=0.5.1"></script>
 
-    <script>
-        // Глобальный объект данных для сохранения состояния MVP
-        const combatData = {
-            board: [],
-            heroes: [
-                { id: 1, name: "Воитель", hp: 150, maxHp: 150, role: "фронт-лево" },
-                { id: 2, name: "Танк", hp: 120, maxHp: 120, role: "фронт-право" },
-                { id: 3, name: "Маг", hp: 80, maxHp: 80, role: "тыл-лево" },
-                { id: 4, name: "Рекрут", hp: 70, maxHp: 70, role: "тыл-право" }
-            ],
-            dragonBoss: { name: "Огненный Дракон", hp: 500, maxHp: 500 }
-        };
-
-        // Переключение экранов
-        function showScreen(screenId) {
-            document.querySelectorAll('.game-screen').forEach(s => s.style.display = 'none');
-            const target = document.getElementById(screenId);
-            if (target) {
-                target.style.display = 'flex';
-                
-                // Переинициализация боя при заходе в рейд
-                if (screenId === 'screen-battle') {
-                    setTimeout(() => {
-                        rebuildActionArea();
-                        generateValidBoard();
-                        renderMatch3Board();
-                        if (typeof initCombatLog === 'function') initCombatLog();
-                        if (typeof renderSquad === 'function') renderSquad();
-                    }, 20);
-                }
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-             showScreen('screen-camp');
-        });
-        
-        function appendToLog(text, type) {
-            const log = document.getElementById('combat-log');
-            if (!log) return;
-            const msg = document.createElement('div');
-            msg.className = `log-msg msg-${type}`;
-            msg.innerText = text;
-            log.appendChild(msg);
-            log.scrollTop = log.scrollHeight;
-        }
-        
-        function refreshBattleUI() {
-            renderMatch3Board();
-            if (typeof renderSquad === 'function') renderSquad();
-            
-            // Обновление полоски ХП босса
-            const bossHpBar = document.getElementById('boss-hp-bar');
-            const bossHpText = document.getElementById('boss-hp-text');
-            if (bossHpBar && bossHpText) {
-                const pct = Math.max(0, (combatData.dragonBoss.hp / combatData.dragonBoss.maxHp) * 100);
-                bossHpBar.style.width = pct + '%';
-                bossHpText.innerText = `${Math.max(0, combatData.dragonBoss.hp)} / ${combatData.dragonBoss.maxHp} ОЗ`;
-            }
-        }
-    </script>
 </body>
 </html>
