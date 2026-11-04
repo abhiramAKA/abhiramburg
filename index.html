@@ -4,35 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>КХАМАЧ: Легенды Абхирамбурга</title>
-    <!-- Подключаем внешние стили -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=0.4.4">
 </head>
 <body>
-
-    <!-- Живой задний план -->
     <canvas id="bg-canvas"></canvas>
-
-    <!-- Основной интерфейс -->
     <div id="game-interface">
-
-        <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ -->
         <div id="main-menu" class="game-window">
             <h1>КХАМАЧ</h1>
             <span class="subtitle">Легенды Абхирамбурга</span>
-            
             <button class="menu-btn" onclick="showScreen('battle-screen')">⚔️ Дракон </button>
             <button class="menu-btn" onclick="showScreen('forge-screen')">⚒️ Кузнец </button>
             <button class="menu-btn" onclick="showScreen('alchemy-screen')">🧪 Алхимик</button>
             <button class="menu-btn" onclick="showScreen('squad-screen')">👤 Мой Отряд</button>
             <button class="menu-btn disabled">🏆 PvP Арена (Заблокировано)</button>
-
-            <!-- ИНДИКАТОР ВЕРСИИ НА ГЛАВНОМ ЭКРАНЕ -->
             <div style="margin-top: auto; padding-top: 15px; font-size: 11px; color: #4a3f2c; letter-spacing: 1px; font-family: monospace;">
                 ВЕРСИЯ: <span class="version-link" onclick="loadAndShowChangelog()">v0.4.4</span>
             </div>
         </div>
 
-        <!-- ЭКРАН: ИСТОРИЯ ОБНОВЛЕНИЙ (CHANGELOG ГЕНЕРИРУЕТСЯ ИЗ JSON) -->
         <div id="changelog-screen" class="game-window screen">
             <h2>📜 Летопись изменений</h2>
             <div id="changelog-list" class="changelog-container">
@@ -41,24 +30,20 @@
             <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Назад в меню</button>
         </div>
 
-        <!-- ЭКРАН 2: КУЗНИЦА -->
         <div id="forge-screen" class="game-window screen">
             <h2>⚒️ Древнее Горнило</h2>
-            <p>В полумраке кузницы тяжело вздыхают мехи. Старый мастер готов принять трофеи из черева великого ящера. Из чешуи и хребтовых костей он скует доспех, не знающий износа, а из клыка — клинок, разящий без промаха.</p>
+            <p>В полумраке кузницы тяжело вздыхают мехи. Старый мастер готовит экипировку из трофеев дракона.</p>
             <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
         </div>
 
-        <!-- ЭКРАН 3: АЛХИМИЯ -->
         <div id="alchemy-screen" class="game-window screen">
             <h2>🧪 Тайный Очаг</h2>
-            <p>Свитки, покрытые пылью веков, и склянки со светящимися эссенциями заполняют полки. Алхимик Абхирамбурга способен дистиллировать кровь Дракона в чистый опыт для ваших верных воинов или превратить прах в золото.</p>
+            <p>Свитки и склянки с эссенциями помогают трансформировать ресурсы в опыт и золото.</p>
             <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
         </div>
 
-        <!-- ЭКРАН 4: ОТРЯД -->
         <div id="squad-screen" class="game-window screen">
             <h2>👤 Ваше Воинство</h2>
-            <p>Ваш отряд замер у походного костра в ожидании приказов. Сила Кхамача растет с каждой битвой. Здесь вы сможете распределять вехи развития, повышать классы бойцов и снаряжать их в дорогу.</p>
             <p style="text-align: center; color: #e6c280; margin-top: 20px;">
                 <b>Предводитель:</b> Рыцарь смерти (1 ур)<br>
                 ⚔️ Атака: 25 | ❤️ Жизнь: 120
@@ -66,11 +51,8 @@
             <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
         </div>
 
-        <!-- ЭКРАН 5: БОЕВАЯ АРЕНА -->
         <div id="battle-screen" class="game-window screen">
             <h2>⚔️ Логово Дракона</h2>
-            
-            <!-- Панель Босса -->
             <div class="boss-plate">
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span id="boss-name" style="color:#e6aaaa; font-weight:bold;">Древний Змей</span>
@@ -78,31 +60,21 @@
                 </div>
                 <div class="hp-bar"><div id="boss-hp-fill" class="hp-fill"></div></div>
             </div>
-
-            <!-- Сетка отряда -->
             <div id="squad-battle-grid" class="squad-grid"></div>
-
-            <!-- Контейнер для динамического поля Match-3 -->
             <div id="combat-action-area" style="flex-shrink: 0; display: flex; justify-content: center; align-items: center;">
                 <button id="step-combat-btn" class="menu-btn" onclick="processCombatTurn()">⚡ Собрать комбинацию (Match-3)</button>
             </div>
-
-            <!-- Текстовый лог боя -->
             <div id="battle-log-box" class="battle-log-container">
                 Приветствуем в Абхирамбурге! Нажмите «Собрать комбинацию», чтобы начать атаку.
             </div>
-
-            <!-- Управление -->
             <button id="restart-combat-btn" class="menu-btn" onclick="reviveAndRestart()" style="display: none; margin: 4px 0;">🔄 Начать новую битву</button>
             <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Отступить в лагерь</button>
         </div>
-
     </div>
 
-    <!-- Подключаем логические скрипты -->
-    <script src="background.js"></script>
-    <script src="match3.js"></script>
-    <script src="combat.js"></script>
+    <script src="background.js?v=0.4.4"></script>
+    <script src="match3.js?v=0.4.4"></script>
+    <script src="combat.js?v=0.4.4"></script>
     <script>
         function showScreen(screenId) {
             const screens = document.querySelectorAll('.game-window');
@@ -110,24 +82,42 @@
                 screen.style.display = 'none';
                 screen.style.visibility = 'hidden';
             });
-
             const activeScreen = document.getElementById(screenId);
             if (activeScreen) {
-                // Если это под-экран, включаем flex-режим для выравнивания кнопки
-                if (screenId === 'main-menu') {
-                    activeScreen.style.display = 'flex';
-                } else {
-                    activeScreen.style.display = 'flex';
-                }
+                activeScreen.style.display = 'flex';
                 activeScreen.style.visibility = 'visible';
-                
                 if (screenId === 'battle-screen') {
                     setTimeout(setupBattleSession, 20);
                 }
             }
         }
         
-        // Первичная инициализация главного экрана при старте
+        function loadAndShowChangelog() {
+            showScreen('changelog-screen');
+            const listContainer = document.getElementById('changelog-list');
+            fetch('changelog.json?t=' + Date.now())
+                .then(response => response.json())
+                .then(data => {
+                    listContainer.innerHTML = '';
+                    data.forEach(item => {
+                        const block = document.createElement('div');
+                        block.className = 'changelog-item';
+                        let pointsHTML = '';
+                        item.changes.forEach(text => {
+                            pointsHTML += `<li>${text}</li>`;
+                        });
+                        block.innerHTML = `
+                            <div class="changelog-version">${item.version}</div>
+                            <ul>${pointsHTML}</ul>
+                        `;
+                        listContainer.appendChild(block);
+                    });
+                })
+                .catch(err => {
+                    listContainer.innerHTML = '<div style="color: #a84444; font-size:12px; padding:10px;">Не удалось прочесть свиток обновлений.</div>';
+                });
+        }
+
         window.onload = () => { showScreen('main-menu'); };
     </script>
 </body>
