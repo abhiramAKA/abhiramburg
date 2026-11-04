@@ -1,4 +1,4 @@
-// Глобальный объект данных состояния игры (Версия v0.5.2 под сетку 8х8 и систему ОД)
+// Глобальный объект данных состояния игры (Версия v0.5.5 под сетку 8х8 и систему ОД)
 const combatData = {
     board: [],
     heroes: [
@@ -21,18 +21,19 @@ function showScreen(screenId) {
         target.style.display = 'flex';
         
         if (screenId === 'screen-battle') {
-            combatData.ap = combatData.maxAp; // Сброс очков действий при старте рейда
+            combatData.ap = combatData.maxAp; 
             combatData.turnCount = 1;
-            combatData.dragonBoss.hp = combatData.dragonBoss.maxHp; // Восстанавливаем босса
-            combatData.heroes.forEach(h => h.hp = h.maxHp); // Восстанавливаем отряд
+            combatData.dragonBoss.hp = combatData.dragonBoss.maxHp; 
+            combatData.heroes.forEach(h => h.hp = h.maxHp); 
             
             setTimeout(() => {
+                // Принудительно вызываем именно новые пересобранные методы под 8х8
                 if (typeof rebuildActionArea === 'function') rebuildActionArea();
                 if (typeof generateValidBoard === 'function') generateValidBoard();
                 if (typeof renderMatch3Board === 'function') renderMatch3Board();
                 if (typeof renderSquad === 'function') renderSquad();
                 updateStatusPanel("⚔️ Раунд 1. Ваш ход!");
-            }, 20);
+            }, 40);
         }
     }
 }
@@ -49,7 +50,6 @@ function updateStatusPanel(text, isBossTurn = false) {
     }
 }
 
-// Перехватчик старых логов для обратной совместимости с модулями
 function appendToLog(text) {
     updateStatusPanel(text);
 }
@@ -59,7 +59,6 @@ function refreshBattleUI() {
     if (typeof renderMatch3Board === 'function') renderMatch3Board();
     if (typeof renderSquad === 'function') renderSquad();
     
-    // Обновление здоровья босса
     const bossHpBar = document.getElementById('boss-hp-bar');
     const bossHpText = document.getElementById('boss-hp-text');
     if (bossHpBar && bossHpText) {
@@ -68,12 +67,16 @@ function refreshBattleUI() {
         bossHpText.innerText = `${Math.max(0, combatData.dragonBoss.hp)} / ${combatData.dragonBoss.maxHp} ОЗ`;
     }
     
-    // Актуализация счетчика действий
     const currentStatus = document.getElementById('battle-status-text')?.innerText || "Битва продолжается";
     updateStatusPanel(currentStatus, combatData.ap === 0);
 }
 
-// Старт игры после полной инициализации DOM дерева
+// Безопасный запуск игры и фонового костра после полной прогрузки тегов
 document.addEventListener('DOMContentLoaded', () => {
-     showScreen('screen-camp');
+    // Если скрипт background.js загрузился, но уснул — будим его через принудительный ресайз
+    setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+    }, 100);
+    
+    showScreen('screen-camp');
 });
