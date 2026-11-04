@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>КХАМАЧ — Восхождение Рейдов</title>
-    <!-- Принудительный сброс кэша для CSS-стилей -->
-    <link rel="stylesheet" href="styles.css?v=0.6.0-alpha.6">
+    <!-- Уникальный хвостовик v=800 заставляет браузер мгновенно обновить стили -->
+    <link rel="stylesheet" href="styles.css?v=800">
 </head>
 <body>
-    <!-- Холст для автономного модуля атмосферы (искры костра) -->
+    <!-- Холст для искр костра -->
     <canvas id="bg-canvas"></canvas>
 
     <!-- Общий контейнер интерфейса -->
@@ -34,7 +34,8 @@
                 <button id="to-squad-btn" class="menu-btn disabled" disabled>Отряд</button>
             </div>
             
-            <div id="game-version" class="version-footer">v0.6.0-alpha.6</div>
+            <!-- Сюда текст версии впишет только новый скрипт -->
+            <div id="game-version" class="version-footer">Загрузка...</div>
         </div>
 
         <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ ================= -->
@@ -50,7 +51,7 @@
         <!-- ================= БОЕВОЙ ЭКРАН (ОКНО РЕЙДА) ================= -->
         <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 15px 20px;">
             
-            <!-- Сюда JS-модуль боевого движка сам внедрит Дракона при старте -->
+            <!-- Сюда JS динамически внедрит Дракона и пламя -->
             <div id="dragon-raid-zone"></div>
 
             <!-- ПАНЕЛЬ БОССА (ЗДОРОВЬЕ) -->
@@ -70,12 +71,12 @@
 
             <!-- ИНТЕРФЕЙС ОТРЯДА ГЕРОЕВ -->
             <div id="squad-matrix">
-                <!-- Заполняется динамически из combat.js -->
+                <!-- Заполняется динамически -->
             </div>
 
             <!-- ИГРОВОЕ ПОЛЕ MATCH-3 (СТРОГО 8х8) -->
             <div id="match3-board-container" class="match3-board">
-                <!-- Ячейки рун генерируются динамически из match3.js -->
+                <!-- Ячейки рун генерируются динамически -->
             </div>
 
             <button id="leave-combat-btn" class="menu-btn back-btn" style="margin-top: 10px; padding: 10px;">Сбежать из рейда</button>
@@ -83,10 +84,10 @@
 
     </div>
 
-    <!-- Принудительный сброс кэша для JS-модулей -->
-    <script src="background.js?v=0.6.0-alpha.6"></script>
-    <script src="game.js?v=0.6.0-alpha.6"></script>
-    <script src="match3.js?v=0.6.0-alpha.6"></script>
-    <script src="combat.js?v=0.6.0-alpha.6"></script>
+    <!-- Уникальные хвостовики v=800 полностью очищают старый кэш браузера -->
+    <script src="background.js?v=800"></script>
+    <script src="game.js?v=800"></script>
+    <script src="match3.js?v=800"></script>
+    <script src="combat.js?v=800"></script>
 </body>
 </html>
