@@ -1,7 +1,6 @@
 // Боевое ядро рейда. Интегрировано с глобальным стейтом game.js и системой ОД.
 
 function setupBattleSession() {
-    // Если сессия не инициализирована в game.js, подтягиваем базовые параметры раундов
     if (!combatData.currentRound) {
         combatData.currentRound = 1;
     }
@@ -19,7 +18,6 @@ function renderSquad() {
 
     combatData.heroes.forEach(hero => {
         const card = document.createElement('div');
-        // Стилизация карточек героев под Disciples 2
         card.style.cssText = `
             background: #1c1510; border: 1px solid #4a3e31; border-radius: 4px;
             padding: 6px; text-align: center; font-size: 11px; color: #e6c280;
@@ -47,12 +45,11 @@ function executeComboRules(matches, isFirstCascade = true) {
     let protectionActive = false;
     let logMessage = "";
 
-    // Суммируем эффекты от всех собранных комбинаций за один ход
     matches.forEach(match => {
         switch(match.type) {
             case '🔥':
                 totalDamage += 45;
-                logMessage += "🔥 Маг: Огненный Шар (45) ";
+                logMessage += "🔥 Маг: Шар (45) ";
                 break;
             case '💀':
                 totalDamage += 30;
@@ -60,43 +57,37 @@ function executeComboRules(matches, isFirstCascade = true) {
                 break;
             case '🛡️':
                 protectionActive = true;
-                logMessage += "🛡️ Щиты подняты! ";
+                logMessage += "🛡️ Щиты! ";
                 break;
             case '🧪':
                 totalHeal += 25;
                 break;
             case '💎':
                 totalDamage += 60;
-                logMessage += "💎 Бездна: Чистый урон (60) ";
+                logMessage += "💎 Бездна: Чистый (60) ";
                 break;
         }
     });
 
-    // Наносим урон боссу
     if (totalDamage > 0) {
         combatData.dragonBoss.hp -= totalDamage;
     }
 
-    // Лечим раненых союзников
     if (totalHeal > 0) {
         let wounded = combatData.heroes.filter(h => h.hp > 0 && h.hp < h.maxHp);
         if (wounded.length > 0) {
             let targetHero = wounded[Math.floor(Math.random() * wounded.length)];
             targetHero.hp = Math.min(targetHero.maxHp, targetHero.hp + totalHeal);
-            logMessage += `🧪 Лечение: +${totalHeal} ОЗ для ${targetHero.name} `;
+            logMessage += `🧪 Лечение: +${totalHeal} ОЗ `;
         } else {
-            logMessage += "🧪 Алхимия: Отряд здоров ";
+            logMessage += "🧪 Алхимия: Все здоровы ";
         }
     }
 
-    // Выводим аккуратную сводку комбинации в строку состояния
-    if (logMessage) {
-        if (typeof updateStatusPanel === 'function') {
-            updateStatusPanel(logMessage.trim());
-        }
+    if (logMessage && typeof updateStatusPanel === 'function') {
+        updateStatusPanel(logMessage.trim());
     }
 
-    // Запускаем физику разрушения рун и падения верхних рядов
     if (typeof applyBoardGravity === 'function') {
         applyBoardGravity(matches);
     }
@@ -105,7 +96,6 @@ function executeComboRules(matches, isFirstCascade = true) {
         refreshBattleUI();
     }
 
-    // Проверяем, не вызвали ли упавшие камни новые автоматические комбо (Каскады)
     let nextMatches = (typeof checkMatches === 'function') ? checkMatches() : [];
 
     if (nextMatches.length > 0 && combatData.dragonBoss.hp > 0) {
@@ -113,25 +103,22 @@ function executeComboRules(matches, isFirstCascade = true) {
             executeComboRules(nextMatches, false);
         }, 600);
     } else {
-        // Каскады завершились. Списываем 1 Очко Действия за совершенный игроком ход
         combatData.ap--;
         
         if (typeof refreshBattleUI === 'function') {
             refreshBattleUI();
         }
 
-        // Проверяем триггеры окончания раунда или победы
         if (combatData.dragonBoss.hp <= 0) {
             if (typeof updateStatusPanel === 'function') {
                 updateStatusPanel("🏆 ПОБЕДА! Древний змей повержен!");
             }
-            isProcessingGrid = true; // Блокируем поле
+            isProcessingGrid = true;
             return;
         }
 
-        // Если Очки Действия закончились (0/3) — наступает фаза контратаки Дракона
         if (combatData.ap <= 0) {
-            isProcessingGrid = true; // Блокируем ходы во время атаки босса
+            isProcessingGrid = true;
             if (typeof updateStatusPanel === 'function') {
                 updateStatusPanel("🐉 Ход Дракона! Защищайтесь...", true);
             }
@@ -140,7 +127,6 @@ function executeComboRules(matches, isFirstCascade = true) {
                 handleDragonTurn(protectionActive);
             }, 1200);
         } else {
-            // Если ОД еще есть — возвращаем управление игроку для следующего хода
             isProcessingGrid = false;
             if (typeof renderMatch3Board === 'function') {
                 renderMatch3Board();
@@ -153,15 +139,13 @@ function handleDragonTurn(protectionActive) {
     const aliveHeroes = combatData.heroes.filter(h => h.hp > 0);
     
     if (aliveHeroes.length > 0) {
-        // Каждый третий раунд Дракон бьет массовой магией по всему отряду
         if (combatData.turnCount % 3 === 0) {
             let dmg = protectionActive ? 10 : 25;
             aliveHeroes.forEach(h => { h.hp -= dmg; });
             if (typeof updateStatusPanel === 'function') {
-                updateStatusPanel(`🐉 Дракон изрыгает [Дыхание Рока]! Все получили по ${dmg} урона.`);
+                updateStatusPanel(`🐉 Дракон: [Дыхание Рока]! Все получили по ${dmg} урона.`);
             }
         } else {
-            // В остальные ходы наносит точечный удар по случайному герою
             const target = aliveHeroes[Math.floor(Math.random() * aliveHeroes.length)];
             let dmg = protectionActive ? 15 : 35;
             target.hp -= dmg;
@@ -171,7 +155,6 @@ function handleDragonTurn(protectionActive) {
         }
     }
 
-    // Проверка глобального поражения (все пали)
     const survivors = combatData.heroes.filter(h => h.hp > 0);
     if (survivors.length === 0) {
         if (typeof updateStatusPanel === 'function') {
@@ -180,11 +163,10 @@ function handleDragonTurn(protectionActive) {
         return;
     }
 
-    // Завершаем полный цикл раунда: обновляем ОД игрока и увеличиваем счетчик ходов босса
     setTimeout(() => {
-        combatData.ap = combatData.maxAp; // Полное восстановление 3/3 ОД
+        combatData.ap = combatData.maxAp;
         combatData.turnCount++;
-        isProcessingGrid = false; // Открываем доступ к доске Match-3
+        isProcessingGrid = false;
         
         if (typeof updateStatusPanel === 'function') {
             updateStatusPanel(`⚔️ Раунд ${combatData.turnCount}. Ваш ход!`);
