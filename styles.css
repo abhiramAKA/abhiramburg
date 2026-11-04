@@ -12,6 +12,18 @@ body, html {
     -webkit-user-select: none;
 }
 
+/* Настройки холста искр для background.js */
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    display: block;
+}
+
 /* Главный контейнер (строго Mobile-First) */
 #game-container {
     display: flex;
@@ -20,33 +32,35 @@ body, html {
     max-width: 480px;
     height: 94vh;
     max-height: 640px;
-    margin: 0 auto;
-    background: rgba(12, 8, 6, 0.85);
+    margin: 3vh auto;
+    background: rgba(12, 8, 6, 0.88);
     border: 2px solid #3a2e22;
     box-shadow: 0 0 30px #000;
     position: relative;
     box-sizing: border-box;
+    border-radius: 4px;
 }
 
 /* Шапка игры */
 #game-header {
     text-align: center;
-    padding: 8px 0;
+    padding: 10px 0;
     background: linear-gradient(to bottom, #1c1510, rgba(28,21,16,0));
     border-bottom: 1px solid rgba(74, 62, 49, 0.3);
 }
 #game-header h1 {
     margin: 0;
-    font-size: 24px;
+    font-size: 26px;
     letter-spacing: 3px;
     color: #ffeb99;
     text-shadow: 0 2px 4px #000;
 }
 #sub-title {
-    font-size: 10px;
+    font-size: 11px;
     text-transform: uppercase;
     color: #8c765c;
     letter-spacing: 1px;
+    margin-top: 2px;
 }
 
 /* Динамическая область экранов */
@@ -54,7 +68,7 @@ body, html {
     display: flex;
     flex: 1;
     flex-direction: column;
-    padding: 8px;
+    padding: 12px;
     overflow: hidden;
     box-sizing: border-box;
 }
@@ -72,16 +86,16 @@ body, html {
 #screen-camp {
     justify-content: center;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
 }
 .menu-banner {
-    font-size: 18px;
-    margin-bottom: 15px;
+    font-size: 20px;
+    margin-bottom: 10px;
     text-shadow: 0 2px 5px #000;
     letter-spacing: 1px;
 }
 
-/* Кнопки интерфейса */
+/* Активные кнопки интерфейса */
 .btn-main {
     width: 85%;
     max-width: 280px;
@@ -101,15 +115,16 @@ body, html {
     transform: scale(0.97);
     background: #1c1510;
 }
-.btn-main:disabled {
-    background: #15110d;
-    color: #5a4d3e;
-    border-color: #261f17;
-    cursor: not-allowed;
-    box-shadow: none;
-}
+
+/* Стилизация заблокированных кнопок (они нажимаются, но выглядят закрытыми) */
 .font-locked {
-    position: relative;
+    background: #15110d;
+    color: #6e5b47;
+    border-color: #2b2219;
+    box-shadow: 0 2px 4px #000;
+}
+.font-locked:active {
+    background: #100d0a;
 }
 
 /* ЭКРАН БОЯ: Зона Босса */
@@ -154,13 +169,13 @@ body, html {
     text-shadow: 1px 1px 1px #000;
 }
 
-/* ЭКРАН БОЯ: Матрица Отряда (Disciples 2 стиль) */
+/* ЭКРАН БОЯ: Матрица Отряда */
 #squad-matrix {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);
-    gap: 4px;
-    margin-bottom: 6px;
+    gap: 6px;
+    margin-bottom: 8px;
     width: 100%;
     max-width: 320px;
     margin-left: auto;
@@ -178,15 +193,16 @@ body, html {
 .btn-retreat {
     width: 100%;
     max-width: 320px;
-    padding: 10px;
+    padding: 12px;
     background: #331414;
     color: #ff9999;
     border: 1px solid #5c2323;
     border-radius: 4px;
     font-family: 'Georgia', serif;
-    font-size: 13px;
+    font-size: 14px;
     cursor: pointer;
-    box-shadow: 0 2px 5px #000;
+    box-shadow: 0 4px 6px #000;
+    text-shadow: 1px 1px 1px #000;
 }
 .btn-retreat:active {
     background: #200b0b;
@@ -195,17 +211,9 @@ body, html {
 /* Подвал */
 #game-footer {
     text-align: center;
-    padding: 6px 0;
+    padding: 8px 0;
     font-size: 11px;
     color: #5a4d3e;
     border-top: 1px solid rgba(74, 62, 49, 0.2);
     background: #0f0b09;
-}
-
-/* Анимации рун на поле */
-#match3-board div {
-    transition: background 0.15s, border-color 0.15s;
-}
-#match3-board div:active {
-    transform: scale(0.9);
 }
