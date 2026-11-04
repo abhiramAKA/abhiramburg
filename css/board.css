@@ -1,5 +1,5 @@
 /* ==========================================================================
-   4. СЕТКА ИГРОВОГО ПОЛЯ MATCH-3 (РАСШИРЕНИЕ 8х8 - ВЕРСИЯ v0.6.0-BETA)
+   4. СЕТКА ИГРОВОГО ПОЛЯ MATCH-3 (АНИМАЦИИ И ИСКРЫ - ВЕРСИЯ v0.6.0-BETA.2)
    ========================================================================== */
 
 .match3-board {
@@ -8,8 +8,7 @@
     grid-template-rows: repeat(8, 1fr);
     gap: 4px;
     width: 100%;
-    max-width: 410px;
-    min-height: 320px; /* Принудительная высота против схлопывания */
+    max-width: 360px;
     aspect-ratio: 1 / 1;
     margin: 8px auto 0;
     background: rgba(15, 12, 10, 0.85);
@@ -18,66 +17,70 @@
     padding: 4px;
     box-sizing: border-box;
     box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9);
-    overflow: hidden;
+    position: relative; /* Нужно для абсолютного позиционирования искр */
 }
 
 /* Стили ячеек рун */
 .rune-cell {
     width: 100%;
     height: 100%;
+    aspect-ratio: 1 / 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px; /* Увеличенный размер значков камней для лучшей читаемости */
+    font-size: 26px;
+    line-height: 1;
     cursor: pointer;
-    transition: transform 0.15s ease, background-color 0.2s ease;
     box-sizing: border-box;
     position: relative;
     user-select: none;
     -webkit-user-select: none;
+    
+    /* Плавность для перемещений (свопа) */
+    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.2s ease;
+    z-index: 2;
 }
 
 .rune-cell:active {
     transform: scale(0.85);
 }
 
-/* 🔥 АНИМАЦИЯ ПЛАВНОГО ВЫПАДЕНИЯ (ГРАВИТАЦИЯ) */
+/* 🔥 АНИМАЦИЯ ПЛАВНОГО ПАДЕНИЯ (ГРАВИТАЦИЯ СО СТУКОМ) */
 @keyframes runeFallDown {
     0% {
-        transform: translateY(-60px) scaleY(1.3);
+        transform: translateY(-200px);
         opacity: 0;
     }
-    60% {
-        transform: translateY(6px) scaleY(0.85);
+    70% {
+        transform: translateY(6px);
         opacity: 1;
     }
     85% {
-        transform: translateY(-2px) scaleY(1.05);
+        transform: translateY(-2px);
     }
     100% {
-        transform: translateY(0) scaleY(1);
+        transform: translateY(0);
     }
 }
 
 .rune-fall {
-    animation: runeFallDown 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    animation: runeFallDown 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
 
-/* 💥 АНИМАЦИЯ ДИЗАЙНЕРСКОГО ВЗРЫВА РУН */
+/* 💥 СТИЛЬ ВЗРЫВАЮЩЕЙСЯ РУНЫ */
 @keyframes runeExplosion {
     0% {
         transform: scale(1);
-        filter: brightness(1) drop-shadow(0 0 0px rgba(255,255,255,0));
+        filter: brightness(1);
         opacity: 1;
     }
-    30% {
-        transform: scale(1.35);
-        filter: brightness(2) drop-shadow(0 0 10px #fff);
+    40% {
+        transform: scale(1.3);
+        filter: brightness(2);
         opacity: 1;
     }
     100% {
-        transform: scale(0.1);
-        filter: brightness(3) drop-shadow(0 0 20px #ffcc00);
+        transform: scale(0);
         opacity: 0;
     }
 }
@@ -86,4 +89,29 @@
     animation: runeExplosion 0.25s ease-out both;
     pointer-events: none;
     z-index: 5;
+}
+
+/* ✨ МАГИЧЕСКИЕ ИСКРЫ ОТ ВЗРЫВА РУН */
+.rune-spark {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #ffaa00;
+    pointer-events: none;
+    z-index: 10;
+    box-shadow: 0 0 6px #ff4500, 0 0 12px #ffcc00;
+    opacity: 1;
+    animation: sparkFade 0.45s ease-out both;
+}
+
+@keyframes sparkFade {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--dx), var(--dy)) scale(0.2);
+        opacity: 0;
+    }
 }
