@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК РЕЙДОВ (v0.6.0-beta.11)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК РЕЙДОВ (v0.6.0-beta.16)
    ========================================================================== */
 
 function buildDragonDOM() {
@@ -33,7 +33,7 @@ function startCombatSession() {
     combatData.dragonHP = 1000;
     combatData.playerAP = 3;
     combatData.currentRound = 1;
-    combatData.playerShield = 0; // Инициализация щита отряда перед боем
+    combatData.playerShield = 0;
     combatData.squad.forEach(hero => hero.hp = hero.maxHP);
     
     buildDragonDOM();
@@ -45,13 +45,11 @@ function startCombatSession() {
 }
 
 function applyRuneCombination(effects) {
-    // Расчет урона Дракону: Огонь и Молния
     let totalDamage = (effects['🔥'] * 15) + (effects['⚡️'] * 10);
     if (totalDamage > 0) {
         combatData.dragonHP = Math.max(0, combatData.dragonHP - totalDamage);
     }
     
-    // Расчет лечения отряда: Руна Жизни
     let totalHeal = effects['💚'] * 8;
     if (totalHeal > 0) {
         combatData.squad.forEach(hero => {
@@ -59,7 +57,6 @@ function applyRuneCombination(effects) {
         });
     }
 
-    // МЕХАНИКА ЩИТОВ: Руна Защиты копит общую броню отряда
     let totalShieldGain = effects['🛡️'] * 12;
     if (totalShieldGain > 0) {
         combatData.playerShield += totalShieldGain;
@@ -78,11 +75,9 @@ function usePlayerActionPoint() {
     }
 }
 
-// Помощник для поглощения урона щитами
 function damageSquadWithShieldAbsorption(incomingDamage, hitAll = false) {
     let currentDamage = incomingDamage;
 
-    // Сначала урон поглощается щитом отряда
     if (combatData.playerShield > 0) {
         if (combatData.playerShield >= currentDamage) {
             combatData.playerShield -= currentDamage;
@@ -93,15 +88,12 @@ function damageSquadWithShieldAbsorption(incomingDamage, hitAll = false) {
         }
     }
 
-    // Если щит уничтожен и урон остался — бьем героев
     if (currentDamage > 0) {
         if (hitAll) {
-            // Массовый удар по всем живым героям
             combatData.squad.forEach(hero => {
                 hero.hp = Math.max(0, hero.hp - currentDamage);
             });
         } else {
-            // Одиночный удар по случайному живому герою
             let aliveHeroes = combatData.squad.filter(h => h.hp > 0);
             if (aliveHeroes.length > 0) {
                 let target = aliveHeroes[Math.floor(Math.random() * aliveHeroes.length)];
@@ -124,10 +116,8 @@ function executeDragonTurnAI() {
 
     if (combatData.currentRound % 3 === 0) {
         if (fireFx) fireFx.classList.add('active');
-        // Дыхание Рока (Массовая атака 35 ед.) с учетом щита
         damageSquadWithShieldAbsorption(35, true);
     } else {
-        // Обычный точечный удар (20 ед.) с учетом щита
         damageSquadWithShieldAbsorption(20, false);
     }
 
@@ -163,7 +153,6 @@ function updateCombatInterfaceDOM() {
     if (roundDisp) roundDisp.innerText = `Раунд: ${combatData.currentRound}`;
     if (apDisp) apDisp.innerText = `Очки Действия: ${combatData.playerAP} / ${combatData.playerMaxAP}`;
     
-    // Обновление индикатора общего Щита отряда
     const shieldDisp = document.getElementById('combat-shield-display');
     if (shieldDisp) {
         if (combatData.playerShield > 0) {
