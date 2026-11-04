@@ -131,7 +131,7 @@ function handleDragonTurn(protectionActive) {
 
     if (combatData.dragonBoss.hp <= 0) {
         refreshBattleUI();
-        appendToLog("🏆 ПОБЕДА! Древний змей повержен! Выпал дроп: 3 ресурса стихии Огонь (Тир 1).", "system");
+        appendToLog("🏆 ПОБЕДА! Древний змей повержен! Выпал дроп: 3px ресурса стихии Огонь (Тир 1).", "system");
         finishBattleSession();
         return;
     }
