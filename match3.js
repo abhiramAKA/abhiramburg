@@ -1,91 +1,142 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>КХАМАЧ — Восхождение Рейдов</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <!-- Холст для автономного модуля атмосферы (искры костра) -->
-    <canvas id="bg-canvas"></canvas>
+/* ==========================================================================
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (v0.6.0-alpha.8)
+   ========================================================================== */
 
-    <!-- Общий контейнер интерфейса -->
-    <div id="game-interface">
+// Инициализация игрового поля
+function initMatch3Board() {
+    const boardContainer = document.getElementById('match3-board-container');
+    if (!boardContainer) return;
+    
+    boardContainer.innerHTML = '';
+    match3BoardData = [];
+    
+    // Генерация матрицы строго 8х8 без готовых комбинаций 3-в-ряд
+    for (let r = 0; r < BOARD_ROWS; r++) {
+        match3BoardData[r] = [];
+        for (let c = 0; c < BOARD_COLS; c++) {
+            let allowedTypes = RUNE_TYPES.filter(type => {
+                if (r >= 2 && match3BoardData[r-1][c] === type && match3BoardData[r-2][c] === type) return false;
+                if (c >= 2 && match3BoardData[r][c-1] === type && match3BoardData[r][c-2] === type) return false;
+                return true;
+            });
+            let randomType = allowedTypes[Math.floor(Math.random() * allowedTypes.length)];
+            match3BoardData[r][c] = randomType;
+        }
+    }
+    
+    renderBoardDOM();
+}
+
+// Отрисовка рун в контейнер
+function renderBoardDOM() {
+    const boardContainer = document.getElementById('match3-board-container');
+    if (!boardContainer) return;
+    boardContainer.innerHTML = '';
+    
+    for (let r = 0; r < BOARD_ROWS; r++) {
+        for (let c = 0; c < BOARD_COLS; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'rune-cell';
+            cell.dataset.row = r;
+            cell.dataset.col = c;
+            cell.innerText = match3BoardData[r][c];
+            
+            cell.addEventListener('click', handleCellClick);
+            boardContainer.appendChild(cell);
+        }
+    }
+}
+
+// Обработка клика по рунам
+function handleCellClick(e) {
+    if (combatData.playerAP <= 0) return;
+    
+    const cell = e.currentTarget;
+    const r = parseInt(cell.dataset.row);
+    const c = parseInt(cell.dataset.col);
+    
+    if (!selectedCell) {
+        selectedCell = { row: r, col: c };
+        cell.style.background = 'rgba(230, 194, 128, 0.3)';
+    } else {
+        const prevR = selectedCell.row;
+        const prevC = selectedCell.col;
         
-        <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
-        <div id="main-menu" class="game-window" style="display: flex;">
-            <h1>КХАМАЧ</h1>
-            <span class="subtitle">Рейды в Горнило Рун</span>
-            <p>Древний Дракон пробудился в недрах подземелья. Соберите свой отряд, куйте руны власти и сокрушите огнедышащую тварь в пошаговой тактической битве.</p>
-            
-            <div class="menu-row">
-                <button id="to-combat-btn" class="menu-btn">В БОЙ</button>
-                <button id="info-btn" class="info-btn">❓</button>
-            </div>
-            <div class="menu-row">
-                <button id="to-forge-btn" class="menu-btn disabled" disabled>Кузница</button>
-            </div>
-            <div class="menu-row">
-                <button id="to-alchemy-btn" class="menu-btn disabled" disabled>Алхимия</button>
-            </div>
-            <div class="menu-row">
-                <button id="to-squad-btn" class="menu-btn disabled" disabled>Отряд</button>
-            </div>
-            
-            <div id="game-version" class="version-footer">v0.6.0-alpha.3</div>
-        </div>
+        const isNeighbor = (Math.abs(r - prevR) === 1 && c === prevC) || (Math.abs(c - prevC) === 1 && r === prevR);
+        
+        if (isNeighbor) {
+            swapRunes(prevR, prevC, r, c);
+        }
+        
+        selectedCell = null;
+        renderBoardDOM();
+    }
+}
 
-        <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ ================= -->
-        <div id="info-screen" class="game-window" style="display: none;">
-            <h2>КОНТЕКСТНАЯ СПРАВКА</h2>
-            <span class="subtitle">Правила выживания</span>
-            <p><strong>Система Очков Действия:</strong> Вам дается 3 ОД на раунд. Каждый обмен рун на поле тратит 1 ОД.</p>
-            <p>Собирайте комбинации из 3 и более рун. Эффекты суммируются! Дракон атакует строго после того, как вы потратите все 3 ОД.</p>
-            <p>Опасайтесь 3-го раунда — Дракон использует массовое <em>Дыхание Рока</em>!</p>
-            <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
-        </div>
+// Своп (обмен местами)
+function swapRunes(r1, c1, r2, c2) {
+    let temp = match3BoardData[r1][c1];
+    match3BoardData[r1][c1] = match3BoardData[r2][c2];
+    match3BoardData[r2][c2] = temp;
+    
+    let hasMatches = checkMatchesAndExecute();
+    
+    if (hasMatches) {
+        if (typeof usePlayerActionPoint === 'function') {
+            usePlayerActionPoint();
+        }
+    } else {
+        // Возврат назад при пустом обмене
+        temp = match3BoardData[r1][c1];
+        match3BoardData[r1][c1] = match3BoardData[r2][c2];
+        match3BoardData[r2][c2] = temp;
+    }
+}
 
-        <!-- ================= БОЕВОЙ ЭКРАН (ОКНО РЕЙДА) ================= -->
-        <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 15px 20px;">
-            
-            <!-- Сюда JS-модуль боевого движка сам внедрит Дракона при старте -->
-            <div id="dragon-raid-zone"></div>
-
-            <!-- ПАНЕЛЬ БОССА (ЗДОРОВЬЕ) -->
-            <div id="boss-panel">
-                <div id="boss-name">ДРАКОН НЕКРОСМУТ</div>
-                <div class="hp-bar-container">
-                    <div id="boss-hp-bar" class="hp-bar" style="width: 100%;"></div>
-                    <div id="boss-hp-text">1000 / 1000</div>
-                </div>
-            </div>
-
-            <!-- СТАТУС РАУНДА И ОЧКОВ ДЕЙСТВИЯ -->
-            <div id="battle-status-panel">
-                <div id="combat-round-display">Раунд: 1</div>
-                <div id="combat-ap-display">Очки Действия: 3 / 3</div>
-            </div>
-
-            <!-- ИНТЕРФЕЙС ОТРЯДА ГЕРОЕВ -->
-            <div id="squad-matrix">
-                <!-- Заполняется динамически из combat.js -->
-            </div>
-
-            <!-- ИГРОВОЕ ПОЛЕ MATCH-3 (СТРОГО 8х8) -->
-            <div id="match3-board-container" class="match3-board">
-                <!-- Ячейки рун генерируются динамически из match3.js -->
-            </div>
-
-            <button id="leave-combat-btn" class="menu-btn back-btn" style="margin-top: 10px; padding: 10px;">Сбежать из рейда</button>
-        </div>
-
-    </div>
-
-    <!-- ПОДКЛЮЧЕНИЕ СТРИКТ-МОДУЛЕЙ ИГРЫ -->
-    <script src="background.js"></script>
-    <script src="game.js"></script>
-    <script src="match3.js"></script>
-    <script src="combat.js"></script>
-</body>
-</html>
+// Расчет линий совпадений
+function checkMatchesAndExecute() {
+    let matchedMatrix = Array(BOARD_ROWS).fill().map(() => Array(BOARD_COLS).fill(false));
+    let found = false;
+    
+    for (let r = 0; r < BOARD_ROWS; r++) {
+        for (let c = 0; c < BOARD_COLS - 2; c++) {
+            let t = match3BoardData[r][c];
+            if (t && match3BoardData[r][c+1] === t && match3BoardData[r][c+2] === t) {
+                matchedMatrix[r][c] = matchedMatrix[r][c+1] = matchedMatrix[r][c+2] = true;
+                found = true;
+            }
+        }
+    }
+    
+    for (let r = 0; r < BOARD_ROWS - 2; r++) {
+        for (let c = 0; c < BOARD_COLS; c++) {
+            let t = match3BoardData[r][c];
+            if (t && match3BoardData[r+1][c] === t && match3BoardData[r+2][c] === t) {
+                matchedMatrix[r][c] = matchedMatrix[r+1][c] = matchedMatrix[r+2][c] = true;
+                found = true;
+            }
+        }
+    }
+    
+    if (found) {
+        let executionEffects = { '🔥': 0, '🛡️': 0, '💚': 0, '⚡️': 0, '💀': 0 };
+        
+        for (let r = 0; r < BOARD_ROWS; r++) {
+            for (let c = 0; c < BOARD_COLS; c++) {
+                if (matchedMatrix[r][c]) {
+                    let type = match3BoardData[r][c];
+                    executionEffects[type]++;
+                    match3BoardData[r][c] = RUNE_TYPES[Math.floor(Math.random() * RUNE_TYPES.length)];
+                }
+            }
+        }
+        
+        if (typeof applyRuneCombination === 'function') {
+            applyRuneCombination(executionEffects);
+        }
+        
+        checkMatchesAndExecute();
+    }
+    
+    return found;
+}
