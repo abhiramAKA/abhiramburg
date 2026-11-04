@@ -1,178 +1,181 @@
-// Боевое ядро рейда. Интегрировано с глобальным стейтом game.js и системой ОД.
+/* ==========================================================================
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК РЕЙДОВ (v0.6.0-alpha.2)
+   ========================================================================== */
 
-function setupBattleSession() {
-    if (!combatData.currentRound) {
-        combatData.currentRound = 1;
-    }
+let combatData = {
+    dragonHP: 1000,
+    dragonMaxHP: 1000,
+    playerAP: 3,
+    playerMaxAP: 3,
+    currentRound: 1,
+    squad: [
+        { name: "Воин", hp: 120, maxHP: 120, class: "warrior", role: "Атака/Щит" },
+        { name: "Клирик", hp: 90, maxHP: 90, class: "cleric", role: "Лечение" }
+    ]
+};
+
+// Динамическая сборка интерфейса Дракона (Соблюдение Strict Module Separation)
+function buildDragonDOM() {
+    const raidZone = document.getElementById('dragon-raid-zone');
+    if (!raidZone) return;
+
+    // Полностью очищаем зону перед созданием, чтобы избежать дубликатов
+    raidZone.innerHTML = '';
+
+    // Создаем контейнер
+    const container = document.createElement('div');
+    container.className = 'dragon-container';
+
+    // Создаем модель дракона
+    const model = document.createElement('div');
+    model.id = 'dragon-model';
+    model.className = 'dragon-idle';
+
+    // Создаем слой эффекта огненного дыхания
+    const fireFx = document.createElement('div');
+    fireFx.id = 'dragon-fire-fx';
+    fireFx.className = 'fire-breath-fx';
+
+    // Собираем структуру воедино
+    container.appendChild(model);
+    container.appendChild(fireFx);
+    raidZone.appendChild(container);
+}
+
+// Запуск боевого режима
+function startCombatSession() {
+    combatData.dragonHP = 1000;
+    combatData.playerAP = 3;
+    combatData.currentRound = 1;
+    combatData.squad.forEach(hero => hero.hp = hero.maxHP);
     
-    if (!document.getElementById('match3-board')) {
-        if (typeof rebuildActionArea === 'function') rebuildActionArea();
-    }
-    if (typeof refreshBattleUI === 'function') refreshBattleUI();
+    // Сначала динамически строим Дракона, затем обновляем интерфейсы
+    buildDragonDOM();
+    updateCombatInterfaceDOM();
+    initMatch3Board();
 }
 
-function renderSquad() {
-    const gridContainer = document.getElementById('squad-matrix');
-    if (!gridContainer) return;
-    gridContainer.innerHTML = '';
-
-    combatData.heroes.forEach(hero => {
-        const card = document.createElement('div');
-        card.style.cssText = `
-            background: #1c1510; border: 1px solid #4a3e31; border-radius: 4px;
-            padding: 6px; text-align: center; font-size: 11px; color: #e6c280;
-            box-shadow: inset 0 0 10px #000; box-sizing: border-box;
-            opacity: ${hero.hp <= 0 ? '0.4' : '1'};
-            filter: ${hero.hp <= 0 ? 'grayscale(1)' : 'none'};
-        `;
-        
-        card.innerHTML = `
-            <div style="font-weight: bold; color: ${hero.hp <= 0 ? '#7a6b58' : '#e6c280'}">${hero.name}</div>
-            <div style="font-size: 9px; color: #8c765c; margin: 2px 0;">[${hero.role}]</div>
-            <div style="font-weight: bold; color: ${hero.hp <= (hero.maxHp * 0.3) ? '#ff4d4d' : '#4ade80'}">
-                ❤️ ${Math.max(0, hero.hp)}/${hero.maxHp}
-            </div>
-        `;
-        gridContainer.appendChild(card);
-    });
-}
-
-function executeComboRules(matches, isFirstCascade = true) {
-    if (combatData.dragonBoss.hp <= 0) return;
-
-    let totalDamage = 0;
-    let totalHeal = 0;
-    let protectionActive = false;
-    let logMessage = "";
-
-    matches.forEach(match => {
-        switch(match.type) {
-            case '🔥':
-                totalDamage += 45;
-                logMessage += "🔥 Маг: Шар (45) ";
-                break;
-            case '💀':
-                totalDamage += 30;
-                logMessage += "💀 Воины: Натиск (30) ";
-                break;
-            case '🛡️':
-                protectionActive = true;
-                logMessage += "🛡️ Щиты! ";
-                break;
-            case '🧪':
-                totalHeal += 25;
-                break;
-            case '💎':
-                totalDamage += 60;
-                logMessage += "💎 Бездна: Чистый (60) ";
-                break;
-        }
-    });
-
+// Применение собранных комбинаций рун игроком
+function applyRuneCombination(effects) {
+    let totalDamage = (effects['🔥'] * 15) + (effects['⚡️'] * 10);
     if (totalDamage > 0) {
-        combatData.dragonBoss.hp -= totalDamage;
-    }
-
-    if (totalHeal > 0) {
-        let wounded = combatData.heroes.filter(h => h.hp > 0 && h.hp < h.maxHp);
-        if (wounded.length > 0) {
-            let targetHero = wounded[Math.floor(Math.random() * wounded.length)];
-            targetHero.hp = Math.min(targetHero.maxHp, targetHero.hp + totalHeal);
-            logMessage += `🧪 Лечение: +${totalHeal} ОЗ `;
-        } else {
-            logMessage += "🧪 Алхимия: Все здоровы ";
-        }
-    }
-
-    if (logMessage && typeof updateStatusPanel === 'function') {
-        updateStatusPanel(logMessage.trim());
-    }
-
-    if (typeof applyBoardGravity === 'function') {
-        applyBoardGravity(matches);
+        combatData.dragonHP = Math.max(0, combatData.dragonHP - totalDamage);
     }
     
-    if (typeof refreshBattleUI === 'function') {
-        refreshBattleUI();
+    let totalHeal = effects['💚'] * 8;
+    if (totalHeal > 0) {
+        combatData.squad.forEach(hero => {
+            if (hero.hp > 0) hero.hp = Math.min(hero.maxHP, hero.hp + totalHeal);
+        });
     }
+    
+    updateCombatInterfaceDOM();
+    checkBattleResolution();
+}
 
-    let nextMatches = (typeof checkMatches === 'function') ? checkMatches() : [];
-
-    if (nextMatches.length > 0 && combatData.dragonBoss.hp > 0) {
-        setTimeout(() => {
-            executeComboRules(nextMatches, false);
-        }, 600);
-    } else {
-        combatData.ap--;
-        
-        if (typeof refreshBattleUI === 'function') {
-            refreshBattleUI();
-        }
-
-        if (combatData.dragonBoss.hp <= 0) {
-            if (typeof updateStatusPanel === 'function') {
-                updateStatusPanel("🏆 ПОБЕДА! Древний змей повержен!");
-            }
-            isProcessingGrid = true;
-            return;
-        }
-
-        if (combatData.ap <= 0) {
-            isProcessingGrid = true;
-            if (typeof updateStatusPanel === 'function') {
-                updateStatusPanel("🐉 Ход Дракона! Защищайтесь...", true);
-            }
-            
-            setTimeout(() => {
-                handleDragonTurn(protectionActive);
-            }, 1200);
-        } else {
-            isProcessingGrid = false;
-            if (typeof renderMatch3Board === 'function') {
-                renderMatch3Board();
-            }
-        }
+// Трата Очков Действия (ОД) игрока при передвижении на поле
+function usePlayerActionPoint() {
+    combatData.playerAP--;
+    updateCombatInterfaceDOM();
+    
+    if (combatData.playerAP <= 0) {
+        setTimeout(executeDragonTurnAI, 800);
     }
 }
 
-function handleDragonTurn(protectionActive) {
-    const aliveHeroes = combatData.heroes.filter(h => h.hp > 0);
-    
-    if (aliveHeroes.length > 0) {
-        if (combatData.turnCount % 3 === 0) {
-            let dmg = protectionActive ? 10 : 25;
-            aliveHeroes.forEach(h => { h.hp -= dmg; });
-            if (typeof updateStatusPanel === 'function') {
-                updateStatusPanel(`🐉 Дракон: [Дыхание Рока]! Все получили по ${dmg} урона.`);
-            }
-        } else {
-            const target = aliveHeroes[Math.floor(Math.random() * aliveHeroes.length)];
-            let dmg = protectionActive ? 15 : 35;
-            target.hp -= dmg;
-            if (typeof updateStatusPanel === 'function') {
-                updateStatusPanel(`🐉 Дракон бьет когтями! ${target.name} теряет ${dmg} ОЗ.`);
-            }
-        }
+// Пошаговый ИИ Дракона с воспроизведением анимаций огня и парения
+function executeDragonTurnAI() {
+    if (combatData.dragonHP <= 0) return;
+
+    const dragonModel = document.getElementById('dragon-model');
+    const fireFx = document.getElementById('dragon-fire-fx');
+
+    // АКТИВАЦИЯ АНИМАЦИИ АТАКИ
+    if (dragonModel) {
+        dragonModel.classList.remove('dragon-idle');
+        dragonModel.classList.add('dragon-attacking');
     }
 
-    const survivors = combatData.heroes.filter(h => h.hp > 0);
-    if (survivors.length === 0) {
-        if (typeof updateStatusPanel === 'function') {
-            updateStatusPanel("💀 ОТРАД УНИЧТОЖЕН. Защитники Абхирамбурга пали.", true);
-        }
-        return;
-    }
-
-    setTimeout(() => {
-        combatData.ap = combatData.maxAp;
-        combatData.turnCount++;
-        isProcessingGrid = false;
+    // Проверка на фазу массового Дыхания Рока (Каждый 3-й раунд)
+    if (combatData.currentRound % 3 === 0) {
+        if (fireFx) fireFx.classList.add('active');
         
-        if (typeof updateStatusPanel === 'function') {
-            updateStatusPanel(`⚔️ Раунд ${combatData.turnCount}. Ваш ход!`);
+        combatData.squad.forEach(hero => {
+            hero.hp = Math.max(0, hero.hp - 35);
+        });
+    } else {
+        let aliveHeroes = combatData.squad.filter(h => h.hp > 0);
+        if (aliveHeroes.length > 0) {
+            let target = aliveHeroes[Math.floor(Math.random() * aliveHeroes.length)];
+            target.hp = Math.max(0, target.hp - 20);
         }
-        if (typeof refreshBattleUI === 'function') {
-            refreshBattleUI();
+    }
+
+    updateCombatInterfaceDOM();
+    
+    // Фаза завершения хода Дракона (через 1.5 секунды сброс в режим ожидания)
+    setTimeout(() => {
+        if (dragonModel) {
+            dragonModel.classList.remove('dragon-attacking');
+            dragonModel.classList.add('dragon-idle');
         }
+        if (fireFx) {
+            fireFx.classList.remove('active');
+        }
+        
+        combatData.currentRound++;
+        combatData.playerAP = combatData.playerMaxAP;
+        updateCombatInterfaceDOM();
+        checkBattleResolution();
     }, 1500);
+}
+
+// Обновление всех шкал и текстовых полей боевого экрана
+function updateCombatInterfaceDOM() {
+    const hpBar = document.getElementById('boss-hp-bar');
+    const hpText = document.getElementById('boss-hp-text');
+    if (hpBar && hpText) {
+        let pct = (combatData.dragonHP / combatData.dragonMaxHP) * 100;
+        hpBar.style.width = pct + '%';
+        hpText.innerText = `${combatData.dragonHP} / ${combatData.dragonMaxHP}`;
+    }
+    
+    const roundDisp = document.getElementById('combat-round-display');
+    const apDisp = document.getElementById('combat-ap-display');
+    if (roundDisp) roundDisp.innerText = `Раунд: ${combatData.currentRound}`;
+    if (apDisp) apDisp.innerText = `Очки Действия: ${combatData.playerAP} / ${combatData.playerMaxAP}`;
+    
+    const squadMatrix = document.getElementById('squad-matrix');
+    if (squadMatrix) {
+        squadMatrix.innerHTML = '';
+        combatData.squad.forEach(hero => {
+            const card = document.createElement('div');
+            card.style.background = 'rgba(25, 20, 15, 0.8)';
+            card.style.border = hero.hp <= 0 ? '1px solid #333' : '1px solid #8a7350';
+            card.style.padding = '6px';
+            card.style.fontSize = '12px';
+            card.style.textAlign = 'left';
+            card.style.opacity = hero.hp <= 0 ? '0.4' : '1';
+            
+            card.innerHTML = `
+                <div style="font-weight:bold; color:#e6c280;">${hero.name} (${hero.role})</div>
+                <div style="color:#bfae96;">ХП: ${hero.hp} / ${hero.maxHP}</div>
+            `;
+            squadMatrix.appendChild(card);
+        });
+    }
+}
+
+// Проверка исхода рейда (Победа / Поражение)
+function checkBattleResolution() {
+    if (combatData.dragonHP <= 0) {
+        alert("ВЕЛИКАЯ ПОБЕДА! Дракон повержен, руны Горнила принадлежат вам!");
+        showScreen('main-menu');
+    } else {
+        let allDead = combatData.squad.every(hero => hero.hp <= 0);
+        if (allDead) {
+            alert("ОТРЯД ПАЛ! Дракон сжег ваши надежды. Попробуйте снова.");
+            showScreen('main-menu');
+        }
+    }
 }
