@@ -28,7 +28,7 @@
 
             <!-- ИНДИКАТОР ВЕРСИИ НА ГЛАВНОМ ЭКРАНЕ -->
             <div style="margin-top: 25px; font-size: 11px; color: #4a3f2c; letter-spacing: 1px; font-family: monospace;">
-                ВЕРСИЯ: <span class="version-link" onclick="loadAndShowChangelog()">v0.3.1</span>
+                ВЕРСИЯ: <span class="version-link" onclick="loadAndShowChangelog()">v0.4.1</span>
             </div>
         </div>
 
@@ -83,13 +83,17 @@
             <div style="font-size: 12px; color: #8a7350; margin-bottom: 5px; text-align: left;">Матрица отряда:</div>
             <div id="squad-battle-grid" class="squad-grid"></div>
 
+            <!-- Контейнер для динамического поля Match-3 (установили жесткую заглушку) -->
+            <div id="combat-action-area">
+                <button id="step-combat-btn" class="menu-btn" onclick="processCombatTurn()">⚡ Собрать комбинацию (Match-3)</button>
+            </div>
+
             <!-- Текстовый лог боя -->
             <div id="battle-log-box" class="battle-log-container">
                 Приветствуем в Абхирамбурге! Нажмите «Собрать комбинацию», чтобы начать атаку.
             </div>
 
             <!-- Управление -->
-            <button id="step-combat-btn" class="menu-btn" onclick="processCombatTurn()">⚡ Собрать комбинацию (Match-3)</button>
             <button id="restart-combat-btn" class="menu-btn" onclick="reviveAndRestart()" style="display: none;">🔄 Начать новую битву</button>
             <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Отступить в лагерь</button>
         </div>
@@ -110,7 +114,8 @@
             if (activeScreen) {
                 activeScreen.style.display = 'block';
                 if (screenId === 'battle-screen') {
-                    setupBattleSession();
+                    // Даем браузеру 20 миллисекунд, чтобы отрендерить окно, прежде чем строить сетку
+                    setTimeout(setupBattleSession, 20);
                 }
             }
         }
@@ -141,8 +146,7 @@
                     });
                 })
                 .catch(err => {
-                    listContainer.innerHTML = '<div style="color: #a84444; font-size:12px; padding:10px;">Не удалось прочесть свиток обновлений. Убедитесь, что changelog.json находится в репозитории.</div>';
-                    console.error('Ошибка загрузки changelog:', err);
+                    listContainer.innerHTML = '<div style="color: #a84444; font-size:12px; padding:10px;">Не удалось прочесть свиток обновлений.</div>';
                 });
         }
     </script>
