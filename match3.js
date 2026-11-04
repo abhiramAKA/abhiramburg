@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ОБЛЕГЧЕННЫЙ ЛОГИЧЕСКИЙ движок) (v0.6.0-beta.4)
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ОЧИЩЕННОЕ ЯДРО ЛОГИКИ) (v0.6.0-beta.6)
    ========================================================================== */
 
 let isBoardLocked = false;
@@ -10,12 +10,13 @@ function initMatch3Board() {
     if (!boardContainer) return;
     
     boardContainer.innerHTML = '';
-    match3BoardData = [];
+    match3BoardData =;
     isBoardLocked = false;
     selectedCell = null;
+    if (typeof resetSwipeTracker === 'function') resetSwipeTracker();
     
     for (let r = 0; r < BOARD_ROWS; r++) {
-        match3BoardData[r] = [];
+        match3BoardData[r] =;
         for (let c = 0; c < BOARD_COLS; c++) {
             let allowedTypes = RUNE_TYPES.filter(type => {
                 if (r >= 2 && match3BoardData[r-1][c] === type && match3BoardData[r-2][c] === type) return false;
@@ -26,11 +27,10 @@ function initMatch3Board() {
             match3BoardData[r][c] = randomType;
         }
     }
-    
     renderBoardDOM(true);
 }
 
-function renderBoardDOM(isIntro = false, newRunesCoords = []) {
+function renderBoardDOM(isIntro = false, newRunesCoords =) {
     const boardContainer = document.getElementById('match3-board-container');
     if (!boardContainer) return;
     boardContainer.innerHTML = '';
@@ -58,6 +58,12 @@ function renderBoardDOM(isIntro = false, newRunesCoords = []) {
             }
             
             cell.addEventListener('click', handleCellClick);
+            
+            // Настраиваем жесты ввода из подключенного модуля ввода
+            if (typeof setupInputListeners === 'function') {
+                setupInputListeners(cell);
+            }
+            
             boardContainer.appendChild(cell);
         }
     }
@@ -77,7 +83,6 @@ function handleCellClick(e) {
     } else {
         const prevR = selectedCell.row;
         const prevC = selectedCell.col;
-        
         const isNeighbor = (Math.abs(r - prevR) === 1 && c === prevC) || (Math.abs(c - prevC) === 1 && r === prevR);
         
         if (isNeighbor) {
@@ -99,15 +104,10 @@ function animateAndSwapRunes(r1, c1, r2, c2) {
     
     const cell1 = document.querySelector(`[data-row="${r1}"][data-col="${c1}"]`);
     const cell2 = document.querySelector(`[data-row="${r2}"][data-col="${c2}"]`);
-    
-    if (!cell1 || !cell2) {
-        isBoardLocked = false;
-        return;
-    }
+    if (!cell1 || !cell2) { isBoardLocked = false; return; }
     
     const deltaX = cell2.offsetLeft - cell1.offsetLeft;
     const deltaY = cell2.offsetTop - cell1.offsetTop;
-    
     cell1.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
     cell2.style.transform = `translate(${-deltaX}px, ${-deltaY}px)`;
     
@@ -117,23 +117,15 @@ function animateAndSwapRunes(r1, c1, r2, c2) {
         match3BoardData[r2][c2] = temp;
         
         let hasMatches = checkMatchesAndExecute();
-        
         if (hasMatches) {
-            if (typeof usePlayerActionPoint === 'function') {
-                usePlayerActionPoint();
-            }
+            if (typeof usePlayerActionPoint === 'function') usePlayerActionPoint();
         } else {
             cell1.style.transform = 'translate(0, 0)';
             cell2.style.transform = 'translate(0, 0)';
-            
             temp = match3BoardData[r1][c1];
             match3BoardData[r1][c1] = match3BoardData[r2][c2];
             match3BoardData[r2][c2] = temp;
-            
-            setTimeout(() => {
-                renderBoardDOM();
-                isBoardLocked = false;
-            }, 220);
+            setTimeout(() => { renderBoardDOM(); isBoardLocked = false; }, 220);
         }
     }, 220);
 }
@@ -151,7 +143,6 @@ function checkMatchesAndExecute() {
             }
         }
     }
-    
     for (let r = 0; r < BOARD_ROWS - 2; r++) {
         for (let c = 0; c < BOARD_COLS; c++) {
             let t = match3BoardData[r][c];
@@ -168,14 +159,13 @@ function checkMatchesAndExecute() {
         if (typeof triggerMatch3Haptic === 'function') triggerMatch3Haptic(60);
         
         let executionEffects = { '🔥': 0, '🛡️': 0, '💚': 0, '⚡️': 0, '💀': 0 };
-        let newRunesCoords = [];
+        let newRunesCoords =;
         
         for (let r = 0; r < BOARD_ROWS; r++) {
             for (let c = 0; c < BOARD_COLS; c++) {
                 if (matchedMatrix[r][c]) {
                     const cellEl = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
                     let type = match3BoardData[r][c];
-                    
                     if (cellEl) cellEl.classList.add('rune-explode');
                     if (typeof spawnRuneExplosionSparks === 'function') {
                         spawnRuneExplosionSparks(r, c, type);
@@ -194,22 +184,15 @@ function checkMatchesAndExecute() {
                     }
                 }
             }
-            
-            if (typeof applyRuneCombination === 'function') {
-                applyRuneCombination(executionEffects);
-            }
-            
+            if (typeof applyRuneCombination === 'function') applyRuneCombination(executionEffects);
             renderBoardDOM(false, newRunesCoords);
-            
             setTimeout(() => {
                 let chainMatched = checkMatchesAndExecute();
                 if (!chainMatched) isBoardLocked = false;
             }, 350);
-            
         }, 220);
     } else {
         isBoardLocked = false;
     }
-    
     return found;
 }
