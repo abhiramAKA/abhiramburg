@@ -52,9 +52,10 @@
                 inset 0 0 30px rgba(0, 0, 0, 0.8),
                 0 0 20px rgba(138, 115, 80, 0.2);
             border-radius: 2px;
-            padding: 40px 30px;
+            padding: 30px 20px;
             text-align: center;
             position: relative;
+            box-sizing: border-box;
         }
 
         /* 🔥 СТИЛЬ НАЗВАНИЯ ИГРЫ */
@@ -132,7 +133,7 @@
         }
 
         .back-btn {
-            margin-top: 30px;
+            margin-top: 20px;
             background: linear-gradient(to bottom, #421e1e 0%, #241010 100%);
             border-color: #6e3131;
             color: #e6aaaa;
@@ -153,6 +154,70 @@
             color: #e6c280;
             font-size: 24px;
             margin-bottom: 25px;
+        }
+
+        /* СТИЛИ ДЛЯ БОЕВОГО ЭКРАНА MVP */
+        .boss-container {
+            background: rgba(138, 115, 80, 0.1);
+            border: 1px solid #8a7350;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .hp-bar {
+            width: 100%;
+            background-color: #241010;
+            border: 1px solid #6e3131;
+            height: 16px;
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .hp-fill {
+            height: 100%;
+            background: linear-gradient(to right, #a84444, #ff5c5c);
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+        .squad-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .squad-cell {
+            background: #14110f;
+            border: 1px solid #4a3f2c;
+            padding: 8px;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+        .squad-cell.recruit {
+            border-color: #5c6e31;
+            background: #11140f;
+        }
+        .dead-unit {
+            opacity: 0.4;
+            text-decoration: line-through;
+        }
+        .battle-log-window {
+            background: #0a0807;
+            border: 1px solid #2b241f;
+            height: 150px;
+            overflow-y: auto;
+            text-align: left;
+            padding: 10px;
+            font-size: 13px;
+            color: #a39684;
+            margin-bottom: 15px;
+            border-radius: 2px;
+            box-shadow: inset 0 0 10px #000;
+        }
+        .log-entry {
+            margin-bottom: 6px;
+            border-bottom: 1px solid #14100e;
+            padding-bottom: 4px;
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -201,79 +266,24 @@
             <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
         </div>
 
-        <!-- ЭКРАН 5: БОЕВАЯ АРЕНА (Заглушка) -->
+        <!-- ЭКРАН 5: БОЕВАЯ АРЕНА (Интерактивный MVP) -->
         <div id="battle-screen" class="game-window screen">
-            <h2>⚔️ Логово Чудовища</h2>
-            <p>Земля содрогается от поступи древнего змея. Скоро здесь появится боевое поле, и каждая собранная триада камней обрушит ярость вашего отряда на врага.</p>
-            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Отступить</button>
-        </div>
+            <h2>⚔️ Логово Дракона</h2>
+            
+            <!-- Панель Босса -->
+            <div class="boss-container">
+                <div style="display: flex; justify-content: space-between; font-size: 14px;">
+                    <span id="dragon-name" style="color:#e6aaaa; font-weight:bold;">Дракон</span>
+                    <span id="dragon-hp-text">500/500 HP</span>
+                </div>
+                <div class="hp-bar"><div id="dragon-hp-fill" class="hp-fill"></div></div>
+            </div>
 
-    </div>
+            <!-- Сетка отряда (Матрица а-ля Disciples 2) -->
+            <div style="font-size: 12px; color: #8a7350; margin-bottom: 5px; text-align: left;">Матрица отряда:</div>
+            <div id="squad-container" class="squad-grid">
+                <!-- Генерируется из JS -->
+            </div>
 
-    <!-- СКРИПТ КРАСИВОГО АНИМИРОВАННОГО ФОНА -->
-    <script>
-        function showScreen(screenId) {
-            const screens = document.querySelectorAll('.game-window');
-            screens.forEach(screen => screen.style.display = 'none');
-
-            const activeScreen = document.getElementById(screenId);
-            if (activeScreen) {
-                if(screenId === 'main-menu') {
-                    activeScreen.style.display = 'block';
-                } else {
-                    activeScreen.style.display = 'block';
-                }
-            }
-        }
-
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
-
-        window.addEventListener('resize', () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        });
-
-        const particles = [];
-        for (let i = 0; i < 40; i++) {
-            particles.push({
-                x: Math.random() * width,
-                y: Math.random() * height + height,
-                speed: 0.5 + Math.random() * 1,
-                radius: 1 + Math.random() * 2,
-                alpha: 0.2 + Math.random() * 0.5,
-                drift: (Math.random() - 0.5) * 0.3
-            });
-        }
-
-        function drawBackground() {
-            const grad = ctx.createRadialGradient(width/2, height/2, 10, width/2, height/2, Math.max(width, height));
-            grad.addColorStop(0, '#161210');
-            grad.addColorStop(0.6, '#080605');
-            grad.addColorStop(1, '#020202');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, width, height);
-
-            for (let p of particles) {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(230, 140, 40, ${p.alpha})`;
-                ctx.fill();
-
-                p.y -= p.speed;
-                p.x += p.drift;
-
-                if (p.y < -10) {
-                    p.y = height + 10;
-                    p.x = Math.random() * width;
-                }
-            }
-            requestAnimationFrame(drawBackground);
-        }
-        drawBackground();
-    </script>
-</body>
-</html>
+            <!-- Текстовый лог боя -->
+            <div id="battle-log" class="battle-log-window">
