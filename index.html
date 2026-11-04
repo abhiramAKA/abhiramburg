@@ -3,149 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>КХАМАЧ: Легенды Абхирамбурга</title>
-    <link rel="stylesheet" href="styles.css?v=0.5.7">
+    <title>КХАМАЧ — Восхождение Рейдов</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-    <!-- Оригинальный живой задний план -->
+    <!-- Холст для автономного модуля атмосферы (искры костра) -->
     <canvas id="bg-canvas"></canvas>
 
-    <!-- Основной интерфейс поверх фона -->
+    <!-- Общий контейнер интерфейса -->
     <div id="game-interface">
-
-        <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ -->
+        
+        <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
         <div id="main-menu" class="game-window">
             <h1>КХАМАЧ</h1>
-            <span class="subtitle">Легенды Абхирамбурга</span>
+            <span class="subtitle">Рейды в Горнило Рун</span>
+            <p>Древний Дракон пробудился в недрах подземелья. Соберите свой отряд, куйте руны власти и сокрушите огнедышащую тварь в пошаговой тактической битве.</p>
             
-            <!-- Ряд кнопки В Бой -->
             <div class="menu-row">
-                <button class="menu-btn" onclick="showScreen('battle-screen')">⚔️ В БОЙ (Три в ряд)</button>
-                <button class="info-btn" onclick="showScreen('battle-info-screen')">❓</button>
+                <button id="to-combat-btn" class="menu-btn">В БОЙ</button>
+                <button id="info-btn" class="info-btn">❓</button>
             </div>
-
-            <!-- Ряд кнопки Кузница -->
             <div class="menu-row">
-                <button class="menu-btn" onclick="showScreen('forge-screen')">⚒️ Кузница предметов</button>
-                <button class="info-btn" onclick="showScreen('forge-info-screen')">❓</button>
+                <button id="to-forge-btn" class="menu-btn disabled" disabled>Кузница</button>
             </div>
-
-            <!-- Ряд кнопки Алхимия -->
             <div class="menu-row">
-                <button class="menu-btn" onclick="showScreen('alchemy-screen')">🧪 Лаборатория Алхимика</button>
-                <button class="info-btn" onclick="showScreen('alchemy-info-screen')">❓</button>
+                <button id="to-alchemy-btn" class="menu-btn disabled" disabled>Алхимия</button>
             </div>
-
-            <!-- Ряд кнопки Отряд -->
             <div class="menu-row">
-                <button class="menu-btn" onclick="showScreen('squad-screen')">👤 Мой Отряд</button>
-                <button class="info-btn" onclick="showScreen('squad-info-screen')">❓</button>
-            </div>
-
-            <!-- Ряд кнопки PvP -->
-            <div class="menu-row">
-                <button class="menu-btn disabled">🏆 PvP Арена</button>
-                <button class="info-btn" onclick="alert('🏆 PvP Арена (Заблокировано)\n\nБудущий режим сражений между Орденами игроков в реальном времени. Станет доступен в версии v0.7.0.')">❓</button>
+                <button id="to-squad-btn" class="menu-btn disabled" disabled>Отряд</button>
             </div>
             
-            <div class="version-footer">Клиент: v0.5.7</div>
+            <div id="game-version" class="version-footer">v0.6.0-alpha.2</div>
         </div>
 
-        <!-- СПРАВКА: В БОЙ -->
-        <div id="battle-info-screen" class="game-window" style="display: none;">
-            <h2>⚔️ Рейды на Драконов</h2>
-            <p>Тактическое ядро игры. Вам предстоит выстроить боевую матрицу из 4 героев и атаковать великого ящера. Сбор комбинаций на поле 8х8 накапливает силу атаки и исцеления ваших воинов, расходуя Очки Действия (ОД). Берегитесь третьих раундов — Дракон изрыгает Дыхание Рока!</p>
-            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Назад в меню</button>
-            <div class="version-footer">Клиент: v0.5.7</div>
+        <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ ================= -->
+        <div id="info-screen" class="game-window" style="display: none;">
+            <h2>КОНТЕКСТНАЯ СПРАВКА</h2>
+            <span class="subtitle">Правила выживания</span>
+            <p><strong>Система Очков Действия:</strong> Вам дается 3 ОД на раунд. Каждый обмен рун на поле тратит 1 ОД.</p>
+            <p>Собирайте комбинации из 3 и более рун. Эффекты суммируются! Дракон атакует строго после того, как вы потратите все 3 ОД.</p>
+            <p>Опасайтесь 3-го раунда — Дракон использует массовое <em>Дыхание Рока</em>!</p>
+            <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
         </div>
 
-        <!-- ЭКРАН 2: КУЗНИЦА (Сама кузница) -->
-        <div id="forge-screen" class="game-window" style="display: none;">
-            <h2>⚒️ Древнее Горнило</h2>
-            <p>Экран крафта находится в разработке для версии v0.6.0. Используйте кнопку «❓» в главном меню, чтобы прочитать детали.</p>
-            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
-            <div class="version-footer">Клиент: v0.5.7</div>
-        </div>
+        <!-- ================= БОЕВОЙ ЭКРАН (ОКНО РЕЙДА) ================= -->
+        <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 15px 20px;">
+            
+            <!-- Сюда JS-модуль боевого движка сам внедрит Дракона при старте -->
+            <div id="dragon-raid-zone"></div>
 
-        <!-- СПРАВКА: КУЗНИЦА -->
-        <div id="forge-info-screen" class="game-window" style="display: none;">
-            <h2>⚒️ О Горниле (v0.6.0)</h2>
-            <p>В полумраке кузницы тяжело вздыхают мехи. Старый мастер готов принять трофеи из чрева великого ящера. Из чешуи и хребтовых костей он скует доспех, не знающий износа, а из клыка — клинок, разящий без промаха.</p>
-            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Назад в меню</button>
-            <div class="version-footer">Клиент: v0.5.7</div>
-        </div>
-
-        <!-- ЭКРАН 3: АЛХИМИЯ (Сама алхимия) -->
-        <div id="alchemy-screen" class="game-window" style="display: none;">
-            <h2>🧪 Тайный Очаг</h2>
-            <p>Лаборатория находится в разработке для версии v0.6.0. Используйте кнопку «❓» в главном меню, чтобы прочитать детали.</p>
-            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
-            <div class="version-footer">Клиент: v0.5.7</div>
-        </div>
-
-        <!-- СПРАВКА: АЛХИМИЯ -->
-        <div id="alchemy-info-screen" class="game-window" style="display: none;">
-            <h2>🧪 Об Алхимии (v0.6.0)</h2>
-            <p>Свитки, покрытые пылью веков, и склянки со светящимися эссенциями заполняют полки. Алхимик Абхирамбурга способен дистиллировать кровь Дракона в чистый опыт для ваших верных воинов или превратить прах в золото.</p>
-            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Назад в меню</button>
-            <div class="version-footer">Клиент: v0.5.7</div>
-        </div>
-
-        <!-- ЭКРАН 4: ОТРЯД -->
-        <div id="squad-screen" class="game-window" style="display: none;">
-            <h2>👤 Управление отрядом</h2>
-            <p>Экран характеристик находится в разработке. Подробное описание доступно по кнопке «❓» в меню.</p>
-            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Вернуться в лагерь</button>
-            <div class="version-footer">Клиент: v0.5.7</div>
-        </div>
-
-        <!-- СПРАВКА: ОТРЯД -->
-        <div id="squad-info-screen" class="game-window" style="display: none;">
-            <h2>👤 Воинство Ордена</h2>
-            <p>Здесь вы сможете управлять характеристиками защитников Абхирамбурга, распределять очки величия и настраивать построение отряда в боевой матрице перед рейдом.</p>
-            <button class="menu-btn back-btn" onclick="showScreen('main-menu')">↩️ Назад в меню</button>
-            <div class="version-footer">Клиент: v0.5.7</div>
-        </div>
-
-        <!-- ЭКРАН БОЯ -->
-        <div id="battle-screen" class="game-window" style="display: none;">
-            <!-- Инфо-панель Босса -->
+            <!-- ПАНЕЛЬ БОССА (ЗДОРОВЬЕ) -->
             <div id="boss-panel">
-                <div id="boss-name">🔥 Огненный Дракон (Тир 1)</div>
+                <div id="boss-name">ДРАКОН НЕКРОСМУТ</div>
                 <div class="hp-bar-container">
                     <div id="boss-hp-bar" class="hp-bar" style="width: 100%;"></div>
-                    <span id="boss-hp-text">500 / 500 ОЗ</span>
+                    <div id="boss-hp-text">1000 / 1000</div>
                 </div>
             </div>
 
-            <!-- Панель статуса раунда и Очков Действия -->
+            <!-- СТАТУС РАУНДА И ОЧКОВ ДЕЙСТВИЯ -->
             <div id="battle-status-panel">
-                <div id="battle-status-text">⚔️ Загрузка боя...</div>
-                <div id="battle-ap-display">⚡ ОД: 3 / 3</div>
+                <div id="combat-round-display">Раунд: 1</div>
+                <div id="combat-ap-display">Очки Действия: 3 / 3</div>
             </div>
 
-            <!-- Матрица отряда -->
-            <div id="squad-matrix"></div>
-
-            <!-- Зона Match-3 игрового поля -->
-            <div id="combat-action-area"></div>
-
-            <!-- Управление -->
-            <div id="battle-controls">
-                <button class="menu-btn back-btn" onclick="showScreen('main-menu')">🏃 Отступить в лагерь</button>
+            <!-- ИНТЕРФЕЙС ОТРЯДА ГЕРОЕВ -->
+            <div id="squad-matrix">
+                <!-- Заполняется динамически из combat.js -->
             </div>
-            
-            <div class="version-footer">Клиент: v0.5.7</div>
+
+            <!-- ИГРОВОЕ ПОЛЕ MATCH-3 (СТРОГО 8х8) -->
+            <div id="match3-board-container" class="match3-board">
+                <!-- Ячейки рун генерируются динамически из match3.js -->
+            </div>
+
+            <button id="leave-combat-btn" class="menu-btn back-btn" style="margin-top: 10px; padding: 10px;">Сбежать из рейда</button>
         </div>
 
     </div>
 
-    <!-- Загрузка скриптов в строгой последовательности (Сброс кэша под v0.5.7) -->
-    <script src="game.js?v=0.5.7"></script>
-    <script src="background.js?v=0.5.7"></script>
-    <script src="match3.js?v=0.5.7"></script>
-    <script src="combat.js?v=0.5.7"></script>
-
+    <!-- ПОДКЛЮЧЕНИЕ СТРИКТ-МОДУЛЕЙ ИГРЫ -->
+    <script src="background.js"></script>
+    <script src="game.js"></script>
+    <script src="match3.js"></script>
+    <script src="combat.js"></script>
 </body>
 </html>
