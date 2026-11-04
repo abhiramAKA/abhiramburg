@@ -1,83 +1,79 @@
-// Глобальный объект данных состояния игры (Интеграция v0.5.5 под сетку 8х8 и систему ОД)
-const combatData = {
-    board: [],
-    heroes: [
-        { id: 1, name: "Рыцарь смерти", role: "Воитель", hp: 150, maxHp: 150, slot: "Фронт-Лево" },
-        { id: 2, name: "Гвардеец", role: "Танк", hp: 120, maxHp: 120, slot: "Фронт-Право" },
-        { id: 3, name: "Чародей", role: "Маг", hp: 80, maxHp: 80, slot: "Тыл-Лево" },
-        { id: 4, name: "Рекрут лагеря", role: "Рекрут", hp: 70, maxHp: 70, slot: "Тыл-Право" }
-    ],
-    dragonBoss: { name: "Огненный Дракон (Тир 1)", hp: 500, maxHp: 500 },
-    ap: 3,
-    maxAp: 3,
-    turnCount: 1
-};
+/* ==========================================================================
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЕЙТА (v0.6.0-alpha.3)
+   ========================================================================== */
 
-// Исправленная функция переключения абсолютно всех экранов
-function showScreen(screenId) {
-    // Прячем абсолютно все окна с классом game-window
-    document.querySelectorAll('.game-window').forEach(window => {
-        window.style.display = 'none';
-    });
-    
-    // Показываем целевое окно
-    const target = document.getElementById(screenId);
-    if (target) {
-        // Окна используют flex для готического позиционирования
-        target.style.display = 'flex';
-        
-        // Особая инициализация только при входе непосредственно в бой
-        if (screenId === 'battle-screen') {
-            combatData.ap = combatData.maxAp; 
-            combatData.turnCount = 1;
-            combatData.dragonBoss.hp = combatData.dragonBoss.maxHp; 
-            combatData.heroes.forEach(h => h.hp = h.maxHp); 
-            
-            setTimeout(() => {
-                if (typeof rebuildActionArea === 'function') rebuildActionArea();
-                if (typeof generateValidBoard === 'function') generateValidBoard();
-                if (typeof renderMatch3Board === 'function') renderMatch3Board();
-                if (typeof renderSquad === 'function') renderSquad();
-                updateStatusPanel("⚔️ Раунд 1. Ваш ход!");
-            }, 30);
-        }
-    }
-}
+const GAME_VERSION = "v0.6.0-alpha.3";
 
-// Управление компактной строкой состояния и отображением ОД
-function updateStatusPanel(text, isBossTurn = false) {
-    const statusText = document.getElementById('battle-status-text');
-    const apDisplay = document.getElementById('battle-ap-display');
-    
-    if (statusText) statusText.innerText = text;
-    if (apDisplay) {
-        apDisplay.innerText = `⚡ ОД: ${combatData.ap} / ${combatData.maxAp}`;
-        apDisplay.style.color = isBossTurn ? "#ff4d4d" : "#5dade2";
-    }
-}
-
-function appendToLog(text) {
-    updateStatusPanel(text);
-}
-
-// Главный метод синхронизации графического интерфейса сражения
-function refreshBattleUI() {
-    if (typeof renderMatch3Board === 'function') renderMatch3Board();
-    if (typeof renderSquad === 'function') renderSquad();
-    
-    const bossHpBar = document.getElementById('boss-hp-bar');
-    const bossHpText = document.getElementById('boss-hp-text');
-    if (bossHpBar && bossHpText) {
-        const pct = Math.max(0, (combatData.dragonBoss.hp / combatData.dragonBoss.maxHp) * 100);
-        bossHpBar.style.width = pct + '%';
-        bossHpText.innerText = `${Math.max(0, combatData.dragonBoss.hp)} / ${combatData.dragonBoss.maxHp} ОЗ`;
-    }
-    
-    const currentStatus = document.getElementById('battle-status-text')?.innerText || "Битва продолжается";
-    updateStatusPanel(currentStatus, combatData.ap === 0);
-}
-
-// Старт игры после загрузки DOM структуры
-document.addEventListener('DOMContentLoaded', () => {
-    showScreen('main-menu');
+// Инициализация игры при загрузке страницы
+window.addEventListener('DOMContentLoaded', () => {
+    initVersionDisplay();
+    setupMenuListeners();
 });
+
+// Автоматическое обновление версии в футере
+function initVersionDisplay() {
+    const versionElement = document.getElementById('game-version');
+    if (versionElement) {
+        versionElement.innerText = GAME_VERSION;
+    }
+}
+
+// Переключение экранов (Бесшовный метод showScreen)
+function showScreen(screenId) {
+    // Находим все окна игры
+    const screens = ['main-menu', 'info-screen', 'combat-screen'];
+    
+    screens.forEach(id => {
+        const screenEl = document.getElementById(id);
+        if (screenEl) {
+            if (id === screenId) {
+                // Показываем целевой экран
+                screenEl.style.display = 'flex';
+            } else {
+                // Скрываем остальные
+                screenEl.style.display = 'none';
+            }
+        }
+    });
+}
+
+// Настройка слушателей событий для интерфейса окон
+function setupMenuListeners() {
+    // Кнопка "В БОЙ"
+    const toCombatBtn = document.getElementById('to-combat-btn');
+    if (toCombatBtn) {
+        toCombatBtn.addEventListener('click', () => {
+            showScreen('combat-screen');
+            // Вызываем запуск сессии из combat.js
+            if (typeof startCombatSession === 'function') {
+                startCombatSession();
+            }
+        });
+    }
+
+    // Кнопка контекстной справки "❓"
+    const infoBtn = document.getElementById('info-btn');
+    if (infoBtn) {
+        infoBtn.addEventListener('click', () => {
+            showScreen('info-screen');
+        });
+    }
+
+    // Кнопка "Назад в меню" из справки
+    const fromInfoToMenuBtn = document.getElementById('from-info-to-menu-btn');
+    if (fromInfoToMenuBtn) {
+        fromInfoToMenuBtn.addEventListener('click', () => {
+            showScreen('main-menu');
+        });
+    }
+
+    // Кнопка "Сбежать из рейда" из боевого экрана
+    const leaveCombatBtn = document.getElementById('leave-combat-btn');
+    if (leaveCombatBtn) {
+        leaveCombatBtn.addEventListener('click', () => {
+            if (confirm("Вы уверены, что хотите сбежать из рейда? Прогресс раунда будет утерян.")) {
+                showScreen('main-menu');
+            }
+        });
+    }
+}
