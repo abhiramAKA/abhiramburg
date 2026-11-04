@@ -1,4 +1,4 @@
-// Глобальный объект данных состояния игры (Версия v0.5.1 под сетку 8х8 и систему ОД)
+// Глобальный объект данных состояния игры (Версия v0.5.2 под сетку 8х8 и систему ОД)
 const combatData = {
     board: [],
     heroes: [
@@ -23,6 +23,8 @@ function showScreen(screenId) {
         if (screenId === 'screen-battle') {
             combatData.ap = combatData.maxAp; // Сброс очков действий при старте рейда
             combatData.turnCount = 1;
+            combatData.dragonBoss.hp = combatData.dragonBoss.maxHp; // Восстанавливаем босса
+            combatData.heroes.forEach(h => h.hp = h.maxHp); // Восстанавливаем отряд
             
             setTimeout(() => {
                 if (typeof rebuildActionArea === 'function') rebuildActionArea();
