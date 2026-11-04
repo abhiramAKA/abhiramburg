@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.14)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.15)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.14";
+const GAME_VERSION = "v0.6.0-beta.15";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -22,7 +22,7 @@ let combatData = {
     ]
 };
 
-let match3BoardData =;
+let match3BoardData = [];
 let selectedCell = null;
 
 // Тексты игровых правил и контента (вынесено из разметки HTML)
@@ -150,7 +150,6 @@ function setupCombatHelpListeners() {
             
             const helpScreen = document.getElementById('combat-help-screen');
             if (helpScreen) {
-                // Добавляем класс полноэкранного режима на мобильных и делаем flex
                 helpScreen.classList.add('mobile-fullscreen');
                 helpScreen.style.display = 'flex';
             }
