@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (v0.6.0-beta.4)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (v0.6.0-beta.6)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.4";
+const GAME_VERSION = "v0.6.0-beta.6";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -20,7 +20,7 @@ let combatData = {
     ]
 };
 
-let match3BoardData = [];
+let match3BoardData =;
 let selectedCell = null;
 
 window.addEventListener('DOMContentLoaded', () => {
