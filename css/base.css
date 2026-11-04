@@ -1,0 +1,18 @@
+:root {
+    --gold-glow: 0 0 15px #d4af37, 0 0 25px rgba(212, 175, 55, 0.5);
+    --gothic-bg: radial-gradient(circle, #1a0f0f 0%, #070303 100%);
+    --rune-border: 2px double #d4af37;
+}
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--gothic-bg);
+    font-family: 'Garamond', serif; /* Или ваш готический шрифт */
+    color: #f0e6d2;
+}
+/* Универсальные эффекты кнопок */
+.btn-gold {
+    border: var(--rune-border);
+    box-shadow: var(--gold-glow);
+    transition: transform 0.2s;
+}
