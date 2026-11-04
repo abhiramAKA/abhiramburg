@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.15)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.16)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.15";
+const GAME_VERSION = "v0.6.0-beta.16";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -90,7 +90,6 @@ function openModeDescription(modeKey) {
 }
 
 function setupMenuListeners() {
-    // Кнопка В БОЙ
     const toCombatBtn = document.getElementById('to-combat-btn');
     if (toCombatBtn) {
         toCombatBtn.addEventListener('click', () => {
@@ -101,7 +100,6 @@ function setupMenuListeners() {
         });
     }
 
-    // Вопросик главного меню
     const infoBtn = document.getElementById('info-btn');
     if (infoBtn) {
         infoBtn.addEventListener('click', () => {
@@ -118,17 +116,14 @@ function setupMenuListeners() {
         });
     }
 
-    // Обработчики новых активных кнопок меню
     document.getElementById('to-forge-btn').addEventListener('click', () => openModeDescription('forge'));
     document.getElementById('to-alchemy-btn').addEventListener('click', () => openModeDescription('alchemy'));
     document.getElementById('to-squad-btn').addEventListener('click', () => openModeDescription('squad'));
 
-    // Закрытие окна описания модов
     document.getElementById('close-mode-desc-btn').addEventListener('click', () => {
         showScreen('main-menu');
     });
 
-    // Кнопка побега из боя
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
     if (leaveCombatBtn) {
         leaveCombatBtn.addEventListener('click', () => {
