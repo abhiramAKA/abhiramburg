@@ -1,0 +1,16 @@
+.combat-ui-wrapper {
+    width: 100%;
+    max-width: 450px;
+}
+/* Наш новый блок анимированного Дракона */
+.dragon-container {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    background: #0a0202;
+    overflow: hidden;
+}
+#dragon-model {
+    animation: dragonFloat 4s ease-in-out infinite;
+}
+/* Стили шкал ХП, ОД (AP) и ходов рейда */
