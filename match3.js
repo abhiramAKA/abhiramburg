@@ -6,7 +6,6 @@ let isProcessingGrid = false;
 function rebuildActionArea() {
     const area = document.getElementById('combat-action-area');
     if (area) {
-        // Добавлен position: relative для контейнера доски, чтобы позиционировать внутри него частицы взрывов
         area.innerHTML = `<div id="match3-board" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 8px auto; width: 100%; max-width: 250px; background: rgba(0,0,0,0.6); padding: 6px; border: 2px solid #4a3e31; border-radius: 4px; box-shadow: inset 0 0 15px #000; box-sizing: border-box; position: relative;"></div>`;
     }
 }
@@ -31,7 +30,6 @@ function renderMatch3Board() {
     for (let r = 0; r < 5; r++) {
         for (let c = 0; c < 5; c++) {
             const tile = document.createElement('div');
-            // Добавлены data-атрибуты для поиска элементов при расчете анимаций падения
             tile.dataset.row = r;
             tile.dataset.col = c;
             tile.style.cssText = `
@@ -76,16 +74,13 @@ function handleTileClick(r, c) {
         if (isNeighbor) {
             isProcessingGrid = true;
             
-            // Находим DOM-элементы для красивой анимации свопа
             const boardContainer = document.getElementById('match3-board');
-            const tile1 = boardContainer.querySelector(`[data-row="${prevR}"][data-col="${prevC}"]`);
-            const tile2 = boardContainer.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+            const tile1 = boardContainer ? boardContainer.querySelector(`[data-row="${prevR}"][data-col="${prevC}"]`) : null;
+            const tile2 = boardContainer ? boardContainer.querySelector(`[data-row="${r}"][data-col="${c}"]`) : null;
 
-            // Вычисляем вектор сдвига для плавной анимации
             if (tile1 && tile2) {
                 const dx = tile2.offsetLeft - tile1.offsetLeft;
                 const dy = tile2.offsetTop - tile1.offsetTop;
-                
                 tile1.animate([{ transform: `translate(${dx}px, ${dy}px)` }], { duration: 150, easing: 'ease-out' });
                 tile2.animate([{ transform: `translate(${-dx}px, ${-dy}px)` }], { duration: 150, easing: 'ease-out' });
             }
@@ -99,9 +94,8 @@ function handleTileClick(r, c) {
 
                 if (matches.length > 0) {
                     selectedTile = null;
-                    executeComboRules(matches, true); 
+                    executeComboRules(matches, true);
                 } else {
-                    // Если комбинации нет — плавно возвращаем назад
                     if (tile1 && tile2) {
                         const dx = tile2.offsetLeft - tile1.offsetLeft;
                         const dy = tile2.offsetTop - tile1.offsetTop;
@@ -147,24 +141,23 @@ function checkMatches() {
     return foundMatches;
 }
 
-// Эффект сочного взрыва руны с вылетающими частицами
 function createExplosionParticles(row, col) {
     const boardContainer = document.getElementById('match3-board');
+    if (!boardContainer) return;
     const targetTile = boardContainer.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-    if (!targetTile || !boardContainer) return;
+    if (!targetTile) return;
 
-    // Вычисляем центр уничтожаемой руны относительно общего поля
     const rect = targetTile.getBoundingClientRect();
     const boardRect = boardContainer.getBoundingClientRect();
     const centerX = (rect.left - boardRect.left) + rect.width / 2;
     const centerY = (rect.top - boardRect.top) + rect.height / 2;
 
-    const particleCount = 12; // Количество искр взрыва
+    const particleCount = 12;
     const colors = ['#ff4d4d', '#ffb366', '#ffeb99', '#ffffff', '#e6c280'];
 
     for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
-        const size = Math.floor(Math.random() * 5) + 4; // Размер искры от 4 до 8px
+        const size = Math.floor(Math.random() * 5) + 4;
         
         particle.style.cssText = `
             position: absolute; width: ${size}px; height: ${size}px;
@@ -176,9 +169,8 @@ function createExplosionParticles(row, col) {
         
         boardContainer.appendChild(particle);
 
-        // Случайный вектор полета во все стороны
         const angle = Math.random() * Math.PI * 2;
-        const velocity = Math.random() * 45 + 25; // Дистанция разлета
+        const velocity = Math.random() * 45 + 25;
         const destinationX = Math.cos(angle) * velocity;
         const destinationY = Math.sin(angle) * velocity;
 
@@ -191,13 +183,11 @@ function createExplosionParticles(row, col) {
             fill: 'forwards'
         });
 
-        // Удаляем искру после завершения ее анимации
         setTimeout(() => particle.remove(), 600);
     }
 }
 
 function applyBoardGravity(matches) {
-    // 1. Сначала запускаем эффекты взрывов на месте уничтожаемых рун
     matches.forEach(match => {
         match.coords.forEach(coord => {
             const [r, c] = coord;
@@ -206,10 +196,8 @@ function applyBoardGravity(matches) {
         });
     });
 
-    // Хранилище сдвигов, чтобы рассчитать плавное падение существующих рун
     let dropTracking = Array.from({length: 5}, () => Array(5).fill(0));
 
-    // 2. Рассчитываем, на сколько ячеек вниз упадет каждая руна
     for (let c = 0; c < 5; c++) {
         let emptyCount = 0;
         for (let r = 4; r >= 0; r--) {
@@ -221,7 +209,6 @@ function applyBoardGravity(matches) {
         }
     }
 
-    // 3. Перестраиваем матрицу данных
     for (let c = 0; c < 5; c++) {
         let columnGems = [];
         for (let r = 4; r >= 0; r--) {
@@ -241,6 +228,29 @@ function applyBoardGravity(matches) {
         }
     }
 
-    // 4. Отрендерим обновленное поле
     renderMatch3Board();
 
+    const boardContainer = document.getElementById('match3-board');
+    if (!boardContainer) return;
+
+    for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+            const dropDistance = dropTracking[r][c];
+            if (dropDistance > 0) {
+                const tile = boardContainer.querySelector(`[data-row="${r + dropDistance}"][data-col="${c}"]`);
+                if (tile) {
+                    const rowHeight = tile.offsetHeight + 4;
+                    const pixelsToDrop = dropDistance * rowHeight;
+
+                    tile.animate([
+                        { transform: `translateY(${-pixelsToDrop}px)` },
+                        { transform: 'translateY(0)' }
+                    ], {
+                        duration: 300,
+                        easing: 'ease-out'
+                    });
+                }
+            }
+        }
+    }
+}
