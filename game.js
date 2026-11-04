@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (v0.6.0-beta.6)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (v0.6.0-beta.7)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.6";
+const GAME_VERSION = "v0.6.0-beta.7";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -20,12 +20,29 @@ let combatData = {
     ]
 };
 
-let match3BoardData =;
+let match3BoardData = [];
 let selectedCell = null;
+
+// Тексты описаний для кнопок главного меню
+const MODE_DESCRIPTIONS = {
+    forge: {
+        title: "ДРЕВНЯЯ КУЗНИЦА",
+        text: "Священное место, где из осколков побеждённых монстров и застывшей лавы можно выковывать мифическое снаряжение для Воина и Клирика. Повышает базовую атаку и открывает пассивные навыки рун."
+    },
+    alchemy: {
+        title: "ЛАБОРАТОРИЯ АЛХИМИИ",
+        text: "Здесь вы сможете трансмутировать руны прямо во время боя, варить зелья Очков Действия (AP) и дистиллировать драконью кровь для получения мощных эликсиров бессмертия."
+    },
+    squad: {
+        title: "УПРАВЛЕНИЕ ОТРЯДОМ",
+        text: "Военный лагерь ваших героев. Позволяет распределять очки характеристик (Сила, Дух, Выносливость), нанимать новых бойцов в рейд и изучать сокрушительные комбо-приемы."
+    }
+};
 
 window.addEventListener('DOMContentLoaded', () => {
     initVersionDisplay();
     setupMenuListeners();
+    setupCombatHelpListeners();
 });
 
 function initVersionDisplay() {
@@ -36,7 +53,7 @@ function initVersionDisplay() {
 }
 
 function showScreen(screenId) {
-    const screens = ['main-menu', 'info-screen', 'combat-screen'];
+    const screens = ['main-menu', 'info-screen', 'mode-desc-screen', 'combat-screen', 'combat-help-screen'];
     screens.forEach(id => {
         const screenEl = document.getElementById(id);
         if (screenEl) {
@@ -45,19 +62,28 @@ function showScreen(screenId) {
     });
 }
 
+function openModeDescription(modeKey) {
+    const modeData = MODE_DESCRIPTIONS[modeKey];
+    if (!modeData) return;
+    
+    document.getElementById('mode-desc-title').innerText = modeData.title;
+    document.getElementById('mode-desc-text').innerHTML = modeData.text;
+    showScreen('mode-desc-screen');
+}
+
 function setupMenuListeners() {
+    // Кнопка В БОЙ
     const toCombatBtn = document.getElementById('to-combat-btn');
     if (toCombatBtn) {
         toCombatBtn.addEventListener('click', () => {
             showScreen('combat-screen');
             if (typeof startCombatSession === 'function') {
                 startCombatSession();
-            } else {
-                console.error("Критический сбой: Функция startCombatSession не обнаружена!");
             }
         });
     }
 
+    // Вопросик главного меню
     const infoBtn = document.getElementById('info-btn');
     if (infoBtn) {
         infoBtn.addEventListener('click', () => {
@@ -72,12 +98,43 @@ function setupMenuListeners() {
         });
     }
 
+    // Обработчики новых активных кнопок меню
+    document.getElementById('to-forge-btn').addEventListener('click', () => openModeDescription('forge'));
+    document.getElementById('to-alchemy-btn').addEventListener('click', () => openModeDescription('alchemy'));
+    document.getElementById('to-squad-btn').addEventListener('click', () => openModeDescription('squad'));
+
+    // Закрытие окна описания модов
+    document.getElementById('close-mode-desc-btn').addEventListener('click', () => {
+        showScreen('main-menu');
+    });
+
+    // Кнопка побега из боя
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
     if (leaveCombatBtn) {
         leaveCombatBtn.addEventListener('click', () => {
             if (confirm("Вы уверены, что хотите сбежать из рейда?")) {
                 showScreen('main-menu');
             }
+        });
+    }
+}
+
+// Слушатели для всплывающей подсказки прямо на боевом экране
+function setupCombatHelpListeners() {
+    const combatHelpBtn = document.getElementById('combat-help-btn');
+    const closeCombatHelpBtn = document.getElementById('close-combat-help-btn');
+    
+    if (combatHelpBtn) {
+        combatHelpBtn.addEventListener('click', () => {
+            const helpScreen = document.getElementById('combat-help-screen');
+            if (helpScreen) helpScreen.style.display = 'flex'; // Показываем поверх боевого экрана
+        });
+    }
+    
+    if (closeCombatHelpBtn) {
+        closeCombatHelpBtn.addEventListener('click', () => {
+            const helpScreen = document.getElementById('combat-help-screen');
+            if (helpScreen) helpScreen.style.display = 'none'; // Скрываем
         });
     }
 }
