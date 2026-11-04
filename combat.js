@@ -1,4 +1,4 @@
-// Боевое ядро рейда
+// Боевое ядро рейда и состояния характеристик
 let combatData = {};
 
 function setupBattleSession() {
@@ -18,25 +18,28 @@ function reviveAndRestart() {
             { id: 2, name: "Гвардеец", role: "Танк", hp: 120, maxHp: 120, slot: "Фронт-Право", isRecruit: false },
             { id: 3, name: "Чародей", role: "Маг", hp: 80, maxHp: 80, slot: "Тыл-Лево", isRecruit: false },
             { id: 4, name: "Рекрут лагеря", role: "Рекрут", hp: 70, maxHp: 70, slot: "Тыл-Право", isRecruit: true }
-        ]
+        ],
+        board: []
     };
 
-    document.getElementById('step-combat-btn').style.display = 'block';
-    document.getElementById('restart-combat-btn').style.display = 'none';
-    document.getElementById('battle-log-box').innerHTML = '<div class="log-row system">⚔️ Вы вступили на выжженную землю Логова. Дракон готов к бою! Нажмите на кнопку комбинаций.</div>';
+    if(document.getElementById('restart-combat-btn')) document.getElementById('restart-combat-btn').style.display = 'none';
+    document.getElementById('battle-log-box').innerHTML = '<div class="log-row system">⚔️ Вы вступили в Логово. Передвигайте соседние фишки на поле 5х5, чтобы наносить урон!</div>';
     
+    generateValidBoard(); // Вызов из модуля match3.js
+    rebuildActionArea();  // Вызов из модуля match3.js
     refreshBattleUI();
 }
 
 function refreshBattleUI() {
+    // Рендер здоровья босса
     document.getElementById('boss-name').innerText = combatData.dragonBoss.name;
     const hpPercent = Math.max(0, (combatData.dragonBoss.hp / combatData.dragonBoss.maxHp) * 100);
     document.getElementById('boss-hp-fill').style.width = hpPercent + '%';
     document.getElementById('boss-hp-text').innerText = `${Math.max(0, combatData.dragonBoss.hp)}/${combatData.dragonBoss.maxHp} HP`;
 
+    // Рендер карточек отряда
     const gridContainer = document.getElementById('squad-battle-grid');
     gridContainer.innerHTML = '';
-
     combatData.heroes.forEach(hero => {
         const card = document.createElement('div');
         card.className = `squad-card ${hero.isRecruit ? 'recruit' : ''} ${hero.hp <= 0 ? 'dead' : ''}`;
@@ -47,6 +50,9 @@ function refreshBattleUI() {
         `;
         gridContainer.appendChild(card);
     });
+
+    // Рендер самого игрового поля
+    renderMatch3Board(); // Вызов из модуля match3.js
 }
 
 function appendToLog(message, type = 'player') {
@@ -58,54 +64,72 @@ function appendToLog(message, type = 'player') {
     logBox.scrollTop = logBox.scrollHeight;
 }
 
-function processCombatTurn() {
-    const aliveHeroes = combatData.heroes.filter(h => h.hp > 0);
-    if (combatData.dragonBoss.hp <= 0 || aliveHeroes.length === 0) return;
+// Применение боевых эффектов собранных комбинаций
+function executeComboRules(matches) {
+    let protectionActive = false;
 
-    const matchOptions = ["FIRE", "SKULLS", "SHIELDS", "CRIT_COMBO"];
-    const selectedMatch = matchOptions[Math.floor(Math.random() * matchOptions.length)];
+    matches.forEach(match => {
+        switch(match.type) {
+            case '🔥':
+                combatData.dragonBoss.hp -= 45;
+                appendToLog("🔥 Руны Огня! Чародей выпускает Огненный Шар на 45 маг. урона.", "player");
+                break;
+            case '💀':
+                combatData.dragonBoss.hp -= 30;
+                appendToLog("💀 Руны Смерти! Воители наносят дракону 30 физ. урона.", "player");
+                break;
+            case '🛡️':
+                protectionActive = true;
+                appendToLog("🛡️ Руны Защиты! Отряд поднял щиты, снижая будущий урон.", "player");
+                break;
+            case '🧪':
+                let wounded = combatData.heroes.filter(h => h.hp > 0 && h.hp < h.maxHp);
+                if(wounded.length > 0) {
+                    let targetHero = wounded[Math.floor(Math.random() * wounded.length)];
+                    targetHero.hp = Math.min(targetHero.maxHp, targetHero.hp + 25);
+                    appendToLog(`🧪 Алхимия! Целебный состав восстановил 25 ОЗ герою ${targetHero.name}.`, "player");
+                } else {
+                    appendToLog("🧪 Алхимия! Отряд полностью здоров, лечить некого.", "player");
+                }
+                break;
+            case '💎':
+                combatData.dragonBoss.hp -= 60;
+                appendToLog("💎 Кристаллы Бездны взрывают чешую дракона на 60 чистого урона.", "player");
+                break;
+        }
 
-    switch(selectedMatch) {
-        case "FIRE":
-            combatData.dragonBoss.hp -= 45;
-            appendToLog("🔥 Собрана триада Огня! Чародей выпускает сгусток пламени. Нанесено 45 маг. урона.", "player");
-            break;
-        case "SKULLS":
-            combatData.dragonBoss.hp -= 30;
-            appendToLog("💀 Собрана комбинация Черепов! Авангард проводит натиск клинками. Нанесено 30 физ. урона.", "player");
-            break;
-        case "SHIELDS":
-            appendToLog("🛡️ Собраны Щиты! Отряд выстраивает оборонительную стену, готовясь к ярости ящера.", "player");
-            break;
-        case "CRIT_COMBO":
-            combatData.dragonBoss.hp -= 95;
-            appendToLog("⚡ ВЕЛИКОЕ КОМБО (5 в ряд)! Слияние всех рун обрушивает сокрушительный удар на 95 урона!", "player");
-            break;
-    }
+        // Обновляем клетки новыми рунами
+        match.coords.forEach(coord => {
+            const [r, c] = coord;
+            combatData.board[r][c] = TILE_TYPES[Math.floor(Math.random() * TILE_TYPES.length)];
+        });
+    });
 
     if (combatData.dragonBoss.hp <= 0) {
         refreshBattleUI();
-        appendToLog("🏆 ПОБЕДА! Древний змей рухнул оземь. Получено: 3 ресурса стихии Огонь (Тир 1).", "system");
+        appendToLog("🏆 ПОБЕДА! Древний змей повержен! Выпал дроп: 3 ресурса стихии Огонь (Тир 1).", "system");
         finishBattleSession();
         return;
     }
 
+    // Ответный ход Дракона
+    const aliveHeroes = combatData.heroes.filter(h => h.hp > 0);
     if (aliveHeroes.length > 0) {
         if (combatData.currentRound % 3 === 0) {
-            aliveHeroes.forEach(h => { h.hp -= 25; });
-            appendToLog("🐉 Дракон копит ярость и изрыгает [Дыхание Рока]! Все живые члены отряда получают по 25 урона огнем.", "dragon");
+            let dmg = protectionActive ? 10 : 25;
+            aliveHeroes.forEach(h => { h.hp -= dmg; });
+            appendToLog(`🐉 Дракон изрыгает [Дыхание Рока]! Весь отряд получает по ${dmg} урона огнем.`, "dragon");
         } else {
-            const randomTarget = aliveHeroes[Math.floor(Math.random() * aliveHeroes.length)];
-            const finalDamage = (selectedMatch === "SHIELDS") ? 15 : 35;
-            randomTarget.hp -= finalDamage;
-            const shieldNote = (selectedMatch === "SHIELDS") ? " (Урон снижен щитами!)" : "";
-            appendToLog(`🐉 Дракон наносит сокрушительный удар когтями по цели ${randomTarget.name} [${randomTarget.slot}]. Нанесено ${finalDamage} урона.${shieldNote}`, "dragon");
+            const target = aliveHeroes[Math.floor(Math.random() * aliveHeroes.length)];
+            let dmg = protectionActive ? 15 : 35;
+            target.hp -= dmg;
+            appendToLog(`🐉 Дракон бьет когтями по позиции ${target.slot}! ${target.name} получает ${dmg} урона.`, "dragon");
         }
     }
 
     if (combatData.heroes.filter(h => h.hp > 0).length === 0) {
         refreshBattleUI();
-        appendToLog("💀 ОТРАД ПОЛНОСТЬЮ УНИЧТОЖЕН. Защитники Абхирамбурга пали и эвакуированы в Полевой Госпиталь.", "system");
+        appendToLog("💀 ОТРАД УНИЧТОЖЕН. Защитники Абхирамбурга пали.", "system");
         finishBattleSession();
         return;
     }
@@ -115,6 +139,6 @@ function processCombatTurn() {
 }
 
 function finishBattleSession() {
-    document.getElementById('step-combat-btn').style.display = 'none';
-    document.getElementById('restart-combat-btn').style.display = 'block';
+    const restartBtn = document.getElementById('restart-combat-btn');
+    if (restartBtn) restartBtn.style.display = 'block';
 }
