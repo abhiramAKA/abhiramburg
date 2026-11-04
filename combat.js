@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК РЕЙДОВ (v0.6.0-alpha.5)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК РЕЙДОВ (v0.6.0-alpha.8)
    ========================================================================== */
 
-// Динамическая сборка интерфейса Дракона
+// Динамическое создание блока 3D Дракона на экране
 function buildDragonDOM() {
     const raidZone = document.getElementById('dragon-raid-zone');
     if (!raidZone) return;
@@ -27,27 +27,26 @@ function buildDragonDOM() {
     raidZone.appendChild(container);
 }
 
-// Запуск боевого режима
+// Запуск боевого сеанса
 function startCombatSession() {
-    // Сброс параметров перед боем
     combatData.dragonHP = 1000;
     combatData.playerAP = 3;
     combatData.currentRound = 1;
     combatData.squad.forEach(hero => hero.hp = hero.maxHP);
     
-    // Последовательная сборка экрана рейда
+    // Собираем Дракона и обновляем текст характеристик персонажей
     buildDragonDOM();
     updateCombatInterfaceDOM();
     
-    // Запуск генерации игрового поля из модуля match3.js
+    // Запускаем генерацию рун из модуля match3.js
     if (typeof initMatch3Board === 'function') {
         initMatch3Board();
     } else {
-        console.error("Ошибка: функция initMatch3Board не найдена в памяти!");
+        console.error("Сбой: Модуль match3.js не предоставил функцию initMatch3Board!");
     }
 }
 
-// Применение собранных комбинаций рун игроком
+// Применение собранных комбинаций
 function applyRuneCombination(effects) {
     let totalDamage = (effects['🔥'] * 15) + (effects['⚡️'] * 10);
     if (totalDamage > 0) {
@@ -65,7 +64,7 @@ function applyRuneCombination(effects) {
     checkBattleResolution();
 }
 
-// Трата Очков Действия (ОД) игрока при передвижении на поле
+// Трата ОД
 function usePlayerActionPoint() {
     combatData.playerAP--;
     updateCombatInterfaceDOM();
@@ -75,7 +74,7 @@ function usePlayerActionPoint() {
     }
 }
 
-// Пошаговый ИИ Дракона с воспроизведением анимаций огня и парения
+// Действия ИИ Дракона
 function executeDragonTurnAI() {
     if (combatData.dragonHP <= 0) return;
 
@@ -119,7 +118,7 @@ function executeDragonTurnAI() {
     }, 1500);
 }
 
-// Обновление всех шкал и текстовых полей боевого экрана
+// Отрисовка значений ХП отряда и здоровья босса
 function updateCombatInterfaceDOM() {
     const hpBar = document.getElementById('boss-hp-bar');
     const hpText = document.getElementById('boss-hp-text');
@@ -155,7 +154,7 @@ function updateCombatInterfaceDOM() {
     }
 }
 
-// Проверка исхода рейда
+// Определение победы
 function checkBattleResolution() {
     if (combatData.dragonHP <= 0) {
         alert("ВЕЛИКАЯ ПОБЕДА! Дракон повержен, руны Горнила принадлежат вам!");
