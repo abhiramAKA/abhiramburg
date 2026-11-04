@@ -1,12 +1,12 @@
 // Модуль игрового поля Match-3 (5х5) с алгоритмом гравитации и каскадов
 const TILE_TYPES = ['🔥', '💀', '🛡️', '🧪', '💎'];
 let selectedTile = null;
-let isProcessingGrid = false; // Блокировка поля во время анимации каскадов
+let isProcessingGrid = false;
 
 function rebuildActionArea() {
-    const btn = document.getElementById('step-combat-btn');
-    if (btn) {
-        btn.outerHTML = `<div id="match3-board" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 8px auto; width: 100%; max-width: 250px; background: rgba(0,0,0,0.6); padding: 6px; border: 2px solid #4a3e31; border-radius: 4px; box-shadow: inset 0 0 15px #000; box-sizing: border-box;"></div>`;
+    const area = document.getElementById('combat-action-area');
+    if (area) {
+        area.innerHTML = `<div id="match3-board" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 8px auto; width: 100%; max-width: 250px; background: rgba(0,0,0,0.6); padding: 6px; border: 2px solid #4a3e31; border-radius: 4px; box-shadow: inset 0 0 15px #000; box-sizing: border-box;"></div>`;
     }
 }
 
@@ -69,7 +69,7 @@ function handleTileClick(r, c) {
         const isNeighbor = (Math.abs(prevR - r) === 1 && prevC === c) || (Math.abs(prevC - c) === 1 && prevR === r);
 
         if (isNeighbor) {
-            isProcessingGrid = true; // Блокируем новые нажатия
+            isProcessingGrid = true;
             let temp = combatData.board[prevR][prevC];
             combatData.board[prevR][prevC] = combatData.board[r][c];
             combatData.board[r][c] = temp;
@@ -78,7 +78,7 @@ function handleTileClick(r, c) {
 
             if (matches.length > 0) {
                 selectedTile = null;
-                executeComboRules(matches, true); // Запускаем боевой ход (true = первый ход)
+                executeComboRules(matches, true);
             } else {
                 combatData.board[r][c] = combatData.board[prevR][prevC];
                 combatData.board[prevR][prevC] = temp;
