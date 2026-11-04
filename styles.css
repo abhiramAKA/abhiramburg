@@ -22,7 +22,7 @@ html, body {
     z-index: 1;
 }
 
-/* Общий контейнер интерфейса поверх фона */
+/* Общий контейнер интерфейса поверх фона — жесткое центрирование окон */
 #game-interface {
     position: relative;
     z-index: 2;
@@ -32,6 +32,7 @@ html, body {
     justify-content: center;
     align-items: center;
     background: rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
 }
 
 /* 🏰 РУНИЧЕСКОЕ ГОТИЧЕСКОЕ ОКНО */
@@ -209,15 +210,6 @@ p {
     font-size: 13px;
     color: #cdb38c;
     box-sizing: border-box;
-}
-
-#battle-ap-display {
-    font-weight: bold;
-    background: #2a2015;
-    padding: 2px 6px;
-    border-radius: 3px;
-    border: 1px solid #635341;
-    color: #5dade2;
 }
 
 #squad-matrix {
