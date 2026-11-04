@@ -1,11 +1,11 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (v0.6.0-beta.2)
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ОБЛЕГЧЕННЫЙ ЛОГИЧЕСКИЙ движок) (v0.6.0-beta.4)
    ========================================================================== */
 
-let isBoardLocked = false; 
+let isBoardLocked = false;
 
-// Инициализация игрового поля
 function initMatch3Board() {
+    if (typeof initAudioContext === 'function') initAudioContext();
     const boardContainer = document.getElementById('match3-board-container');
     if (!boardContainer) return;
     
@@ -27,11 +27,10 @@ function initMatch3Board() {
         }
     }
     
-    renderBoardDOM(true); 
+    renderBoardDOM(true);
 }
 
-// Отрисовка рун в контейнер
-function renderBoardDOM(animateFall = false, newRunesCoords = []) {
+function renderBoardDOM(isIntro = false, newRunesCoords = []) {
     const boardContainer = document.getElementById('match3-board-container');
     if (!boardContainer) return;
     boardContainer.innerHTML = '';
@@ -44,10 +43,16 @@ function renderBoardDOM(animateFall = false, newRunesCoords = []) {
             cell.dataset.col = c;
             cell.innerText = match3BoardData[r][c];
             
-            // Логика падения
-            if (animateFall) {
-                cell.classList.add('rune-fall');
-                cell.style.animationDelay = `${(7 - r) * 0.03 + c * 0.02}s`; // Эффект волны падения сверху вниз
+            if (isIntro) {
+                cell.classList.add('rune-appear');
+                const delay = Math.abs(3.5 - r) * 0.035 + Math.abs(3.5 - c) * 0.035;
+                cell.style.animationDelay = `${delay}s`;
+                
+                setTimeout(() => { 
+                    if (isIntro && !isBoardLocked && typeof playMatch3Sound === 'function') {
+                        playMatch3Sound('intro');
+                    }
+                }, delay * 1000);
             } else if (newRunesCoords.some(coord => coord.row === r && coord.col === c)) {
                 cell.classList.add('rune-fall');
             }
@@ -58,8 +63,8 @@ function renderBoardDOM(animateFall = false, newRunesCoords = []) {
     }
 }
 
-// Обработка клика по рунам
 function handleCellClick(e) {
+    if (typeof initAudioContext === 'function') initAudioContext();
     if (combatData.playerAP <= 0 || isBoardLocked) return;
     
     const cell = e.currentTarget;
@@ -84,14 +89,13 @@ function handleCellClick(e) {
             if (currentCell) currentCell.style.backgroundColor = 'rgba(230, 194, 128, 0.3)';
             return;
         }
-        
         selectedCell = null;
     }
 }
 
-// Красивый визуальный обмен с помощью CSS-сдвигов
 function animateAndSwapRunes(r1, c1, r2, c2) {
     isBoardLocked = true;
+    if (typeof playMatch3Sound === 'function') playMatch3Sound('swap');
     
     const cell1 = document.querySelector(`[data-row="${r1}"][data-col="${c1}"]`);
     const cell2 = document.querySelector(`[data-row="${r2}"][data-col="${c2}"]`);
@@ -101,7 +105,6 @@ function animateAndSwapRunes(r1, c1, r2, c2) {
         return;
     }
     
-    // Вычисляем смещение в пикселях
     const deltaX = cell2.offsetLeft - cell1.offsetLeft;
     const deltaY = cell2.offsetTop - cell1.offsetTop;
     
@@ -109,7 +112,6 @@ function animateAndSwapRunes(r1, c1, r2, c2) {
     cell2.style.transform = `translate(${-deltaX}px, ${-deltaY}px)`;
     
     setTimeout(() => {
-        // Меняем данные в массиве местами
         let temp = match3BoardData[r1][c1];
         match3BoardData[r1][c1] = match3BoardData[r2][c2];
         match3BoardData[r2][c2] = temp;
@@ -121,7 +123,6 @@ function animateAndSwapRunes(r1, c1, r2, c2) {
                 usePlayerActionPoint();
             }
         } else {
-            // Своп-бэк (возврат назад, если комбинация не собралась)
             cell1.style.transform = 'translate(0, 0)';
             cell2.style.transform = 'translate(0, 0)';
             
@@ -132,45 +133,11 @@ function animateAndSwapRunes(r1, c1, r2, c2) {
             setTimeout(() => {
                 renderBoardDOM();
                 isBoardLocked = false;
-            }, 250);
+            }, 220);
         }
-    }, 250);
+    }, 220);
 }
 
-// Создание сочных искр при взрыве камня
-function createSparksAtCell(r, c) {
-    const boardContainer = document.getElementById('match3-board-container');
-    const cellEl = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
-    if (!boardContainer || !cellEl) return;
-    
-    // Определяем центр взорвавшейся ячейки руны
-    const startX = cellEl.offsetLeft + cellEl.offsetWidth / 2;
-    const startY = cellEl.offsetTop + cellEl.offsetHeight / 2;
-    
-    const sparkCount = 8; // По 8 искр на каждый уничтоженный камень
-    for (let i = 0; i < sparkCount; i++) {
-        const spark = document.createElement('div');
-        spark.className = 'rune-spark';
-        spark.style.left = `${startX}px`;
-        spark.style.top = `${startY}px`;
-        
-        // Случайное направление разлета
-        const angle = (i * (360 / sparkCount) + Math.random() * 20) * (Math.PI / 180);
-        const distance = Math.random() * 45 + 30;
-        const dx = Math.cos(angle) * distance;
-        const dy = Math.sin(angle) * distance;
-        
-        spark.style.setProperty('--dx', `${dx}px`);
-        spark.style.setProperty('--dy', `${dy}px`);
-        
-        boardContainer.appendChild(spark);
-        
-        // Удаляем искру из DOM после завершения её CSS анимации
-        setTimeout(() => spark.remove(), 450);
-    }
-}
-
-// Расчет линий совпадений
 function checkMatchesAndExecute() {
     let matchedMatrix = Array(BOARD_ROWS).fill().map(() => Array(BOARD_COLS).fill(false));
     let found = false;
@@ -197,19 +164,22 @@ function checkMatchesAndExecute() {
     
     if (found) {
         isBoardLocked = true;
+        if (typeof playMatch3Sound === 'function') playMatch3Sound('explosion');
+        if (typeof triggerMatch3Haptic === 'function') triggerMatch3Haptic(60);
+        
         let executionEffects = { '🔥': 0, '🛡️': 0, '💚': 0, '⚡️': 0, '💀': 0 };
         let newRunesCoords = [];
         
-        // Запускаем взрывы и рождение искр
         for (let r = 0; r < BOARD_ROWS; r++) {
             for (let c = 0; c < BOARD_COLS; c++) {
                 if (matchedMatrix[r][c]) {
                     const cellEl = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
-                    if (cellEl) {
-                        cellEl.classList.add('rune-explode');
-                    }
-                    createSparksAtCell(r, c);
                     let type = match3BoardData[r][c];
+                    
+                    if (cellEl) cellEl.classList.add('rune-explode');
+                    if (typeof spawnRuneExplosionSparks === 'function') {
+                        spawnRuneExplosionSparks(r, c, type);
+                    }
                     executionEffects[type]++;
                 }
             }
@@ -233,12 +203,10 @@ function checkMatchesAndExecute() {
             
             setTimeout(() => {
                 let chainMatched = checkMatchesAndExecute();
-                if (!chainMatched) {
-                    isBoardLocked = false;
-                }
-            }, 400);
+                if (!chainMatched) isBoardLocked = false;
+            }, 350);
             
-        }, 250);
+        }, 220);
     } else {
         isBoardLocked = false;
     }
