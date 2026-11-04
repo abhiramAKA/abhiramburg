@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>КХАМАЧ — Восхождение Рейдов</title>
-    <!-- Жесткий сброс кэша для CSS-стилей -->
-    <link rel="stylesheet" href="styles.css?v=1000">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Холст для искр костра -->
@@ -34,7 +33,7 @@
                 <button id="to-squad-btn" class="menu-btn disabled" disabled>Отряд</button>
             </div>
             
-            <div id="game-version" class="version-footer">Загрузка...</div>
+            <div id="game-version" class="version-footer">Сброс кэша...</div>
         </div>
 
         <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ ================= -->
@@ -50,7 +49,7 @@
         <!-- ================= БОЕВОЙ ЭКРАН (ОКНО РЕЙДА) ================= -->
         <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 10px 15px;">
             
-            <!-- Сюда JS динамически внедрит Дракона и пламя -->
+            <!-- Динамическая зона дракона -->
             <div id="dragon-raid-zone"></div>
 
             <!-- ПАНЕЛЬ БОССА (ЗДОРОВЬЕ) -->
@@ -68,12 +67,12 @@
                 <div id="combat-ap-display">Очки Действия: 3 / 3</div>
             </div>
 
-            <!-- ИНТЕРФЕЙС ОТРЯДА ГЕРОЕВ (ТЕПЕРЬ УЛЬТРАКОМПАКТНЫЙ РЯД ЗНАЧКОВ) -->
+            <!-- ИНТЕРФЕЙС ОТРЯДА ГЕРОЕВ -->
             <div id="squad-matrix" style="display: flex; justify-content: space-around; gap: 4px; margin-bottom: 6px;">
-                <!-- Заполняется значками динамически из combat.js -->
+                <!-- Заполняется динамически -->
             </div>
 
-            <!-- ИГРОВОЕ ПОЛЕ MATCH-3 (СТРОГО 8х8) -->
+            <!-- ИГРОВОЕ ПОЛЕ MATCH-3 (8х8) -->
             <div id="match3-board-container" class="match3-board">
                 <!-- Ячейки рун генерируются динамически -->
             </div>
@@ -83,10 +82,9 @@
 
     </div>
 
-    <!-- Обновленный принудительный сброс кэша для JS-скриптов -->
-    <script src="background.js?v=1000"></script>
-    <script src="game.js?v=1000"></script>
-    <script src="match3.js?v=1000"></script>
-    <script src="combat.js?v=1000"></script>
+    <script src="background.js"></script>
+    <script src="game.js"></script>
+    <script src="match3.js"></script>
+    <script src="combat.js"></script>
 </body>
 </html>
