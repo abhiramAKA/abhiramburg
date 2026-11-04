@@ -1,8 +1,7 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК РЕЙДОВ (v0.6.0-alpha.8)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК РЕЙДОВ (v0.6.0-alpha.12)
    ========================================================================== */
 
-// Динамическое создание блока 3D Дракона на экране
 function buildDragonDOM() {
     const raidZone = document.getElementById('dragon-raid-zone');
     if (!raidZone) return;
@@ -11,12 +10,15 @@ function buildDragonDOM() {
 
     const container = document.createElement('div');
     container.className = 'dragon-container';
-    container.style.width = '100%';
-    container.style.height = '150px';
 
     const model = document.createElement('div');
     model.id = 'dragon-model';
     model.className = 'dragon-idle';
+    model.innerText = '🐉';
+    model.style.fontSize = '70px';
+    model.style.display = 'flex';
+    model.style.alignItems = 'center';
+    model.style.justifyContent = 'center';
 
     const fireFx = document.createElement('div');
     fireFx.id = 'dragon-fire-fx';
@@ -27,26 +29,20 @@ function buildDragonDOM() {
     raidZone.appendChild(container);
 }
 
-// Запуск боевого сеанса
 function startCombatSession() {
     combatData.dragonHP = 1000;
     combatData.playerAP = 3;
     combatData.currentRound = 1;
     combatData.squad.forEach(hero => hero.hp = hero.maxHP);
     
-    // Собираем Дракона и обновляем текст характеристик персонажей
     buildDragonDOM();
     updateCombatInterfaceDOM();
     
-    // Запускаем генерацию рун из модуля match3.js
     if (typeof initMatch3Board === 'function') {
         initMatch3Board();
-    } else {
-        console.error("Сбой: Модуль match3.js не предоставил функцию initMatch3Board!");
     }
 }
 
-// Применение собранных комбинаций
 function applyRuneCombination(effects) {
     let totalDamage = (effects['🔥'] * 15) + (effects['⚡️'] * 10);
     if (totalDamage > 0) {
@@ -64,7 +60,6 @@ function applyRuneCombination(effects) {
     checkBattleResolution();
 }
 
-// Трата ОД
 function usePlayerActionPoint() {
     combatData.playerAP--;
     updateCombatInterfaceDOM();
@@ -74,7 +69,6 @@ function usePlayerActionPoint() {
     }
 }
 
-// Действия ИИ Дракона
 function executeDragonTurnAI() {
     if (combatData.dragonHP <= 0) return;
 
@@ -88,7 +82,6 @@ function executeDragonTurnAI() {
 
     if (combatData.currentRound % 3 === 0) {
         if (fireFx) fireFx.classList.add('active');
-        
         combatData.squad.forEach(hero => {
             hero.hp = Math.max(0, hero.hp - 35);
         });
@@ -118,7 +111,6 @@ function executeDragonTurnAI() {
     }, 1500);
 }
 
-// Отрисовка значений ХП отряда и здоровья босса
 function updateCombatInterfaceDOM() {
     const hpBar = document.getElementById('boss-hp-bar');
     const hpText = document.getElementById('boss-hp-text');
@@ -137,32 +129,36 @@ function updateCombatInterfaceDOM() {
     if (squadMatrix) {
         squadMatrix.innerHTML = '';
         combatData.squad.forEach(hero => {
-            const card = document.createElement('div');
-            card.style.background = 'rgba(25, 20, 15, 0.8)';
-            card.style.border = hero.hp <= 0 ? '1px solid #333' : '1px solid #8a7350';
-            card.style.padding = '6px';
-            card.style.fontSize = '12px';
-            card.style.textAlign = 'left';
-            card.style.opacity = hero.hp <= 0 ? '0.4' : '1';
+            const badge = document.createElement('div');
+            badge.style.display = 'flex';
+            badge.style.alignItems = 'center';
+            badge.style.gap = '4px';
+            badge.style.background = 'rgba(30, 25, 20, 0.9)';
+            badge.style.border = '1px solid #8a7350';
+            badge.style.padding = '3px 8px';
+            badge.style.borderRadius = '12px';
+            badge.style.fontSize = '12px';
+            badge.style.color = hero.hp <= 0 ? '#555' : '#fff';
+            badge.style.opacity = hero.hp <= 0 ? '0.5' : '1';
             
-            card.innerHTML = `
-                <div style="font-weight:bold; color:#e6c280;">${hero.name} (${hero.role})</div>
-                <div style="color:#bfae96;">ХП: ${hero.hp} / ${hero.maxHP}</div>
+            badge.innerHTML = `
+                <span>${hero.icon}</span>
+                <span style="font-weight:bold;">${hero.hp}</span>
+                <span style="color:#8a7350; font-size:10px;">/${hero.maxHP}</span>
             `;
-            squadMatrix.appendChild(card);
+            squadMatrix.appendChild(badge);
         });
     }
 }
 
-// Определение победы
 function checkBattleResolution() {
     if (combatData.dragonHP <= 0) {
-        alert("ВЕЛИКАЯ ПОБЕДА! Дракон повержен, руны Горнила принадлежат вам!");
+        alert("ВЕЛИКАЯ ПОБЕДА! Дракон повержен!");
         showScreen('main-menu');
     } else {
         let allDead = combatData.squad.every(hero => hero.hp <= 0);
         if (allDead) {
-            alert("ОТРЯД ПАЛ! Дракон сжег ваши надежды. Попробуйте снова.");
+            alert("ОТРЯД ПАЛ!");
             showScreen('main-menu');
         }
     }
