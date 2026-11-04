@@ -25,6 +25,11 @@
             <button class="menu-btn" onclick="showScreen('alchemy-screen')">🧪 Алхимик</button>
             <button class="menu-btn" onclick="showScreen('squad-screen')">👤 Мой Отряд</button>
             <button class="menu-btn disabled">🏆 PvP Арена (Заблокировано)</button>
+
+            <!-- ИНДИКАТОР ВЕРСИИ НА ГЛАВНОМ ЭКРАНЕ -->
+            <div style="margin-top: 25px; font-size: 11px; color: #4a3f2c; letter-spacing: 1px; font-family: monospace;">
+                ВЕРСИЯ: <span style="color: #8a7350; font-weight: bold;">v0.2.0</span> (Match-3 MVP Адаптивная)
+            </div>
         </div>
 
         <!-- ЭКРАН 2: КУЗНИЦА -->
@@ -83,11 +88,9 @@
     </div>
 
     <!-- Подключаем логические скрипты -->
-        <!-- Подключаем логические скрипты -->
     <script src="background.js"></script>
-    <script src="match3.js"></script> <!-- Добавили новый модуль поля -->
+    <script src="match3.js"></script>
     <script src="combat.js"></script>
-
     <script>
         // Функция переключения экранов
         function showScreen(screenId) {
