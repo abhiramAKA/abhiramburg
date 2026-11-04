@@ -1,18 +1,111 @@
-:root {
-    --gold-glow: 0 0 15px #d4af37, 0 0 25px rgba(212, 175, 55, 0.5);
-    --gothic-bg: radial-gradient(circle, #1a0f0f 0%, #070303 100%);
-    --rune-border: 2px double #d4af37;
-}
-body {
+/* ==========================================================================
+   1. БАЗОВЫЕ НАСТРОЙКИ, ШРИФТЫ И ГЛОБАЛЬНЫЕ КНОПКИ
+   ========================================================================== */
+
+html, body {
     margin: 0;
     padding: 0;
-    background: var(--gothic-bg);
-    font-family: 'Garamond', serif; /* Или ваш готический шрифт */
-    color: #f0e6d2;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #050508;
+    font-family: 'Georgia', serif;
+    color: #e0e0e0;
+    user-select: none;
+    -webkit-user-select: none;
 }
-/* Универсальные эффекты кнопок */
-.btn-gold {
-    border: var(--rune-border);
-    box-shadow: var(--gold-glow);
-    transition: transform 0.2s;
+
+h1 {
+    font-size: 36px;
+    color: #e6c280;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    margin: 0 0 5px 0;
+    font-weight: 900;
+    text-shadow: 
+        0px 2px 4px rgba(0, 0, 0, 1), 
+        0 0 20px rgba(230, 194, 128, 0.4);
+}
+
+h2 {
+    color: #e6c280;
+    font-size: 24px;
+    margin-bottom: 20px;
+    margin-top: 0;
+    text-shadow: 0px 2px 4px rgba(0, 0, 0, 1);
+}
+
+p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #bfae96;
+    margin-bottom: 20px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #8a7350;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 25px;
+    display: block;
+    border-bottom: 1px dashed #4a3f2c;
+    padding-bottom: 15px;
+}
+
+/* ⚔️ КНОПКИ С ЭФФЕКТОМ СИЯНИЯ */
+.menu-btn {
+    flex: 1;
+    padding: 16px;
+    font-size: 15px;
+    font-family: 'Georgia', serif;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: #cdb38c;
+    background: linear-gradient(to bottom, #2d2621 0%, #171311 100%);
+    border: 1px solid #544432;
+    box-shadow: 
+        inset 0 1px 3px rgba(255,255,255,0.1),
+        0 5px 10px rgba(0,0,0,0.6);
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    text-shadow: 2px 2px 3px #000;
+    box-sizing: border-box;
+}
+
+.menu-btn:hover {
+    color: #fff;
+    background: linear-gradient(to bottom, #3d332c 0%, #211b18 100%);
+    border-color: #cbb281;
+    box-shadow: 
+        0 0 15px rgba(203, 178, 129, 0.5),
+        inset 0 0 8px rgba(203, 178, 129, 0.3);
+    letter-spacing: 1.5px;
+}
+
+.menu-btn:active {
+    transform: scale(0.99);
+}
+
+.menu-btn.disabled {
+    color: #4a453f;
+    background: #0f0d0b;
+    border-color: #26211c;
+    cursor: not-allowed;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+.back-btn {
+    margin-top: 15px;
+    background: linear-gradient(to bottom, #421e1e 0%, #241010 100%);
+    border-color: #6e3131;
+    color: #e6aaaa;
+}
+
+.back-btn:hover {
+    background: linear-gradient(to bottom, #542525 0%, #301414 100%);
+    border-color: #a84444;
+    box-shadow: 0 0 15px rgba(168, 68, 68, 0.4);
+    color: #fff;
 }
