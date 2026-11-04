@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>КХАМАЧ — Восхождение Рейдов</title>
-    <!-- Жесткий сброс кэша стилей -->
-    <link rel="stylesheet" href="styles.css?v=900">
+    <!-- Жесткий сброс кэша для CSS-стилей -->
+    <link rel="stylesheet" href="styles.css?v=1000">
 </head>
 <body>
     <!-- Холст для искр костра -->
@@ -34,7 +34,6 @@
                 <button id="to-squad-btn" class="menu-btn disabled" disabled>Отряд</button>
             </div>
             
-            <!-- Сюда текст версии впишет только новый скрипт -->
             <div id="game-version" class="version-footer">Загрузка...</div>
         </div>
 
@@ -49,29 +48,29 @@
         </div>
 
         <!-- ================= БОЕВОЙ ЭКРАН (ОКНО РЕЙДА) ================= -->
-        <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 15px 20px;">
+        <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 10px 15px;">
             
             <!-- Сюда JS динамически внедрит Дракона и пламя -->
             <div id="dragon-raid-zone"></div>
 
             <!-- ПАНЕЛЬ БОССА (ЗДОРОВЬЕ) -->
-            <div id="boss-panel">
-                <div id="boss-name">ДРАКОН НЕКРОСМУТ</div>
-                <div class="hp-bar-container">
+            <div id="boss-panel" style="margin-bottom: 4px; padding: 4px;">
+                <div id="boss-name" style="font-size: 12px; margin-bottom: 2px;">ДРАКОН НЕКРОСМУТ</div>
+                <div class="hp-bar-container" style="height: 10px;">
                     <div id="boss-hp-bar" class="hp-bar" style="width: 100%;"></div>
-                    <div id="boss-hp-text">1000 / 1000</div>
+                    <div id="boss-hp-text" style="font-size: 9px; line-height: 10px;">1000 / 1000</div>
                 </div>
             </div>
 
             <!-- СТАТУС РАУНДА И ОЧКОВ ДЕЙСТВИЯ -->
-            <div id="battle-status-panel">
+            <div id="battle-status-panel" style="margin-bottom: 4px; padding: 4px; font-size: 11px;">
                 <div id="combat-round-display">Раунд: 1</div>
                 <div id="combat-ap-display">Очки Действия: 3 / 3</div>
             </div>
 
-            <!-- ИНТЕРФЕЙС ОТРЯДА ГЕРОЕВ -->
-            <div id="squad-matrix">
-                <!-- Заполняется динамически -->
+            <!-- ИНТЕРФЕЙС ОТРЯДА ГЕРОЕВ (ТЕПЕРЬ УЛЬТРАКОМПАКТНЫЙ РЯД ЗНАЧКОВ) -->
+            <div id="squad-matrix" style="display: flex; justify-content: space-around; gap: 4px; margin-bottom: 6px;">
+                <!-- Заполняется значками динамически из combat.js -->
             </div>
 
             <!-- ИГРОВОЕ ПОЛЕ MATCH-3 (СТРОГО 8х8) -->
@@ -79,15 +78,15 @@
                 <!-- Ячейки рун генерируются динамически -->
             </div>
 
-            <button id="leave-combat-btn" class="menu-btn back-btn" style="margin-top: 10px; padding: 10px;">Сбежать из рейда</button>
+            <button id="leave-combat-btn" class="menu-btn back-btn" style="margin-top: 6px; padding: 6px; font-size: 12px;">Сбежать</button>
         </div>
 
     </div>
 
     <!-- Обновленный принудительный сброс кэша для JS-скриптов -->
-    <script src="background.js?v=900"></script>
-    <script src="game.js?v=900"></script>
-    <script src="match3.js?v=900"></script>
-    <script src="combat.js?v=900"></script>
+    <script src="background.js?v=1000"></script>
+    <script src="game.js?v=1000"></script>
+    <script src="match3.js?v=1000"></script>
+    <script src="combat.js?v=1000"></script>
 </body>
 </html>
