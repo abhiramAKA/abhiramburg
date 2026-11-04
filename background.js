@@ -1,4 +1,3 @@
-// Код управления живым фоном с искрами
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
 
@@ -38,5 +37,4 @@ function animateBg() {
     requestAnimationFrame(animateBg);
 }
 
-// Запускаем анимацию сразу при загрузке скрипта
 animateBg();
