@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ОЧИЩЕННОЕ ЯДРО ЛОГИКИ) (v0.6.0-beta.6)
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ОЧИЩЕННОЕ ЯДРО ЛОГИКИ) (v0.6.0-beta.10)
    ========================================================================== */
 
 let isBoardLocked = false;
@@ -10,13 +10,13 @@ function initMatch3Board() {
     if (!boardContainer) return;
     
     boardContainer.innerHTML = '';
-    match3BoardData = []; // ИСПРАВЛЕНО: добавлено []
+    match3BoardData = [];
     isBoardLocked = false;
     selectedCell = null;
     if (typeof resetSwipeTracker === 'function') resetSwipeTracker();
     
     for (let r = 0; r < BOARD_ROWS; r++) {
-        match3BoardData[r] = []; // ИСПРАВЛЕНО: добавлено []
+        match3BoardData[r] = [];
         for (let c = 0; c < BOARD_COLS; c++) {
             let allowedTypes = RUNE_TYPES.filter(type => {
                 if (r >= 2 && match3BoardData[r-1][c] === type && match3BoardData[r-2][c] === type) return false;
@@ -27,10 +27,10 @@ function initMatch3Board() {
             match3BoardData[r][c] = randomType;
         }
     }
-    renderBoardDOM(true, []); // ИСПРАВЛЕНО: добавлен пустой массив дефолтных координат
+    renderBoardDOM(true, []);
 }
 
-function renderBoardDOM(isIntro = false, newRunesCoords = []) { // ИСПРАВЛЕНО: добавлено = []
+function renderBoardDOM(isIntro = false, newRunesCoords = []) {
     const boardContainer = document.getElementById('match3-board-container');
     if (!boardContainer) return;
     boardContainer.innerHTML = '';
@@ -159,7 +159,7 @@ function checkMatchesAndExecute() {
         if (typeof triggerMatch3Haptic === 'function') triggerMatch3Haptic(60);
         
         let executionEffects = { '🔥': 0, '🛡️': 0, '💚': 0, '⚡️': 0, '💀': 0 };
-        let newRunesCoords = []; // ИСПРАВЛЕНО: добавлено []
+        let newRunesCoords = [];
         
         for (let r = 0; r < BOARD_ROWS; r++) {
             for (let c = 0; c < BOARD_COLS; c++) {
