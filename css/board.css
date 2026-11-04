@@ -1,5 +1,5 @@
 /* ==========================================================================
-   4. СЕТКА ИГРОВОГО ПОЛЯ MATCH-3 (АНИМАЦИИ, ИСКРЫ И ЗВУКИ - ВЕРСИЯ v0.6.0-BETA.3)
+   4. СЕТКА ИГРОВОГО ПОЛЯ MATCH-3 (МОДУЛЬНАЯ СБОРКА - ВЕРСИЯ v0.6.0-BETA.4)
    ========================================================================== */
 
 .match3-board {
@@ -36,7 +36,6 @@
     user-select: none;
     -webkit-user-select: none;
     
-    /* Плавность для перемещений (свопа) */
     transition: transform 0.22s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.2s ease;
     z-index: 2;
 }
@@ -45,7 +44,7 @@
     transform: scale(0.85);
 }
 
-/* 🎇 НОВОЕ МЯГКОЕ ПРОЯВЛЕНИЕ ПОЛЯ И ПАДЕНИЕ ДЛЯ НОВЫХ РУН */
+/* 🎇 ЭЛЕГАНТНОЕ ПРОЯВЛЕНИЕ ШАХМАТНОЙ ВОЛНОЙ ИЗ ЦЕНТРА */
 @keyframes runeIntro {
     0% {
         transform: scale(0) rotate(-15deg);
@@ -67,7 +66,7 @@
     animation: runeIntro 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-/* Обычное падение только для новорождённых рун в процессе игры */
+/* Падение для новых выпадающих рун в процессе игры */
 @keyframes runeFallDown {
     0% { transform: translateY(-120px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }
@@ -101,16 +100,14 @@
     z-index: 5;
 }
 
-/* ✨ МАГИЧЕСКИЕ ИСКРЫ ОТ ВЗРЫВА РУН */
+/* ✨ УМНЫЕ РАЗНОЦВЕТНЫЕ МАГИЧЕСКИЕ ИСКРЫ */
 .rune-spark {
     position: absolute;
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: #ffaa00;
     pointer-events: none;
     z-index: 10;
-    box-shadow: 0 0 6px #ff4500, 0 0 12px #ffcc00;
     opacity: 1;
     animation: sparkFade 0.4s ease-out both;
 }
