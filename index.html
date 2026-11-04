@@ -9,7 +9,7 @@
 <body style="margin: 0; padding: 0; background: #0c0806; overflow: hidden;">
 
     <!-- Живой задний план (Искры костра) -->
-    <canvas id="bg-canvas" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;"></canvas>
+    <canvas id="bg-canvas" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; display: block;"></canvas>
 
     <!-- Главный контейнер игры (Mobile-First) -->
     <div id="game-container">
@@ -27,8 +27,8 @@
             <div id="screen-camp" class="game-screen">
                 <div class="menu-banner">Лагерь <span style="color: #e6c280;">Ордена</span></div>
                 <button class="btn-main" onclick="showScreen('screen-battle')">⚔️ Отправиться в Рейд</button>
-                <button class="btn-main font-locked" disabled>🔨 Горнило (v0.6.0)</button>
-                <button class="btn-main font-locked" disabled>🧪 Алхимия (v0.6.0)</button>
+                <button class="btn-main font-locked" onclick="alert('🔨 Горнило (v0.6.0)\n\nЗдесь откроется кузница Ордена. Вы сможете перековывать и улучшать экипировку за ресурсы, добытые в рейдах на Драконов.')">🔨 Горнило (v0.6.0)</button>
+                <button class="btn-main font-locked" onclick="alert('🧪 Алхимия (v0.6.0)\n\nЗдесь откроется Алхимическая Лаборатория. Вы сможете проводить Ритуал Рун, варить боевые зелья и преобразовывать энергию Харизмы.')">🧪 Алхимия (v0.6.0)</button>
             </div>
 
             <!-- Экран боевой сессии (Рейд на Дракона) -->
@@ -73,7 +73,7 @@
         </footer>
     </div>
 
-    <!-- Порядок подключения скриптов -->
+    <!-- Загрузка скриптов в строгой последовательности сброса кэша -->
     <script src="game.js?v=0.5.5"></script>
     <script src="background.js?v=0.5.5"></script>
     <script src="match3.js?v=0.5.5"></script>
