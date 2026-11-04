@@ -22,7 +22,7 @@ html, body {
     z-index: 1;
 }
 
-/* Общий контейнер интерфейса поверх фона — жесткое центрирование окон */
+/* Общий контейнер интерфейса поверх фона */
 #game-interface {
     position: relative;
     z-index: 2;
@@ -95,12 +95,20 @@ p {
     margin-bottom: 20px;
 }
 
+/* 🧱 ГОРИЗОНТАЛЬНЫЙ РЯД ДЛЯ КНОПОК МЕНЮ */
+.menu-row {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    align-items: center;
+}
+
 /* ⚔️ КНОПКИ С ЭФФЕКТОМ СИЯНИЯ */
 .menu-btn {
-    display: block;
-    width: 100%;
+    flex: 1;
     padding: 16px;
-    margin: 12px 0;
     font-size: 15px;
     font-family: 'Georgia', serif;
     font-weight: bold;
@@ -138,6 +146,35 @@ p {
     cursor: not-allowed;
     box-shadow: none;
     text-shadow: none;
+}
+
+/* ❓ КНОПКА ЗНАКА ВОПРОСА */
+.info-btn {
+    width: 50px;
+    height: 51px; /* Выравнивание под высоту menu-btn с бордерами */
+    font-size: 16px;
+    font-weight: bold;
+    color: #e6c280;
+    background: linear-gradient(to bottom, #241d19 0%, #14100e 100%);
+    border: 1px solid #4a3e31;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.info-btn:hover {
+    color: #fff;
+    border-color: #8a7350;
+    background: linear-gradient(to bottom, #332922 0%, #1c1511 100%);
+    box-shadow: 0 0 10px rgba(138, 115, 80, 0.4);
+}
+
+.info-btn:active {
+    transform: scale(0.95);
 }
 
 .back-btn {
