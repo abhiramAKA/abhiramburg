@@ -19,7 +19,7 @@ function reviveAndRestart() {
             { id: 3, name: "Чародей", role: "Маг", hp: 80, maxHp: 80, slot: "Тыл-Лево", isRecruit: false },
             { id: 4, name: "Рекрут лагеря", role: "Рекрут", hp: 70, maxHp: 70, slot: "Тыл-Право", isRecruit: true }
         ],
-        board: []
+        board:
     };
 
     if(document.getElementById('restart-combat-btn')) document.getElementById('restart-combat-btn').style.display = 'none';
@@ -97,13 +97,10 @@ function executeComboRules(matches) {
                 appendToLog("💎 Кристаллы Бездны взрывают чешую дракона на 60 чистого урона.", "player");
                 break;
         }
-
-        // Обновляем клетки новыми рунами
-        match.coords.forEach(coord => {
-            const [r, c] = coord;
-            combatData.board[r][c] = TILE_TYPES[Math.floor(Math.random() * TILE_TYPES.length)];
-        });
     });
+
+    // ПРИМЕНЯЕМ ГРАВИТАЦИЮ И СДВИГ ФИШЕК ВМЕСТО СТАРОЙ МГНОВЕННОЙ ЗАМЕНЫ
+    applyBoardGravity(matches);
 
     if (combatData.dragonBoss.hp <= 0) {
         refreshBattleUI();
