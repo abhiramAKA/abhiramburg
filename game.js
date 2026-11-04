@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.10)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.13)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.10";
+const GAME_VERSION = "v0.6.0-beta.13";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -14,6 +14,7 @@ let combatData = {
     playerAP: 3,
     playerMaxAP: 3,
     currentRound: 1,
+    playerShield: 0,
     squad: [
         { name: "Воин", hp: 120, maxHP: 120, class: "warrior", role: "⚔️", icon: "⚔️" },
         { name: "Маг", hp: 80, maxHP: 80, class: "mage", role: "⚡️", icon: "⚡️" },
@@ -21,10 +22,26 @@ let combatData = {
     ]
 };
 
-let match3BoardData = [];
+let match3BoardData =;
 let selectedCell = null;
 
-// Тексты описаний для кнопок главного меню
+// Тексты игровых правил и контента (вынесено из разметки HTML)
+const GAME_TEXTS = {
+    mainInfo: `
+        <p><strong>Система Очков Действия:</strong> Вам дается 3 ОД на раунд. Каждый обмен рун на поле тратит 1 ОД.</p>
+        <p>Собирайте комбинации из 3 и более рун. Эффекты суммируются! Дракон атакует строго после того, как вы потратите все 3 ОД.</p>
+        <p>Опасайтесь 3-го раунда — Дракон использует массовое <em>Дыхание Рока</em>!</p>
+    `,
+    combatHelp: `
+        <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>🔥 Руна Огня:</strong> Наносит Дракону сокрушительный урон (15 ед. за камень).</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>⚡️ Руна Молнии:</strong> Пробивает чешую Дракона чистой магией (10 ед. за камень).</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>🛡️ Руна Защиты:</strong> Накапливает щиты отряда (12 ед. за камень). Щит полностью принимает на себя входящие атаки босса.</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>💚 Руна Жизни:</strong> Моментально исцеляет Воина, Мага и Клирика (8 ед. за камень).</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 15px;"><strong>💀 Руна Смерти:</strong> Непредсказуемая тёмная энергия подземелий.</p>
+        <p style="border-top: 1px dashed #4a3f2c; padding-top: 10px; font-size: 13px; text-align: left;"><strong>⚔️ Тактика боя:</strong> Соберите мощное комбо за 3 Очка Действия. Когда ОД закончатся, Дракон Некросмут проведёт яростную контратаку по вашему отряду!</p>
+    `
+};
+
 const MODE_DESCRIPTIONS = {
     forge: {
         title: "⚒️ ДРЕВНЯЯ КУЗНИЦА",
@@ -88,6 +105,8 @@ function setupMenuListeners() {
     const infoBtn = document.getElementById('info-btn');
     if (infoBtn) {
         infoBtn.addEventListener('click', () => {
+            const infoTextEl = document.getElementById('info-screen-text');
+            if (infoTextEl) infoTextEl.innerHTML = GAME_TEXTS.mainInfo;
             showScreen('info-screen');
         });
     }
@@ -120,22 +139,24 @@ function setupMenuListeners() {
     }
 }
 
-// Слушатели для всплывающей подсказки прямо на боевом экране
 function setupCombatHelpListeners() {
     const combatHelpBtn = document.getElementById('combat-help-btn');
     const closeCombatHelpBtn = document.getElementById('close-combat-help-btn');
     
     if (combatHelpBtn) {
         combatHelpBtn.addEventListener('click', () => {
+            const txtContainer = document.getElementById('combat-help-text-container');
+            if (txtContainer) txtContainer.innerHTML = GAME_TEXTS.combatHelp;
+            
             const helpScreen = document.getElementById('combat-help-screen');
-            if (helpScreen) helpScreen.style.display = 'flex';
+            if (helpScreen) helpScreen.style.setProperty('display', 'flex', 'important');
         });
     }
     
     if (closeCombatHelpBtn) {
         closeCombatHelpBtn.addEventListener('click', () => {
             const helpScreen = document.getElementById('combat-help-screen');
-            if (helpScreen) helpScreen.style.display = 'none';
+            if (helpScreen) helpScreen.style.setProperty('display', 'none', 'important');
         });
     }
 }
