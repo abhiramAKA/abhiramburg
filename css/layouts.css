@@ -52,7 +52,7 @@
     align-items: center;
 }
 
-/* ❓ КНОПКА ЗНАКА ВОПРОСА */
+/* ⚔️ КНОПКА ЗНАКА ВОПРОСА */
 .info-btn {
     width: 50px;
     height: 51px;
@@ -115,9 +115,7 @@
         padding: 16px !important;
         background: rgba(10, 7, 5, 0.98) !important;
         overflow-y: auto !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+        box-sizing: border-box;
     }
     
     .combat-help-content {
