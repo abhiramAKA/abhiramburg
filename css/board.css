@@ -1,0 +1,12 @@
+/* Исправленная сетка 8х8, которая теперь будет открываться корректно */
+.match3-board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap: 4px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+}
+/* Стили падающих рун и частиц взрыва */
+.rune-cell { ... }
+.particle-fx { ... }
