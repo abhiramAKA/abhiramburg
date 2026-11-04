@@ -2,11 +2,11 @@
 const TILE_TYPES = ['🔥', '💀', '🛡️', '🧪', '💎'];
 let selectedTile = null;
 
-// Перестраиваем интерфейс: заменяем кнопку логова на сетку 5x5
+// Перестраиваем интерфейс под компактную мобильную сетку
 function rebuildActionArea() {
     const btn = document.getElementById('step-combat-btn');
     if (btn) {
-        btn.outerHTML = `<div id="match3-board" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 15px auto; max-width: 320px; background: rgba(0,0,0,0.6); padding: 8px; border: 2px solid #4a3e31; border-radius: 4px; box-shadow: inset 0 0 15px #000;"></div>`;
+        btn.outerHTML = `<div id="match3-board" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 8px auto; width: 100%; max-width: 250px; background: rgba(0,0,0,0.6); padding: 6px; border: 2px solid #4a3e31; border-radius: 4px; box-shadow: inset 0 0 15px #000; box-sizing: border-box;"></div>`;
     }
 }
 
@@ -23,7 +23,7 @@ function generateValidBoard() {
     } while (checkMatches().length > 0);
 }
 
-// Отрисовка сетки поля в HTML
+// Отрисовка сетки поля в HTML (с уменьшенным размером фишек)
 function renderMatch3Board() {
     const boardContainer = document.getElementById('match3-board');
     if (!boardContainer) return;
@@ -34,7 +34,7 @@ function renderMatch3Board() {
             const tile = document.createElement('div');
             tile.style.cssText = `
                 aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
-                font-size: 24px; background: #1c1510; border: 1px solid #3a2e22;
+                font-size: 20px; background: #1c1510; border: 1px solid #3a2e22;
                 cursor: pointer; border-radius: 4px; user-select: none; transition: all 0.2s;
             `;
             tile.innerText = combatData.board[r][c];
@@ -42,7 +42,7 @@ function renderMatch3Board() {
             if (selectedTile && selectedTile.row === r && selectedTile.col === c) {
                 tile.style.background = '#4a3e31';
                 tile.style.borderColor = '#e6c280';
-                tile.style.transform = 'scale(0.95)';
+                tile.style.transform = 'scale(0.92)';
             }
 
             tile.onclick = () => handleTileClick(r, c);
