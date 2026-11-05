@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ИСПРАВЛЕННЫЙ МОДУЛЬНЫЙ ЗАГРУЗЧИК (v2.4.0-BETA)
+        // ИСПРАВЛЕННЫЙ МОДУЛЬНЫЙ ЗАГРУЗЧИК (v2.5.0-BETA)
         (function() {
             const timestamp = Date.now();
             
@@ -35,7 +35,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Модули v2.4.0 успешно декомпозированы.");
+                    console.log("КХАМАЧ: Модули v2.5.0 успешно загружены.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -77,10 +77,13 @@
                 <button id="info-btn" class="info-btn">❓</button>
             </div>
             <div class="menu-row">
-                <button id="to-forge-btn" class="menu-btn">⚒️ Кузница</button>
+                <button id="to-forge-btn" class="menu-btn">⚒️ Кузня</button>
             </div>
             <div class="menu-row">
                 <button id="to-alchemy-btn" class="menu-btn">🧪 Лаборатория</button>
+            </div>
+            <div class="menu-row">
+                <button id="to-clans-btn" class="menu-btn" style="background: linear-gradient(to bottom, #1f2d42 0%, #101724 100%); border-color: #324e6e;">🛡️ Кланы</button>
             </div>
             <div class="menu-row">
                 <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
@@ -88,7 +91,7 @@
             </div>
             
             <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v2.4.0-BETA</div>
+            <div id="game-version" class="version-footer">v2.5.0-BETA</div>
         </div>
 
         <!-- Контейнеры для динамических модулей генерации DOM -->
