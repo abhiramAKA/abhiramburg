@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ИСПРАВЛЕННЫЙ МОДУЛЬНЫЙ ЗАГРУЗЧИК (v1.1.0-BETA)
+        // ИСПРАВЛЕННЫЙ МОДУЛЬНЫЙ ЗАГРУЗЧИК (v1.2.0-BETA)
         (function() {
             const timestamp = Date.now();
             
@@ -34,7 +34,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Модули v1.1.0 успешно декомпозированы.");
+                    console.log("КХАМАЧ: Модули v1.2.0 успешно декомпозированы.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -64,7 +64,10 @@
             <h1>КХАМАЧ</h1>
             <span class="subtitle">Рейды в Горнило Рун</span>
             
-            <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🪙 0 Золота</div>
+            <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 5px; font-size: 16px;">🪙 0 Золота</div>
+            
+            <!-- ДИНАМИЧЕСКИЙ БЛОК ИНВЕНТАРЯ ГЛАВНОГО ЭКРАНА -->
+            <div id="main-menu-inventory" style="background: rgba(0, 0, 0, 0.4); border: 1px double #544432; padding: 6px 10px; margin-bottom: 12px; font-size: 12px; border-radius: 4px; box-sizing: border-box;"></div>
             
             <p>Древний Дракон пробудился в недрах подземелья. Соберите свой отряд, заряжайте шкалы суперсил через камни стихий и сокрушите огнедышащую тварь в пошаговой тактической битве.</p>
             
@@ -84,7 +87,7 @@
             </div>
             
             <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v1.1.0-BETA</div>
+            <div id="game-version" class="version-footer">v1.2.0-BETA</div>
         </div>
 
         <!-- Контейнеры для динамических модулей генерации DOM -->
