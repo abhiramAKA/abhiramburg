@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК РЕЙДОВ (v0.7.0-ALPHA.1)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (v0.7.0-BETA)
    ========================================================================== */
 
 function buildDragonDOM() {
@@ -30,25 +30,23 @@ function buildDragonDOM() {
 }
 
 function startCombatSession() {
-    let lvl = combatData.currentLevel;
-    combatData.dragonMaxHP = 100 + (lvl * 100);
-    combatData.dragonHP = combatData.dragonMaxHP;
-    
-    combatData.dragonBaseDamage = 6 + (lvl * 4);
-    combatData.dragonMassDamage = 14 + (lvl * 6);
-    
-    combatData.playerAP = 3;
+    combatData.dragonHP = 1000;
+    combatData.playerAP = 1;
     combatData.currentRound = 1;
-    combatData.playerShield = 0;
+    combatData.tankTaunting = false;
+    combatData.dragonBlinded = false;
+    combatData.isActionPhase = false;
     
     combatData.squad.forEach(hero => {
-        if (lvl === 1) {
-            hero.hp = hero.maxHP;
-        } else if (hero.hp > 0) {
-            let missing = hero.maxHP - hero.hp;
-            hero.hp = Math.min(hero.maxHP, hero.hp + Math.floor(missing * 0.5));
-        }
+        hero.hp = hero.maxHP;
+        hero.sp = 0;
     });
+    
+    const endTurnBtn = document.getElementById('end-turn-btn');
+    if (endTurnBtn) endTurnBtn.style.display = 'none';
+    
+    document.getElementById('combat-ap-display').innerText = "Сделайте ход на поле!";
+    document.getElementById('combat-ap-display').style.color = "#ffd700";
     
     buildDragonDOM();
     updateCombatInterfaceDOM();
@@ -58,71 +56,37 @@ function startCombatSession() {
     }
 }
 
-function isHeroAlive(role) {
-    let hero = combatData.squad.find(h => h.role === role);
-    return hero && hero.hp > 0;
-}
-
 function applyRuneCombination(effects) {
-    let fireDamage = isHeroAlive('🔥') ? (effects['🔥'] * 4) : 0;
-    let waterDamage = isHeroAlive('💧') ? (effects['💧'] * 3) : 0;
-    
-    let totalDamage = fireDamage + waterDamage;
-    if (totalDamage > 0) {
-        combatData.dragonHP = Math.max(0, combatData.dragonHP - totalDamage);
+    if (effects['🛡️']) {
+        let t = combatData.squad.find(h => h.id === "tank");
+        if (t && t.hp > 0) t.sp = Math.min(t.maxSP, t.sp + effects['🛡️'] * 6);
     }
-    
-    let totalHeal = isHeroAlive('💨') ? (effects['💨'] * 2) : 0;
-    if (totalHeal > 0) {
-        combatData.squad.forEach(hero => {
-            if (hero.hp > 0) hero.hp = Math.min(hero.maxHP, hero.hp + totalHeal);
-        });
+    if (effects['🔥']) {
+        let d = combatData.squad.find(h => h.id === "damage");
+        if (d && d.hp > 0) d.sp = Math.min(d.maxSP, d.sp + effects['🔥'] * 6);
     }
-
-    let totalShieldGain = isHeroAlive('⛰️') ? (effects['⛰️'] * 3) : 0;
-    if (totalShieldGain > 0) {
-        combatData.playerShield += totalShieldGain;
+    if (effects['🎯']) {
+        let a = combatData.squad.find(h => h.id === "archer");
+        if (a && a.hp > 0) a.sp = Math.min(a.maxSP, a.sp + effects['🎯'] * 6);
+    }
+    if (effects['💚']) {
+        let m = combatData.squad.find(h => h.id === "mage");
+        if (m && m.hp > 0) m.sp = Math.min(m.maxSP, m.sp + effects['💚'] * 6);
     }
     
     updateCombatInterfaceDOM();
-    checkBattleResolution();
 }
 
 function usePlayerActionPoint() {
-    combatData.playerAP--;
+    combatData.playerAP = 0;
     updateCombatInterfaceDOM();
     
-    if (combatData.playerAP <= 0) {
-        setTimeout(executeDragonTurnAI, 600);
-    }
-}
-
-function damageSquadWithShieldAbsorption(incomingDamage, hitAll = false) {
-    let currentDamage = incomingDamage;
-
-    if (combatData.playerShield > 0) {
-        if (combatData.playerShield >= currentDamage) {
-            combatData.playerShield -= currentDamage;
-            currentDamage = 0;
-        } else {
-            currentDamage -= combatData.playerShield;
-            combatData.playerShield = 0;
-        }
-    }
-
-    if (currentDamage > 0) {
-        if (hitAll) {
-            combatData.squad.forEach(hero => {
-                if (hero.hp > 0) hero.hp = Math.max(0, hero.hp - currentDamage);
-            });
-        } else {
-            let aliveHeroes = combatData.squad.filter(h => h.hp > 0);
-            if (aliveHeroes.length > 0) {
-                let target = aliveHeroes[Math.floor(Math.random() * aliveHeroes.length)];
-                target.hp = Math.max(0, target.hp - currentDamage);
-            }
-        }
-    }
+    if (typeof isBoardLocked !== 'undefined') isBoardLocked = true;
+    
+    document.getElementById('combat-ap-display').innerText = "Ход Дракона...";
+    document.getElementById('combat-ap-display').style.color = "#ff4500";
+    
+    setTimeout(executeDragonTurnAI, 800);
 }
 
 function executeDragonTurnAI() {
@@ -136,11 +100,28 @@ function executeDragonTurnAI() {
         dragonModel.classList.add('dragon-attacking');
     }
 
-    if (combatData.currentRound % 3 === 0) {
-        if (fireFx) fireFx.classList.add('active');
-        damageSquadWithShieldAbsorption(combatData.dragonMassDamage, true);
+    // Первый уровень дракона: всегда базовая точечная атака (20 ед. урона)
+    let baseDamage = 20;
+
+    // Если Лучник ослепил дракона Суперсилой, урон режется на 50%
+    if (combatData.dragonBlinded) {
+        baseDamage = Math.round(baseDamage * 0.5);
+        combatData.dragonBlinded = false; 
+    }
+
+    let tankHero = combatData.squad.find(h => h.id === "tank");
+
+    // ПРАВИЛО ПРОВОКАЦИИ И РАНДОМА ДЛЯ 1-ГО УРОВНЯ
+    if (combatData.tankTaunting && tankHero && tankHero.hp > 0) {
+        tankHero.hp = Math.max(0, tankHero.hp - baseDamage);
+        combatData.tankTaunting = false; // Провокация израсходована
     } else {
-        damageSquadWithShieldAbsorption(combatData.dragonBaseDamage, false);
+        // Провокации нет -> Дракон наносит точечный урон по случайному живому герою
+        let aliveHeroes = combatData.squad.filter(h => h.hp > 0);
+        if (aliveHeroes.length > 0) {
+            let target = aliveHeroes[Math.floor(Math.random() * aliveHeroes.length)];
+            target.hp = Math.max(0, target.hp - baseDamage);
+        }
     }
 
     updateCombatInterfaceDOM();
@@ -152,11 +133,54 @@ function executeDragonTurnAI() {
         }
         if (fireFx) fireFx.classList.remove('active');
         
-        combatData.currentRound++;
-        combatData.playerAP = combatData.playerMaxAP;
+        // Включаем ручную фазу приказов для игрока
+        combatData.isActionPhase = true;
+        
+        document.getElementById('combat-ap-display').innerText = "Фаза приказов: активируйте Суперсилы!";
+        document.getElementById('combat-ap-display').style.color = "#2ecc71";
+        
+        const endTurnBtn = document.getElementById('end-turn-btn');
+        if (endTurnBtn) endTurnBtn.style.display = 'block';
+        
         updateCombatInterfaceDOM();
         checkBattleResolution();
-    }, 1000);
+    }, 1200);
+}
+
+function activateHeroSuperpower(heroId) {
+    if (!combatData.isActionPhase) return;
+    
+    let hero = combatData.squad.find(h => h.id === heroId);
+    if (!hero || hero.hp <= 0 || hero.sp < hero.maxSP) return;
+    
+    hero.sp = 0; 
+    
+    if (typeof playMatch3Sound === 'function') {
+        playMatch3Sound(hero.icon);
+    }
+    
+    switch(heroId) {
+        case "tank": // Танк только провоцирует босса на следующий раунд
+            combatData.tankTaunting = true;
+            break;
+            
+        case "damage": // Дамагер наносит чистый урон
+            combatData.dragonHP = Math.max(0, combatData.dragonHP - 120);
+            break;
+            
+        case "archer": // Лучник снижает силу следующей атаки на 50%
+            combatData.dragonBlinded = true;
+            break;
+            
+        case "mage": // Маг лечит здоровье всей четверке сразу
+            combatData.squad.forEach(h => {
+                if (h.hp > 0) h.hp = Math.min(h.maxHP, h.hp + 25);
+            });
+            break;
+    }
+    
+    updateCombatInterfaceDOM();
+    checkBattleResolution();
 }
 
 function updateCombatInterfaceDOM() {
@@ -169,15 +193,12 @@ function updateCombatInterfaceDOM() {
     }
     
     const roundDisp = document.getElementById('combat-round-display');
-    const apDisp = document.getElementById('combat-ap-display');
-    if (roundDisp) roundDisp.innerText = `Уровень: ${combatData.currentLevel} | Раунд: ${combatData.currentRound}`;
-    if (apDisp) apDisp.innerText = `ОД: ${combatData.playerAP} / ${combatData.playerMaxAP}`;
+    if (roundDisp) roundDisp.innerText = `Раунд: ${combatData.currentRound}`;
     
     const shieldDisp = document.getElementById('combat-shield-display');
     if (shieldDisp) {
-        if (combatData.playerShield > 0) {
+        if (combatData.tankTaunting) {
             shieldDisp.style.display = 'block';
-            shieldDisp.innerText = `🛡️ Общий Щит Стихий: +${combatData.playerShield}`;
         } else {
             shieldDisp.style.display = 'none';
         }
@@ -187,37 +208,58 @@ function updateCombatInterfaceDOM() {
     if (squadMatrix) {
         squadMatrix.innerHTML = '';
         combatData.squad.forEach(hero => {
-            const badge = document.createElement('div');
-            badge.style.display = 'flex';
-            badge.style.alignItems = 'center';
-            badge.style.gap = '4px';
-            badge.style.background = 'rgba(20, 18, 15, 0.9)';
-            badge.style.border = hero.hp <= 0 ? '1px solid #444' : '1px solid #8a7350';
-            badge.style.padding = '3px 6px';
-            badge.style.borderRadius = '8px';
-            badge.style.fontSize = '11px';
-            badge.style.color = hero.hp <= 0 ? '#555' : '#fff';
-            badge.style.opacity = hero.hp <= 0 ? '0.4' : '1';
+            const card = document.createElement('div');
+            card.className = 'hero-gothic-card';
             
-            badge.innerHTML = `
-                <span>${hero.icon}</span>
-                <span style="font-weight:bold; color:${hero.hp <= 0 ? '#555' : '#e6aaaa'};">${hero.hp}</span>
-                <span style="color:#666; font-size:9px;">/${hero.maxHP}</span>
+            // Ореол зажигается только если накоплено 100% энергии И идет фаза приказов
+            let isReady = (hero.sp >= hero.maxSP && hero.hp > 0);
+            if (isReady && combatData.isActionPhase) {
+                card.classList.add('ready-glow');
+            }
+            if (hero.hp <= 0) {
+                card.style.opacity = '0.3';
+                card.style.filter = 'grayscale(1)';
+            }
+            
+            let hpPct = (hero.hp / hero.maxHP) * 100;
+            let spPct = (hero.sp / hero.maxSP) * 100;
+            
+            card.innerHTML = `
+                <div class="hero-card-avatar" style="color: ${hero.color};">${hero.icon}</div>
+                <div class="hero-card-name">${hero.name}</div>
+                
+                <!-- Шкала Здоровья (Красная) -->
+                <div class="hero-bar-container">
+                    <div class="hero-bar-fill hp-fill" style="width: ${hpPct}%;"></div>
+                    <div class="hero-bar-text">${hero.hp}/${hero.maxHP}</div>
+                </div>
+                
+                <!-- Шкала Суперсилы (Золотая) -->
+                <div class="hero-bar-container" style="border-color: #5c4314; background: #0f0a02;">
+                    <div class="hero-bar-fill sp-fill" style="width: ${spPct}%;"></div>
+                    <div class="hero-bar-text" style="color: #ffd700;">SP ${Math.round(spPct)}%</div>
+                </div>
             `;
-            squadMatrix.appendChild(badge);
+            
+            card.addEventListener('click', () => {
+                if (hero.hp > 0 && hero.sp >= hero.maxSP && combatData.isActionPhase) {
+                    activateHeroSuperpower(hero.id);
+                }
+            });
+            
+            squadMatrix.appendChild(card);
         });
     }
 }
 
 function checkBattleResolution() {
     if (combatData.dragonHP <= 0) {
-        alert(`УРОВЕНЬ ${combatData.currentLevel} ПРОЙДЕН! Дракон временно отступил и стал сильнее.`);
-        combatData.currentLevel++;
-        startCombatSession();
+        alert("ВЕЛИКАЯ ПОБЕДА! Дракон повержен!");
+        showScreen('main-menu');
     } else {
         let allDead = combatData.squad.every(hero => hero.hp <= 0);
         if (allDead) {
-            alert(`ПОРАЖЕНИЕ! Ваш отряд пал на уровне ${combatData.currentLevel}.`);
+            alert("ОТРЯД ПАЛ!");
             showScreen('main-menu');
         }
     }
