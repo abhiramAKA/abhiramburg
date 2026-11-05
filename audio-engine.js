@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ ПРОЦЕДУРНЫЙ АУДИО-ДВИЖОК (v0.7.9-BETA)
+   КХАМАЧ — ПРОЦЕДУРНЫЙ АУДИО-ДВИЖОК СКАЗОЧНЫХ РУН (ОБНОВЛЕН - v2.9.1-BETA)
    ========================================================================== */
 
 let audioCtx = null;
@@ -19,10 +19,10 @@ function playAmbientNode() {
 
     try {
         const now = audioCtx.currentTime;
-        const baseNotes = [110.00, 130.81, 146.83, 164.81, 196.00];
+        const baseNotes = [146.83, 164.81, 196.00, 220.00, 261.63];
         const freq1 = baseNotes[Math.floor(Math.random() * baseNotes.length)];
         const freq2 = freq1 * 1.5; 
-        const duration = 4 + Math.random() * 2;
+        const duration = 5 + Math.random() * 2;
 
         [freq1, freq2].forEach((freq, idx) => {
             const osc = audioCtx.createOscillator();
@@ -31,11 +31,11 @@ function playAmbientNode() {
             osc.type = 'sine';
             osc.frequency.setValueAtTime(freq, now);
             
-            const targetVolume = idx === 0 ? 0.015 : 0.008;
+            const targetVolume = idx === 0 ? 0.012 : 0.006;
             
             gain.gain.setValueAtTime(0, now);
-            gain.gain.linearRampToValueAtTime(targetVolume, now + 1.5); 
-            gain.gain.setValueAtTime(targetVolume, now + duration - 1.5);
+            gain.gain.linearRampToValueAtTime(targetVolume, now + 2.0); 
+            gain.gain.setValueAtTime(targetVolume, now + duration - 2.0);
             gain.gain.exponentialRampToValueAtTime(0.001, now + duration); 
             
             osc.connect(gain);
@@ -51,7 +51,7 @@ function playAmbientNode() {
             }
         });
     } catch (e) {
-        console.warn("Ошибка генерации фоновой ноты:", e);
+        console.warn("Ошибка эмбиента:", e);
     }
 }
 
@@ -77,65 +77,60 @@ function playMatch3Sound(type) {
         
         const now = audioCtx.currentTime;
         
+        // Сказочный кристальный щелчок при перемещении камней
         if (type === 'swap') {
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(280, now);
-            osc.frequency.exponentialRampToValueAtTime(550, now + 0.08);
-            gain.gain.setValueAtTime(0.1, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-            osc.start(now);
-            osc.stop(now + 0.08);
-        } else if (type === 'intro') {
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(520, now);
-            osc.frequency.exponentialRampToValueAtTime(850, now + 0.12);
-            gain.gain.setValueAtTime(0.04, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
             osc.start(now);
-            osc.stop(now + 0.12);
-        } else {
+            osc.stop(now + 0.1);
+        } 
+        // Нежный перезвон ветра при появлении поля
+        else if (type === 'intro') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, now);
+            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+            gain.gain.setValueAtTime(0.03, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        } 
+        // Сказочные, волшебные взрывы комбинаций на синусоидах и треугольниках
+        else {
+            osc.type = 'triangle';
             switch(type) {
                 case '🔥': 
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(140, now);
-                    osc.frequency.linearRampToValueAtTime(40, now + 0.25);
-                    gain.gain.setValueAtTime(0.25, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                    break;
-                    
-                case '🎯': 
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(800, now);
-                    osc.frequency.linearRampToValueAtTime(150, now + 0.18);
+                    osc.frequency.setValueAtTime(350, now);
+                    osc.frequency.linearRampToValueAtTime(120, now + 0.22);
                     gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
                     break;
-                    
                 case '🛡️': 
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(440, now);
-                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
-                    gain.gain.setValueAtTime(0.18, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.frequency.exponentialRampToValueAtTime(980, now + 0.25);
+                    gain.gain.setValueAtTime(0.12, now);
                     break;
-                    
+                case '⚡': 
+                    osc.frequency.setValueAtTime(700, now);
+                    osc.frequency.linearRampToValueAtTime(300, now + 0.18);
+                    gain.gain.setValueAtTime(0.1, now);
+                    break;
                 case '💚': 
-                    osc.type = 'triangle';
+                    osc.type = 'sine';
                     osc.frequency.setValueAtTime(330, now);
-                    osc.frequency.exponentialRampToValueAtTime(660, now + 0.22);
+                    osc.frequency.exponentialRampToValueAtTime(660, now + 0.25);
                     gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
                     break;
-                    
                 default:
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(150, now);
-                    osc.frequency.linearRampToValueAtTime(50, now + 0.2);
-                    gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.linearRampToValueAtTime(150, now + 0.2);
+                    gain.gain.setValueAtTime(0.1, now);
             }
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
             osc.start(now);
-            osc.stop(now + 0.3);
+            osc.stop(now + 0.25);
         }
     } catch (e) {
         console.warn("Аудио-эффект заблокирован.", e);
