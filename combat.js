@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БАЛАНСА БОССА (v2.1.0-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БАЛАНСА БОССА (v2.3.0-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -135,14 +135,13 @@ function checkBattleResolution() {
     if (combatData.dragonHP <= 0) {
         const earnedGold = Math.floor(activeSessionLevel * 50 + Math.random() * 50);
         
-        const lootTypes = ['plasma', 'blood', 'urine', 'tears'];
-        const lootNames = ['🛡️ Плазма', '🔥 Кровь', '⚡ Урина', '💚 Слезы'];
+        const lootTypes = ['plasma', 'blood', 'scale', 'tears']; // Заменено на scale
+        const lootNames = ['🛡️ Плазма', '🔥 Кровь', '🪶 Чешуя', '💚 Слезы'];
         const randIndex = Math.floor(Math.random() * lootTypes.length);
         
         let lootKey = lootTypes[randIndex];
         let lootName = lootNames[randIndex];
 
-        // Начисляем ништяк мгновенно на склад цитадели «по воздуху»
         if (typeof addPlayerResource === 'function') {
             addPlayerResource(lootKey, 1);
         }
