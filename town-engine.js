@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЭКОНОМИКА ЦИТАДЕЛИ И ПРЯМОЙ СКЛАД НИШТЯКОВ (ОБНОВЛЕН - v2.8.0-BETA)
+   КХАМАЧ — ЭКОНОМИКА ЦИТАДЕЛИ И ПРЯМОЙ СКЛАД НИШТЯКОВ (ОБНОВЛЕН - v2.9.1-BETA)
    ========================================================================== */
 
 const INLINE_TOWN_TEXTS = {
@@ -26,7 +26,7 @@ function buyTownBuilding(id) {
     const cost = 100; 
     if (getPlayerGold() >= cost && !isBuildingPurchased(id)) {
         localStorage.setItem('khamach_gold', getPlayerGold() - cost);
-        localStorage.setItem(`` + `khamach_purchased_${id}`, 'true');
+        localStorage.setItem(`khamach_purchased_${id}`, 'true');
         updateTownGoldDisplay();
         return true;
     }
@@ -67,13 +67,14 @@ function updateTownGoldDisplay() {
     const invContainer = document.getElementById('main-menu-inventory');
     if (!invContainer) return;
     
+    // Исправлено на чистый русский язык по ТЗ
     invContainer.innerHTML = `
         <div style="color: #bfae96; text-transform: uppercase; font-size: 10px; border-bottom: 1px solid #3a3025; padding-bottom: 2px; font-weight: bold;">📜 Хранилище Цитадели</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 12px; margin: 6px 0; color: #cdb38c; text-align: left; padding: 0 5px;">
-            <span>🛡️ Plasma: <strong style="color:#fff;">${getPlayerResource('plasma')}</strong></span>
-            <span>🔥 Blood: <strong style="color:#fff;">${getPlayerResource('blood')}</strong></span>
-            <span>🪶 Scale: <strong style="color:#fff;">${getPlayerResource('scale')}</strong></span>
-            <span>💚 Tears: <strong style="color:#fff;">${getPlayerResource('tears')}</strong></span>
+            <span>🌋 Плазма: <strong style="color:#fff;">${getPlayerResource('plasma')}</strong></span>
+            <span>🩸 Кровь: <strong style="color:#fff;">${getPlayerResource('blood')}</strong></span>
+            <span>🪶 Чешуя: <strong style="color:#fff;">${getPlayerResource('scale')}</strong></span>
+            <span>💧 Слезы: <strong style="color:#fff;">${getPlayerResource('tears')}</strong></span>
         </div>
     `;
 }
