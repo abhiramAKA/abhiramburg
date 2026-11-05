@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ИСПРАВЛЕННЫЙ МОДУЛЬНЫЙ ЗАГРУЗЧИК (v2.8.0-BETA)
+        // ИСПРАВЛЕННЫЙ МОДУЛЬНЫЙ ЗАГРУЗЧИК (v3.0.0-BETA)
         (function() {
             const timestamp = Date.now();
             
@@ -36,7 +36,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Модули v2.8.0 успешно загружены в память.");
+                    console.log("КХАМАЧ: Модули v3.0.0 успешно загружены.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -74,6 +74,7 @@
             <!-- Иерархический вертикальный ряд кнопок по ТЗ -->
             <div class="menu-row">
                 <button id="to-combat-btn" class="menu-btn">В БОЙ</button>
+                <button id="to-settings-btn" class="info-btn" style="font-size: 18px;">⚙️</button>
                 <button id="info-btn" class="info-btn">❓</button>
             </div>
             <div class="menu-row">
@@ -90,7 +91,39 @@
             </div>
             
             <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v2.8.0-BETA</div>
+            <div id="game-version" class="version-footer">v3.0.0-BETA</div>
+        </div>
+
+        <!-- ================= ОКНО АУДИО-МИКШЕРА И НАСТРОЕК ================= -->
+        <div id="settings-screen" class="game-window" style="display: none; padding: 20px;">
+            <h2>ЗВУКОВОЙ ПУЛЬТ</h2>
+            <span class="subtitle">Микшер Абхирамбурга</span>
+            
+            <div style="text-align: left; font-size: 13px; color: #cdb38c; margin-bottom: 15px;">
+                <div style="margin-bottom: 10px;">
+                    <label>🎵 Громкость Музыки:</label>
+                    <input type="range" id="volume-music-slider" min="0" max="100" value="50" style="width: 100%; accent-color: #ffd700;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label>🎇 Громкость Эффектов:</label>
+                    <input type="range" id="volume-fx-slider" min="0" max="100" value="70" style="width: 100%; accent-color: #ffd700;">
+                </div>
+                <div style="margin-bottom: 8px; border-top: 1px dashed #4a3f2c; padding-top: 8px; color: #8a7350; font-weight: bold; font-size: 11px; text-transform: uppercase;">🎛️ ЭКВАЛАЙЗЕР ЧАСТОТ ЭМБИЕНТА</div>
+                <div style="margin-bottom: 8px;">
+                    <label>🪵 Низкие частоты (Бас):</label>
+                    <input type="range" id="eq-low-slider" min="-12" max="12" value="0" style="width: 100%; accent-color: #e6c280;">
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <label>🔮 Средние частоты (Тело):</label>
+                    <input type="range" id="eq-mid-slider" min="-12" max="12" value="3" style="width: 100%; accent-color: #e6c280;">
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <label>✨ Высокие частоты (Блеск):</label>
+                    <input type="range" id="eq-high-slider" min="-12" max="12" value="0" style="width: 100%; accent-color: #e6c280;">
+                </div>
+            </div>
+            
+            <button id="close-settings-btn" class="menu-btn back-btn" style="width: 100%;">Сохранить настройки</button>
         </div>
 
         <!-- Контейнеры для динамических модулей генерации DOM -->
