@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (РАЗДЕЛЕННЫЙ - v0.8.3-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (УРАВНИВАНИЕ УРОНА - v0.8.5-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -123,20 +123,26 @@ function activateHeroSuperpower(heroId) {
     hero.sp = 0; 
     if (typeof playMatch3Sound === 'function') playMatch3Sound(hero.icon);
     
+    // Вспомогательный урон для Танка, Лучника и Мага одинаков — 25 единиц
+    const subHeroDamage = 25;
+    
     switch(heroId) {
         case "tank":
             combatData.tankTaunting = true;
+            combatData.dragonHP = Math.max(0, combatData.dragonHP - subHeroDamage);
             break;
         case "damage":
             combatData.dragonHP = Math.max(0, combatData.dragonHP - 120);
             break;
         case "archer":
             combatData.dragonBlinded = true;
+            combatData.dragonHP = Math.max(0, combatData.dragonHP - subHeroDamage);
             break;
         case "mage":
             combatData.squad.forEach(h => {
                 if (h.hp > 0) h.hp = Math.min(h.maxHP, h.hp + 25);
             });
+            combatData.dragonHP = Math.max(0, combatData.dragonHP - subHeroDamage);
             break;
     }
     
