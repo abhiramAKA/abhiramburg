@@ -1,9 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ИНТЕРАКТИВНАЯ МУЗЫКА - v0.6.0-beta.28)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ИНТЕРАКТИВНАЯ МУЗЫКА - v0.6.0-beta.32)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.28";
-
+const GAME_VERSION = "v0.6.0-beta.32";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const RUNE_TYPES = ['🔥', '🛡️', '💚', '⚡️', '💀'];
@@ -28,121 +27,97 @@ let selectedCell = null;
 const GAME_TEXTS = {
     mainInfo: `
         <p><strong>Система Очков Действия:</strong> Вам дается 3 ОД на раунд. Каждый обмен рун на поле тратит 1 ОД.</p>
-        <p>Собирайте комбинации из 3 и более рун. Эффекты суммируются! Дракон атакует строго после того, как вы потратите все 3 ОД.</p>
-        <p>Опасайтесь 3-го раунда — Дракон использует массовое <em>Дыхание Рока</em>!</p>
+        <p>Собирайте комбинации из 3 и более рун. Дракон контратакует строго после того, как вы потратите все 3 ОД.</p>
     `,
     combatHelp: `
-        <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>🔥 Руна Огня:</strong> Наносит Дракону сокрушительный урон (15 ед. за камень).</p>
-        <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>⚡️ Руна Молнии:</strong> Пробивает чешую Дракона чистой магией (10 ед. за камень).</p>
-        <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>🛡️ Руна Защиты:</strong> Накапливает щиты отряда (12 ед. за камень). Щит полностью принимает на себя входящие атаки босса.</p>
-        <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>💚 Руна Жизни:</strong> Моментально исцеляет Воина, Мага и Клирика (8 ед. за камень).</p>
-        <p style="text-align: left; font-size: 13px; margin-bottom: 15px;"><strong>💀 Руна Смерти:</strong> Непредсказуемая тёмная энергия подземелий.</p>
-        <p style="border-top: 1px dashed #4a3f2c; padding-top: 10px; font-size: 13px; text-align: left;"><strong>⚔️ Тактика боя:</strong> Соберите мощное комбо за 3 Очка Действия. Когда ОД закончатся, Дракон Некросмут проведёт яростную контратаку по вашему отряду!</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 5px;"><strong>🔥 Огонь / ⚡️ Молния:</strong> Атака босса.</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 5px;"><strong>🛡️ Защита:</strong> Накапливает щиты отряда.</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 5px;"><strong>💚 Жизнь:</strong> Исцеление всех героев.</p>
     `
 };
 
 const MODE_DESCRIPTIONS = {
-    forge: {
-        title: "⚒️ ДРЕВНЯЯ КУЗНИЦА",
-        text: "Священное место, где из осколков побеждённых монстров и застывшей лавы можно выковывать мифическое снаряжение для Воина, Мага и Клирика. Повышает базовую атаку и открывает пассивные навыки рун."
-    },
-    alchemy: {
-        title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ",
-        text: "Здесь вы сможете трансмутировать руны прямо во время боя, варить зелья Очков Действия (AP) и дистиллировать драконью кровь для получения мощных эликсиров бессмертия."
-    },
-    squad: {
-        title: "👥 УПРАВЛЕНИЕ ОТРЯДОМ",
-        text: "Военный лагерь ваших героев. Позволяет распределять очки характеристик (Сила, Дух, Выносливость), нанимать новых бойцов в рейд и изучать сокрушительные комбо-приемы."
-    }
+    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНИЦА", text: "Место ковки мифического снаряжения." },
+    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", text: "Здесь варят зелья Очков Действия." },
+    squad: { title: "👥 УПРАВЛЕНИЕ ОТРЯДОМ", text: "Военный лагерь ваших героев." }
 };
 
-// Вызывается загрузчиком строго по окончании инициализации всех JS файлов
 function runGameCoreInitialization() {
     initVersionDisplay();
     setupMenuListeners();
     setupCombatHelpListeners();
-    if (typeof changeMusicState === 'function') {
-        changeMusicState('menu');
-    }
+    setupAudioSettingsListeners();
+    if (typeof changeMusicState === 'function') changeMusicState('menu');
 }
 
 function initVersionDisplay() {
     const versionElement = document.getElementById('game-version');
-    if (versionElement) {
-        versionElement.innerText = GAME_VERSION;
-    }
+    if (versionElement) versionElement.innerText = GAME_VERSION;
 }
 
 function showScreen(screenId) {
     const screens = ['main-menu', 'info-screen', 'mode-desc-screen', 'combat-screen'];
     screens.forEach(id => {
         const screenEl = document.getElementById(id);
-        if (screenEl) {
-            screenEl.style.display = (id === screenId) ? 'flex' : 'none';
-        }
+        if (screenEl) screenEl.style.display = (id === screenId) ? 'flex' : 'none';
     });
-
-    if (typeof changeMusicState === 'function') {
-        if (screenId === 'combat-screen') {
-            changeMusicState('combat');
-        } else {
-            changeMusicState('menu');
-        }
-    }
+    if (typeof changeMusicState === 'function') changeMusicState(screenId === 'combat-screen' ? 'combat' : 'menu');
 }
 
 function openModeDescription(modeKey) {
     const modeData = MODE_DESCRIPTIONS[modeKey];
     if (!modeData) return;
-    
     document.getElementById('mode-desc-title').innerText = modeData.title;
     document.getElementById('mode-desc-text').innerHTML = modeData.text;
     showScreen('mode-desc-screen');
 }
 
-function setupMenuListeners() {
-    const toCombatBtn = document.getElementById('to-combat-btn');
-    if (toCombatBtn) {
-        toCombatBtn.addEventListener('click', () => {
-            showScreen('combat-screen');
-            if (typeof startCombatSession === 'function') {
-                startCombatSession();
+function setupAudioSettingsListeners() {
+    const volMusic = document.getElementById('volume-music');
+    const volFX = document.getElementById('volume-fx');
+    const muteBtn = document.getElementById('btn-mute-toggle');
+
+    if (volMusic) {
+        volMusic.addEventListener('input', (e) => {
+            if (typeof setGameVolume === 'function') setGameVolume('music', e.target.value);
+        });
+    }
+    if (volFX) {
+        volFX.addEventListener('input', (e) => {
+            if (typeof setGameVolume === 'function') setGameVolume('fx', e.target.value);
+        });
+    }
+    if (muteBtn) {
+        muteBtn.addEventListener('click', () => {
+            if (typeof toggleGameMute === 'function') {
+                const muted = toggleGameMute();
+                muteBtn.innerText = muted ? "🔇 Звук выкл" : "🔊 Звук вкл";
+                muteBtn.style.borderColor = muted ? "#a84444" : "#544432";
             }
         });
     }
+}
 
-    const infoBtn = document.getElementById('info-btn');
-    if (infoBtn) {
-        infoBtn.addEventListener('click', () => {
-            const infoTextEl = document.getElementById('info-screen-text');
-            if (infoTextEl) infoTextEl.innerHTML = GAME_TEXTS.mainInfo;
-            showScreen('info-screen');
-        });
-    }
+function setupMenuListeners() {
+    document.getElementById('to-combat-btn').addEventListener('click', () => {
+        showScreen('combat-screen');
+        if (typeof startCombatSession === 'function') startCombatSession();
+    });
 
-    const fromInfoToMenuBtn = document.getElementById('from-info-to-menu-btn');
-    if (fromInfoToMenuBtn) {
-        fromInfoToMenuBtn.addEventListener('click', () => {
-            showScreen('main-menu');
-        });
-    }
+    document.getElementById('info-btn').addEventListener('click', () => {
+        document.getElementById('info-screen-text').innerHTML = GAME_TEXTS.mainInfo;
+        showScreen('info-screen');
+    });
 
+    document.getElementById('from-info-to-menu-btn').addEventListener('click', () => showScreen('main-menu'));
     document.getElementById('to-forge-btn').addEventListener('click', () => openModeDescription('forge'));
     document.getElementById('to-alchemy-btn').addEventListener('click', () => openModeDescription('alchemy'));
     document.getElementById('to-squad-btn').addEventListener('click', () => openModeDescription('squad'));
+    document.getElementById('close-mode-desc-btn').addEventListener('click', () => showScreen('main-menu'));
 
-    document.getElementById('close-mode-desc-btn').addEventListener('click', () => {
-        showScreen('main-menu');
+    document.getElementById('leave-combat-btn').addEventListener('click', () => {
+        if (confirm("Вы уверены, что хотите сбежать из рейда?")) showScreen('main-menu');
     });
-
-    const leaveCombatBtn = document.getElementById('leave-combat-btn');
-    if (leaveCombatBtn) {
-        leaveCombatBtn.addEventListener('click', () => {
-            if (confirm("Вы уверены, что хотите сбежать из рейда?")) {
-                showScreen('main-menu');
-            }
-        });
-    }
 }
 
 function setupCombatHelpListeners() {
@@ -151,22 +126,13 @@ function setupCombatHelpListeners() {
     
     if (combatHelpBtn) {
         combatHelpBtn.addEventListener('click', () => {
-            const txtContainer = document.getElementById('combat-help-text-container');
-            if (txtContainer) txtContainer.innerHTML = GAME_TEXTS.combatHelp;
-            
-            const helpScreen = document.getElementById('combat-help-screen');
-            if (helpScreen) {
-                helpScreen.style.display = 'flex';
-            }
+            document.getElementById('combat-help-text-container').innerHTML = GAME_TEXTS.combatHelp;
+            document.getElementById('combat-help-screen').style.display = 'flex';
         });
     }
-    
     if (closeCombatHelpBtn) {
         closeCombatHelpBtn.addEventListener('click', () => {
-            const helpScreen = document.getElementById('combat-help-screen');
-            if (helpScreen) {
-                helpScreen.style.display = 'none';
-            }
+            document.getElementById('combat-help-screen').style.display = 'none';
         });
     }
 }
