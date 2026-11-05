@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Жесткий барьер против кэширования на уровне мета-тегов страниц -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
-    <link rel="stylesheet" href="styles.css?v=v0.7.4">
+    <link rel="stylesheet" href="styles.css?v=v0.7.5">
 </head>
 <body>
     <canvas id="bg-canvas"></canvas>
@@ -31,8 +35,7 @@
                 <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
             </div>
             
-            <!-- Динамическое отображение версии сборки -->
-            <div id="game-version" class="version-footer">v0.7.4-BETA</div>
+            <div id="game-version" class="version-footer">v0.7.5-BETA</div>
         </div>
 
         <!-- ================= ЭКРАН СПРАВКИ МЕНЮ ================= -->
@@ -99,13 +102,13 @@
 
     </div>
 
-    <!-- Обновленный порядок подключения скриптов -->
-    <script src="game.js?v=v0.7.4"></script>
-    <script src="background.js?v=v0.7.4"></script>
-    <script src="audio-engine.js?v=v0.7.4"></script>
-    <script src="match3-fx.js?v=v0.7.4"></script>
-    <script src="match3-input.js?v=v0.7.4"></script>
-    <script src="match3.js?v=v0.7.4"></script>
-    <script src="combat.js?v=v0.7.4"></script>
+    <!-- Защита от кэша: все модули подключены с версионными метками v0.7.5 -->
+    <script src="game.js?v=v0.7.5"></script>
+    <script src="background.js?v=v0.7.5"></script>
+    <script src="audio-engine.js?v=v0.7.5"></script>
+    <script src="match3-fx.js?v=v0.7.5"></script>
+    <script src="match3-input.js?v=v0.7.5"></script>
+    <script src="match3.js?v=v0.7.5"></script>
+    <script src="combat.js?v=v0.7.5"></script>
 </body>
 </html>
