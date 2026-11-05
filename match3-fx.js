@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АУДИО-ДВИЖОК С ПАНЕЛЬЮ УПРАВЛЕНИЯ ГРОМКОСТЬЮ (v0.6.0-beta.35)
+   КХАМАЧ — АУДИО-ДВИЖОК С ПАНЕЛЬЮ УПРАВЛЕНИЯ ГРОМКОСТЬЮ (v0.6.0-beta.36)
    ========================================================================== */
 
 let audioCtx = null;
@@ -46,7 +46,6 @@ function playAmbientNode() {
         const now = audioCtx.currentTime;
         let duration = 4.0 + Math.random() * 1.5;
         
-        // Массив частот для минорного готического эмбиента [A3, C4, D4, E4, G4]
         const roots = [220.00, 261.63, 293.66, 329.63, 392.00];
         const baseRoot = roots[Math.floor(Math.random() * roots.length)];
         const chordFrequencies = [baseRoot, baseRoot * 1.1892, baseRoot * 1.4983];
@@ -109,51 +108,68 @@ function playMatch3Sound(type) {
     try {
         initAudioContext();
         if (!audioCtx || audioCtx.state === 'suspended' || audioCtx.state === 'closed') return;
+        
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
+        
+        // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Все эффекты рун идут напрямую в аудиовыход БЕЗ подключения к эхо-камере (delayNode)
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        if (delayNode && type !== 'swap') gain.connect(delayNode); 
-        const now = audioCtx.currentTime;
         
+        const now = audioCtx.currentTime;
         const fxVol = gameVolumeFX;
         
         if (type === 'swap') {
-            osc.type = 'triangle'; osc.frequency.setValueAtTime(280, now);
-            osc.frequency.exponentialRampToValueAtTime(550, now + 0.08);
-            gain.gain.setValueAtTime(0.1 * fxVol, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-            osc.start(now); osc.stop(now + 0.08);
+            osc.type = 'sine'; 
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(600, now + 0.06);
+            gain.gain.setValueAtTime(0.05 * fxVol, now); 
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+            osc.start(now); osc.stop(now + 0.06);
         } else {
+            // Новая концепция: Мягкие, нежные, "добрые" переливы для рун
             switch(type) {
-                case '🔥':
-                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(140, now);
-                    osc.frequency.linearRampToValueAtTime(40, now + 0.25);
-                    gain.gain.setValueAtTime(0.25 * fxVol, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                case '🔥': // Пламенный нежный всплеск
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(450, now + 0.15);
+                    gain.gain.setValueAtTime(0.12 * fxVol, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
                     break;
-                case '⚡️':
-                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(800, now);
-                    osc.frequency.linearRampToValueAtTime(150, now + 0.18);
-                    gain.gain.setValueAtTime(0.15 * fxVol, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+                case '⚡️': // Волшебный кристальный дзинь
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(900, now + 0.12);
+                    gain.gain.setValueAtTime(0.08 * fxVol, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
                     break;
-                case '🛡️':
-                    osc.type = 'sine'; osc.frequency.setValueAtTime(440, now);
-                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
-                    gain.gain.setValueAtTime(0.18 * fxVol, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                case '🛡️': // Мягкий бархатный отскок брони
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(250, now);
+                    osc.frequency.exponentialRampToValueAtTime(350, now + 0.18);
+                    gain.gain.setValueAtTime(0.14 * fxVol, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
                     break;
-                case '💚':
-                    osc.type = 'triangle'; osc.frequency.setValueAtTime(330, now);
-                    osc.frequency.exponentialRampToValueAtTime(660, now + 0.22);
-                    gain.gain.setValueAtTime(0.15 * fxVol, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+                case '💚': // Восходящий ангельский перелив исцеления
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(350, now);
+                    osc.frequency.exponentialRampToValueAtTime(700, now + 0.22);
+                    gain.gain.setValueAtTime(0.1 * fxVol, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
                     break;
-                case '💀':
-                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(90, now);
-                    osc.frequency.linearRampToValueAtTime(30, now + 0.3);
-                    gain.gain.setValueAtTime(0.22 * fxVol, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                case '💀': // Глубокий, но мягкий медитативный гонг
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.exponentialRampToValueAtTime(220, now + 0.25);
+                    gain.gain.setValueAtTime(0.12 * fxVol, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
                     break;
-                default:
-                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now);
-                    osc.frequency.linearRampToValueAtTime(50, now + 0.2);
-                    gain.gain.setValueAtTime(0.15 * fxVol, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                default: // Спокойный базовый всплеск
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(500, now + 0.15);
+                    gain.gain.setValueAtTime(0.08 * fxVol, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
             }
             osc.start(now); osc.stop(now + 0.3);
         }
