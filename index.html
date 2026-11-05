@@ -41,7 +41,7 @@
                 <button id="to-arena-btn" class="menu-btn">🏆 PvP Арена</button>
             </div>
             
-            <div id="game-version" class="version-footer">v0.6.0-beta.39</div>
+            <div id="game-version" class="version-footer">v0.6.0-beta.41</div>
         </div>
 
         <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ МЕНЮ ================= -->
@@ -58,7 +58,6 @@
             <span class="subtitle" id="mode-desc-subtitle">Грядущие расширения</span>
             <div id="mode-desc-text">Описание режима...</div>
             
-            <!-- Динамический блок звукового микшера (показывается только в настройках) -->
             <div id="menu-audio-mixer" style="display: none; background: rgba(20,15,12,0.8); border: 1px solid #544432; padding: 15px; margin: 15px 0; border-radius: 4px; text-align: left;">
                 <div style="margin-bottom: 12px;">
                     <label style="font-size: 13px; color: #e6c280; display: block; margin-bottom: 4px;">🎵 Громкость Музыки:</label>
@@ -120,7 +119,8 @@
 
     <script>
         (function() {
-            const scripts = ["game.js", "background.js", "match3-visual-fx.js", "match3-fx.js", "match3-input.js", "match3.js", "combat.js"];
+            // Безопасная инициализация списка скриптов через конструктор
+            const scripts = new Array("game.js", "background.js", "match3-visual-fx.js", "match3-fx.js", "match3-input.js", "match3.js", "combat.js");
             const t = Date.now();
             function loadScript(index) {
                 if (index >= scripts.length) {
@@ -128,9 +128,9 @@
                     return;
                 }
                 const script = document.createElement('script');
-                script.src = `${scripts[index]}?t=${t}`;
+                script.src = scripts[index] + "?t=" + t;
                 script.async = false;
-                script.onload = () => loadScript(index + 1);
+                script.onload = function() { loadScript(index + 1); };
                 document.body.appendChild(script);
             }
             loadScript(0);
