@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (v0.7.3-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (ФИКС HP БОССА - v0.7.9-BETA)
    ========================================================================== */
 
 function buildDragonDOM() {
@@ -28,14 +28,25 @@ function buildDragonDOM() {
     raidZone.appendChild(container);
 }
 
-function startCombatSession() {
+function startCombatSession(level) {
+    const dragonLevel = level || 1;
     combatData.currentRound = 1;
-    combatData.dragonMaxHP = 120; 
-    combatData.dragonHP = 120;
+    
+    // Фиксированный расчет здоровья на основе выбранного уровня
+    const calculatedHP = 120 + (dragonLevel - 1) * 60;
+    combatData.dragonMaxHP = calculatedHP; 
+    combatData.dragonHP = calculatedHP;
+    
     combatData.playerAP = 1;
     combatData.tankTaunting = false;
     combatData.dragonBlinded = false;
     combatData.isActionPhase = false;
+    
+    const bossNameEl = document.getElementById('boss-name');
+    if (bossNameEl) {
+        const names = { 1: "ЗЕЛЕНЫЙ ДРАКОН", 2: "ОГНЕННЫЙ ДРАКОН", 3: "НЕКРОДРАКОН" };
+        bossNameEl.innerText = names[dragonLevel] || `ДРАКОН (УР. ${dragonLevel})`;
+    }
     
     combatData.squad.forEach(hero => {
         hero.hp = hero.maxHP;
@@ -53,7 +64,6 @@ function startCombatSession() {
     }
 }
 
-// Единственный легальный способ заполнения шкал энергии SP персонажей
 function chargeHeroSuperpowers(effects) {
     if (effects['🛡️']) {
         let t = combatData.squad.find(h => h.id === "tank");
@@ -122,7 +132,8 @@ function executeDragonTurnAI() {
         }
         
         combatData.currentRound++;
-        combatData.dragonMaxHP = combatData.currentRound * 120; 
+        
+        // Здоровье зафиксировано при старте. Прогрессивное нарастание максимума в раундах удалено.
         
         combatData.playerAP = combatData.playerMaxAP;
         if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
@@ -150,7 +161,6 @@ function activateHeroSuperpower(heroId) {
             combatData.tankTaunting = true;
             break;
         case "damage":
-            // ТОЧКА УРОНА: Единственное место во всем проекте, где уходит HP босса
             combatData.dragonHP = Math.max(0, combatData.dragonHP - 120);
             break;
         case "archer":
