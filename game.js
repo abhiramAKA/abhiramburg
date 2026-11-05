@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.20)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.21)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.20";
+const GAME_VERSION = "v0.6.0-beta.21";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -93,7 +93,6 @@ function setupMenuListeners() {
     const toCombatBtn = document.getElementById('to-combat-btn');
     if (toCombatBtn) {
         toCombatBtn.addEventListener('click', () => {
-            // Принудительно будим аудио-контекст по клику пользователя
             if (typeof initAudioContext === 'function') {
                 initAudioContext();
             }
