@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (УРАВНИВАНИЕ УРОНА - v0.8.5-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (НАГРАДА ЗОЛОТОМ - v0.8.6-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -123,7 +123,6 @@ function activateHeroSuperpower(heroId) {
     hero.sp = 0; 
     if (typeof playMatch3Sound === 'function') playMatch3Sound(hero.icon);
     
-    // Вспомогательный урон для Танка, Лучника и Мага одинаков — 25 единиц
     const subHeroDamage = 25;
     
     switch(heroId) {
@@ -152,8 +151,16 @@ function activateHeroSuperpower(heroId) {
 
 function checkBattleResolution() {
     if (combatData.dragonHP <= 0) {
-        alert(`ВЕЛИКАЯ ПОБЕДА! Дракон Тира ${activeSessionLevel} повержен!`);
-        if (typeof saveCompletedTier === 'function') saveCompletedTier(activeSessionLevel);
+        // Выдача золота при победе (зависит от уровня Тира дракона)
+        const earnedGold = Math.floor(activeSessionLevel * 50 + Math.random() * 50);
+        alert(`ВЕЛИКАЯ ПОБЕДА! Дракон Тира ${activeSessionLevel} повержен!\nНаграда: 🪙 ${earnedGold} Золота!`);
+        
+        if (typeof addPlayerGold === 'function') {
+            addPlayerGold(earnedGold);
+        }
+        if (typeof saveCompletedTier === 'function') {
+            saveCompletedTier(activeSessionLevel);
+        }
         if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
         showScreen('main-menu');
     } else {
