@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ИСПРАВЛЕННЫЙ МОДУЛЬНЫЙ ЗАГРУЗЧИК (v2.5.0-BETA)
+        // ИСПРАВЛЕННЫЙ МОДУЛЬНЫЙ ЗАГРУЗЧИК (v2.7.0-BETA)
         (function() {
             const timestamp = Date.now();
             
@@ -27,6 +27,7 @@
                 'match3-progression.js',
                 'town-engine.js',
                 'squad-engine.js',
+                'squad-dom.js',
                 'town-dom.js',
                 'combat-dom.js',
                 'combat.js',
@@ -35,7 +36,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Модули v2.5.0 успешно загружены.");
+                    console.log("КХАМАЧ: Модули v2.7.0 успешно загружены.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -91,11 +92,12 @@
             </div>
             
             <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v2.5.0-BETA</div>
+            <div id="game-version" class="version-footer">v2.7.0-BETA</div>
         </div>
 
         <!-- Контейнеры для динамических модулей генерации DOM -->
         <div id="dynamic-town-screens"></div>
+        <div id="squad-screen" class="game-window" style="display: none;"></div>
         <div id="dynamic-combat-screen"></div>
 
     </div>
