@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (БЕЗОПАСНЫЙ СТАРТ - v0.7.6-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (v0.7.7-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v0.7.6-BETA";
+const GAME_VERSION = "v0.7.7-BETA";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -24,12 +24,12 @@ let combatData = {
     ]
 };
 
-let match3BoardData = [];
+let match3BoardData =;
 let selectedCell = null;
 
 const GAME_TEXTS = {
     mainInfo: `
-        <p><strong>Правила Боя v0.7.6:</strong></p>
+        <p><strong>Правила Боя v0.7.7:</strong></p>
         <p>1. Каждый раунд вы делаете ровно <strong>1 ход на поле Match-3</strong>.</p>
         <p>2. Взрывы рун заряжают Суперсилу героев (+6% за камень).</p>
         <p>3. Дракон атакует автоматически <strong>сразу после вашего хода на поле</strong>.</p>
@@ -82,23 +82,14 @@ function setupMenuListeners() {
     const toCombatBtn = document.getElementById('to-combat-btn');
     if (toCombatBtn) {
         toCombatBtn.addEventListener('click', () => {
-            // Безопасный вызов аудио: проверяем, долетел ли модуль звука через инжектор
-            if (typeof startBackgroundMusic === 'function') {
-                startBackgroundMusic();
-            } else {
-                console.warn("Аудио-движок еще загружается...");
-            }
-            
+            if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
             showScreen('combat-screen');
-            
-            // Безопасный старт сессии: ждем полной готовности combat.js
             if (typeof startCombatSession === 'function') {
                 startCombatSession();
             } else {
-                // Если кликнули слишком быстро, делаем микрозадержку для ленивой загрузки
                 setTimeout(() => {
                     if (typeof startCombatSession === 'function') startCombatSession();
-                }, 150);
+                }, 100);
             }
         });
     }
