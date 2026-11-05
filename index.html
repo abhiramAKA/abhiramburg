@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>КХАМАЧ — Восхождение Рейдов</title>
-    <link rel="stylesheet" href="styles.css?v=beta25">
+    <script>
+        // Автоматический хвостик времени для CSS (обновляется при каждом перезапуске)
+        const cacheBusterTime = Date.now();
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = `styles.css?t=${cacheBusterTime}`;
+        document.head.appendChild(link);
+    </script>
 </head>
 <body>
     <canvas id="bg-canvas"></canvas>
@@ -31,7 +38,7 @@
                 <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
             </div>
             
-            <div id="game-version" class="version-footer">v0.6.0-beta.25</div>
+            <div id="game-version" class="version-footer">v0.6.0-beta.26</div>
         </div>
 
         <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ МЕНЮ ================= -->
@@ -94,12 +101,32 @@
 
     </div>
 
-    <script src="game.js"></script>
-    <script src="background.js"></script>
-    <script src="match3-visual-fx.js"></script>
-    <script src="match3-fx.js"></script>
-    <script src="match3-input.js"></script>
-    <script src="match3.js"></script>
-    <script src="combat.js"></script>
+    <!-- Автоматический последовательный загрузчик скриптов с защитой от кэша -->
+    <script>
+        (function() {
+            const scripts = [
+                "game.js",
+                "background.js",
+                "match3-visual-fx.js",
+                "match3-fx.js",
+                "match3-input.js",
+                "match3.js",
+                "combat.js"
+            ];
+            const t = Date.now();
+            
+            function loadScript(index) {
+                if (index >= scripts.length) return;
+                const src = `${scripts[index]}?t=${t}`;
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = false; // Сохраняем строгий порядок инициализации движка
+                script.onload = () => loadScript(index + 1);
+                document.body.appendChild(script);
+            }
+            
+            loadScript(0);
+        })();
+    </script>
 </body>
 </html>
