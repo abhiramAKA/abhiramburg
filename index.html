@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.8.0-BETA)
+        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.8.1-BETA)
         (function() {
             const timestamp = Date.now();
             
@@ -31,7 +31,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Все модули v0.8.0 успешно загружены в память.");
+                    console.log("КХАМАЧ: Все модули v0.8.1 успешно загружены в память.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -77,26 +77,21 @@
             </div>
             
             <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v0.8.0-BETA</div>
+            <div id="game-version" class="version-footer">v0.8.1-BETA</div>
         </div>
 
-        <!-- ================= ОКНО ВЫБОРА ДРАКОНА ================= -->
+        <!-- ================= ОКНО ВЫБОРА ДРАКОНА (С КРУТКОЙ) ================= -->
         <div id="dragon-select-screen" class="game-window" style="display: none;">
-            <h2>ВЫБОР ДОБЫЧИ</h2>
-            <span class="subtitle">Уровень угрозы подземелья</span>
-            <p>Выберите, какого дракона ваш отряд готов выследить. Чем сильнее чудовище, тем выше требования к вашей тактике.</p>
+            <h2>ДОСКА ОБЪЯВЛЕНИЙ ОХОТЫ</h2>
+            <span class="subtitle">24 Бестиария Горнила</span>
+            <p>Выберите доступного дракона. Следующий уровень угрозы откроется только после полной ликвидации текущей цели.</p>
             
-            <div class="menu-row">
-                <button class="menu-btn dragon-level-btn" data-level="1">🐉 Зеленый Дракон (Лвл 1 — 120 HP)</button>
-            </div>
-            <div class="menu-row">
-                <button class="menu-btn dragon-level-btn" data-level="2">🔥 Огненный Дракон (Лвл 2 — 180 HP)</button>
-            </div>
-            <div class="menu-row">
-                <button class="menu-btn dragon-level-btn" data-level="3">💀 Некродракон (Лвл 3 — 240 HP)</button>
+            <!-- Скролл-контейнер для размещения всех 24 уровней на мобильных экранах -->
+            <div id="dragon-levels-grid" style="max-height: 50vh; overflow-y: auto; padding-right: 5px; margin-bottom: 15px; border: 1px solid #4a3e31; background: rgba(0,0,0,0.3); border-radius: 4px;">
+                <!-- Кнопки генерируются динамически через game.js -->
             </div>
             
-            <button id="from-select-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
+            <button id="from-select-to-menu-btn" class="menu-btn back-btn" style="margin-top: 0;">Назад в меню</button>
         </div>
 
         <!-- ================= ЭКРАН СПРАВКИ МЕНЮ ================= -->
