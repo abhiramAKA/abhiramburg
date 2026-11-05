@@ -29,6 +29,7 @@
             </div>
             <div class="menu-row">
                 <button id="to-forge-btn" class="menu-btn">⚒️ Кузница</button>
+                <button id="to-settings-btn" class="info-btn">⚙️</button>
             </div>
             <div class="menu-row">
                 <button id="to-alchemy-btn" class="menu-btn">🧪 Алхимия</button>
@@ -37,7 +38,7 @@
                 <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
             </div>
             
-            <div id="game-version" class="version-footer">v0.6.0-beta.32</div>
+            <div id="game-version" class="version-footer">v0.6.0-beta.33</div>
         </div>
 
         <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ МЕНЮ ================= -->
@@ -48,37 +49,35 @@
             <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
         </div>
 
-        <!-- ================= ОКНО ОПИСАНИЯ РЕЖИМОВ (МЕНЮ) ================= -->
+        <!-- ================= ОКНО ОПИСАНИЯ РЕЖИМОВ И НАСТРОЕК ================= -->
         <div id="mode-desc-screen" class="game-window" style="display: none;">
             <h2 id="mode-desc-title">РЕЖИМ ИГРЫ</h2>
-            <span class="subtitle">Грядущие расширения</span>
-            <p id="mode-desc-text">Описание режима...</p>
+            <span class="subtitle" id="mode-desc-subtitle">Грядущие расширения</span>
+            <div id="mode-desc-text">Описание режима...</div>
+            
+            <!-- Динамический блок звукового микшера (показывается только в настройках) -->
+            <div id="menu-audio-mixer" style="display: none; background: rgba(20,15,12,0.8); border: 1px solid #544432; padding: 15px; margin: 15px 0; border-radius: 4px; text-align: left;">
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 13px; color: #e6c280; display: block; margin-bottom: 4px;">🎵 Громкость Музыки:</label>
+                    <input id="volume-music" type="range" min="0" max="1" step="0.05" value="0.5" style="width: 100%; cursor: pointer;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size: 13px; color: #e6c280; display: block; margin-bottom: 4px;">💥 Громкость Взрывов Рун:</label>
+                    <input id="volume-fx" type="range" min="0" max="1" step="0.05" value="0.6" style="width: 100%; cursor: pointer;">
+                </div>
+                <button id="btn-mute-toggle" class="menu-btn" style="padding: 8px; font-size: 12px; width: 100%;">🔊 Звук вкл</button>
+            </div>
+
             <button id="close-mode-desc-btn" class="menu-btn back-btn">Назад в меню</button>
         </div>
 
-        <!-- ================= НАСТРОЙКИ ЗВУКА И СПРАВОЧНИК (ОКНО ОБЩЕГО ОВЕРЛЕЯ) ================= -->
+        <!-- ================= ЧИСТЫЙ СПРАВОЧНИК В БОЮ ================= -->
         <div id="combat-help-screen" class="game-window combat-help-popup" style="display: none;">
             <div class="combat-help-content">
-                <h2>НАСТРОЙКИ СИСТЕМЫ</h2>
-                <span class="subtitle">Звуковой микшер подземелья</span>
-                
-                <!-- Панель управления звуками -->
-                <div style="background: rgba(20,15,12,0.8); border: 1px solid #544432; padding: 15px; margin-bottom: 20px; border-radius: 4px; text-align: left;">
-                    <div style="margin-bottom: 12px;">
-                        <label style="font-size: 13px; color: #e6c280; display: block; margin-bottom: 4px;">🎵 Громкость Музыки:</label>
-                        <input id="volume-music" type="range" min="0" max="1" step="0.05" value="0.5" style="width: 100%; cursor: pointer;">
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="font-size: 13px; color: #e6c280; display: block; margin-bottom: 4px;">💥 Громкость Эффектов (Рун):</label>
-                        <input id="volume-fx" type="range" min="0" max="1" step="0.05" value="0.6" style="width: 100%; cursor: pointer;">
-                    </div>
-                    <button id="btn-mute-toggle" class="menu-btn" style="padding: 8px; font-size: 12px; width: 100%;">🔊 Звук вкл</button>
-                </div>
-
                 <h2>ГОРНИЛО РУН</h2>
                 <span class="subtitle">Тактический мануал</span>
                 <div id="combat-help-text-container"></div>
-                <button id="close-combat-help-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться</button>
+                <button id="close-combat-help-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в бой</button>
             </div>
         </div>
 
