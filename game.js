@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.21)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ИНТЕРАКТИВНАЯ МУЗЫКА - v0.6.0-beta.27)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.21";
+const GAME_VERSION = "v0.6.0-beta.27";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -25,7 +25,6 @@ let combatData = {
 let match3BoardData = [];
 let selectedCell = null;
 
-// Тексты правил и справочника рун
 const GAME_TEXTS = {
     mainInfo: `
         <p><strong>Система Очков Действия:</strong> Вам дается 3 ОД на раунд. Каждый обмен рун на поле тратит 1 ОД.</p>
@@ -57,11 +56,15 @@ const MODE_DESCRIPTIONS = {
     }
 };
 
-window.addEventListener('DOMContentLoaded', () => {
+// Вызывается загрузчиком строго по окончании инициализации всех JS файлов
+function runGameCoreInitialization() {
     initVersionDisplay();
     setupMenuListeners();
     setupCombatHelpListeners();
-});
+    if (typeof changeMusicState === 'function') {
+        changeMusicState('menu');
+    }
+}
 
 function initVersionDisplay() {
     const versionElement = document.getElementById('game-version');
@@ -78,6 +81,14 @@ function showScreen(screenId) {
             screenEl.style.display = (id === screenId) ? 'flex' : 'none';
         }
     });
+
+    if (typeof changeMusicState === 'function') {
+        if (screenId === 'combat-screen') {
+            changeMusicState('combat');
+        } else {
+            changeMusicState('menu');
+        }
+    }
 }
 
 function openModeDescription(modeKey) {
@@ -93,9 +104,6 @@ function setupMenuListeners() {
     const toCombatBtn = document.getElementById('to-combat-btn');
     if (toCombatBtn) {
         toCombatBtn.addEventListener('click', () => {
-            if (typeof initAudioContext === 'function') {
-                initAudioContext();
-            }
             showScreen('combat-screen');
             if (typeof startCombatSession === 'function') {
                 startCombatSession();
@@ -131,7 +139,6 @@ function setupMenuListeners() {
     if (leaveCombatBtn) {
         leaveCombatBtn.addEventListener('click', () => {
             if (confirm("Вы уверены, что хотите сбежать из рейда?")) {
-                if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
                 showScreen('main-menu');
             }
         });
