@@ -1,12 +1,12 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР И СТРУКТУРА БОНУСОВ ЗДАНbackgroundИЙ (v0.8.8-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР И ИНТЕРФЕЙС ПЛОЩАДИ ГОРОДА (v0.8.9-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v0.8.8-BETA";
+const GAME_VERSION = "v0.8.9-BETA";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
-const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚']; // Заменено на молнию
+const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
 
 let combatData = {
     dragonHP: 120, 
@@ -19,7 +19,7 @@ let combatData = {
     squad: [
         { id: "tank", name: "Танк", hp: 150, maxHP: 150, sp: 0, maxSP: 100, icon: "🛡️", color: "#4a90e2" },
         { id: "damage", name: "Дамагер", hp: 90, maxHP: 90, sp: 0, maxSP: 100, icon: "🔥", color: "#ff4500" },
-        { id: "archer", name: "Лучник", hp: 100, maxHP: 100, sp: 0, maxSP: 100, icon: "⚡", color: "#f1c40f" }, // Заменено на молнию
+        { id: "archer", name: "Лучник", hp: 100, maxHP: 100, sp: 0, maxSP: 100, icon: "⚡", color: "#f1c40f" },
         { id: "mage", name: "Маг", hp: 80, maxHP: 80, sp: 0, maxSP: 100, icon: "💚", color: "#2ecc71" }
     ]
 };
@@ -27,7 +27,6 @@ let combatData = {
 let match3BoardData = [];
 let selectedCell = null;
 let selectedDragonLevel = 1;
-let activeModeKey = "";
 
 const GAME_TEXTS = {
     mainInfo: `
@@ -35,17 +34,11 @@ const GAME_TEXTS = {
         <p>Земля содрогается от поступи древнего змея. Сражайся на поле боя, и каждая собранная триада камней обрушит ярость вашего отряда на врага.</p>
     `,
     combatHelp: `
-        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🛡️ Суперсила Танка:</strong> Провокация (Дракон атакует Танка). Наносит базовый урон (+урон Кузницы).</p>
-        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🔥 Суперсила Дамагера:</strong> Наносит Дракону сокрушительный чистый урон (120 ед.).</p>
-        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>⚡ Суперсила Лучника:</strong> Ослепляет Дракона (урон босса -50%). Наносит базовый урон (+урон Кузницы).</p>
-        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>💚 Суперсила Мага:</strong> Моментально исцеляет здоровье (+25 HP) всему отряду. Наносит базовый урон (+урон Кузницы).</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🛡️ Суперсила Танка:</strong> Провокация. Наносит урон дракону.</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🔥 Суперсила Дамагера:</strong> Наносит Дракону сокрушительный чистый урон.</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>⚡ Суперсила Лучника:</strong> Ослепляет Дракона (урон босса -50%). Наносит урон.</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>💚 Суперсила Мага:</strong> Моментально исцеляет здоровье всему отряду. Наносит урон.</p>
     `
-};
-
-const MODE_DESCRIPTIONS = {
-    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНИЦА (До 15 ур.)", text: "Священное место ковки оружия. Каждый уровень здания увеличивает урон суперсил Танка, Лучника и Мага на <strong>+5 единиц</strong>." },
-    alchemy: { title: "🧪 БАШНЯ АЛХИМИКА (До 15 ур.)", text: "Здесь дистиллируют ману и харизму. Каждые 5 уровней строения навсегда увеличивают лимит ваших очков ходов (Макс. AP) в битвах на +1 ходов." },
-    squad: { title: "👥 ВОЕННЫЙ ЛАГЕРЬ ЦИТАДЕЛИ", text: "Военный штаб планирования. Каждый уровень здания увеличивает максимальный запас здоровья (Max HP) всех героев отряда на <strong>+10 единиц</strong>." }
 };
 
 if (document.readyState === 'loading') {
@@ -77,48 +70,67 @@ function showScreen(screenId) {
     if (screenId === 'dragon-select-screen' && typeof renderDragonSelectionGrid === 'function') {
         renderDragonSelectionGrid();
     }
-    if (screenId === 'main-menu' && typeof updateTownGoldDisplay === 'function') {
-        updateTownGoldDisplay();
+    if (screenId === 'mode-desc-screen') {
+        renderTownBuildingsList();
+    }
+    if (screenId === 'main-menu' || screenId === 'mode-desc-screen') {
+        if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
     }
 }
 
-function openModeDescription(modeKey) {
-    activeModeKey = modeKey;
-    const modeData = MODE_DESCRIPTIONS[modeKey];
-    if (!modeData) return;
-    
-    document.getElementById('mode-desc-title').innerText = modeData.title;
-    document.getElementById('mode-desc-text').innerHTML = modeData.text;
-    
-    updateBuildButtonDOM();
-    showScreen('mode-desc-screen');
-}
+function renderTownBuildingsList() {
+    const listContainer = document.getElementById('town-buildings-list');
+    if (!listContainer) return;
+    listContainer.innerHTML = '';
 
-function updateBuildButtonDOM() {
-    const buildBtn = document.getElementById('build-upgrade-btn');
-    if (!buildBtn || !activeModeKey) return;
-    
-    const lvl = typeof getBuildingLevel === 'function' ? getBuildingLevel(activeModeKey) : 0;
+    const buildings = [
+        { id: 'tank', name: '🛡️ Оружейная Танка', desc: 'Каждый уровень дает Танку +20 к Макс. HP' },
+        { id: 'damage', name: '🔥 Кузница Дамагера', desc: 'Каждый уровень дает Дамагеру +15 к урону ульты' },
+        { id: 'archer', name: '⚡ Стрельбище Лучника', desc: 'Каждый уровень дает Лучнику +10 к урону' },
+        { id: 'mage', name: '💚 Алтарь Мага', desc: 'Каждый уровень дает Магу +5 к силе лечения' }
+    ];
+
     const currentGold = typeof getPlayerGold === 'function' ? getPlayerGold() : 0;
     const cost = 150;
-    
-    if (lvl >= 15) {
-        buildBtn.innerText = `МАКСИМАЛЬНЫЙ УРОВЕНЬ (Ур. 15)`;
-        buildBtn.classList.add('disabled');
-        return;
-    }
 
-    if (lvl === 0) {
-        buildBtn.innerText = `ПОСТРОИТЬ УР. 1 (Цена: 150 🪙)`;
-    } else {
-        buildBtn.innerText = `УЛУЧШИТЬ ДО УР. ${lvl + 1} (Цена: 150 🪙)`;
-    }
-    
-    if (currentGold < cost) {
-        buildBtn.classList.add('disabled');
-    } else {
-        buildBtn.classList.remove('disabled');
-    }
+    buildings.forEach(b => {
+        const lvl = typeof getBuildingLevel === 'function' ? getBuildingLevel(b.id) : 0;
+        
+        const card = document.createElement('div');
+        card.style.background = 'rgba(0,0,0,0.3)';
+        card.style.border = '1px solid #4a3e31';
+        card.style.padding = '8px';
+        card.style.marginBottom = '8px';
+        card.style.borderRadius = '4px';
+        card.style.textAlign = 'left';
+
+        card.innerHTML = `
+            <div style="font-weight:bold; color:#e6c280; font-size:14px;">${b.name} (Ур. ${lvl}/15)</div>
+            <div style="font-size:11px; color:#bfae96; margin:4px 0 6px 0;">${b.desc}</div>
+        `;
+
+        const btn = document.createElement('button');
+        btn.className = 'menu-btn';
+        btn.style.padding = '8px';
+        btn.style.fontSize = '12px';
+
+        if (lvl >= 15) {
+            btn.innerText = 'МАКС. УРОВЕНЬ';
+            btn.classList.add('disabled');
+        } else {
+            btn.innerText = `Улучшить (150 🪙)`;
+            if (currentGold < cost) btn.classList.add('disabled');
+            
+            btn.addEventListener('click', () => {
+                if (typeof upgradeBuilding === 'function' && upgradeBuilding(b.id)) {
+                    renderTownBuildingsList();
+                }
+            });
+        }
+
+        card.appendChild(btn);
+        listContainer.appendChild(card);
+    });
 }
 
 function setupMenuListeners() {
@@ -131,25 +143,8 @@ function setupMenuListeners() {
     });
     
     document.getElementById('from-info-to-menu-btn').addEventListener('click', () => showScreen('main-menu'));
-    document.getElementById('to-forge-btn').addEventListener('click', () => openModeDescription('forge'));
-    document.getElementById('to-alchemy-btn').addEventListener('click', () => openModeDescription('alchemy'));
-    document.getElementById('to-squad-btn').addEventListener('click', () => openModeDescription('squad'));
+    document.getElementById('to-town-btn').addEventListener('click', () => showScreen('mode-desc-screen'));
     document.getElementById('close-mode-desc-btn').addEventListener('click', () => showScreen('main-menu'));
-
-    const buildUpgradeBtn = document.getElementById('build-upgrade-btn');
-    if (buildUpgradeBtn) {
-        buildUpgradeBtn.addEventListener('click', () => {
-            const currentLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel(activeModeKey) : 0;
-            if (currentLvl >= 15) return;
-
-            if (typeof upgradeBuilding === 'function' && upgradeBuilding(activeModeKey)) {
-                updateBuildButtonDOM();
-                alert("Строительство успешно завершено! Бонусы обновлены.");
-            } else {
-                alert("Недостаточно золота для постройки! Сражайтесь с драконами.");
-            }
-        });
-    }
 
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
     if (leaveCombatBtn) {
