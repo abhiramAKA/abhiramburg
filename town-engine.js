@@ -1,15 +1,15 @@
 /* ==========================================================================
-   КХАМАЧ — ЭКОНОМИКА ЦИТАДЕЛИ И СКЛАДЫ НИШТЯКОВ ДРАКОНА (ОБНОВЛЕН - v2.6.0-BETA)
+   КХАМАЧ — ЭКОНОМИКА ЦИТАДЕЛИ И ПРЯМОЙ СКЛАД НИШТЯКОВ (ОБНОВЛЕН - v2.8.0-BETA)
    ========================================================================== */
 
 const INLINE_TOWN_TEXTS = {
-    mainInfo: `<p><strong>«Логово Чудовища»:</strong> Сражайся на поле боя, и собранные триады рун обрушат ярость героев на врага.</p>`,
-    squadInfo: `<p><strong>«Штаб Отряда»:</strong> Тренируй лагеря воинов за золото, добытое с драконов, чтобы повысить здоровье и атаку.</p>`,
+    mainInfo: `<p><strong>«КХАМАЧ: Восхождение Рейдов»</strong></p><p>В недрах древних подземелий Абхирамбурга пробудился великий закон змея. Соберите свой верный отряд, заряжайте шкалы суперсил через камни стихий и сокрушите огнедышащих тварей в пошаговых тактических битвах Горнила!</p>`,
+    squadInfo: `<p><strong>«Военная Цитадель Казарм»:</strong></p><p>Здесь сосредоточены тренировочные лагеря, полигоны и алтари ваших героев. Развивайте инфраструктуру отряда, чтобы открыть скрытые вехи развития и многократно приумножить характеристики воинов перед вылазкой в рейд.</p>`,
     combatHelp: `<p>🛡️-Танк: Провокация. 🔥-Дамагер: Чистый урон. ⚡-Лучник: Слепота босса. 💚-Маг: Масс-хил.</p>`
 };
 
 const INLINE_MODE_DESCRIPTIONS = {
-    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНЯ", reqText: "В полумраке кузницы тяжело вздыхают мехи. Здесь из костей и чешуи великих ящеров куется мифический доспех, не знающий износа.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Кузня открывается только на 12-м уровне развития отряда!</strong>", isLocked: true },
+    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНЯ", reqText: "В полумраке кузницы тяжело вздыхают мехи. Здесь из костей и чешуи великих ящеров куется мифический доспех, не знающий износа.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Кузня открывается только на 12-м уровень развития отряда!</strong>", isLocked: true },
     alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", buyText: "Полки уставлены древними фолиантами и склянками со светящимися эссенциями. Лаборатории требуется закупка редких алхимических реагентов за 100 🪙.", activeText: "Реагенты закуплены. Лаборатория Абхирамбурга полностью готова дистиллировать эссенции драконов.", isLocked: false },
     clans: { title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", reqText: "Знамена великих гильдий замерли под сводами залов безмолвия. Здесь куется коллективное Величие фракций, координируются рейды и возводятся Врата Разломов в Мир 2.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Клановый шлюз открывается на 12-м уровне развития отряда!</strong>", isLocked: true }
 };
@@ -26,7 +26,7 @@ function buyTownBuilding(id) {
     const cost = 100; 
     if (getPlayerGold() >= cost && !isBuildingPurchased(id)) {
         localStorage.setItem('khamach_gold', getPlayerGold() - cost);
-        localStorage.setItem(`khamach_purchased_${id}`, 'true');
+        localStorage.setItem(`` + `khamach_purchased_${id}`, 'true');
         updateTownGoldDisplay();
         return true;
     }
@@ -70,10 +70,10 @@ function updateTownGoldDisplay() {
     invContainer.innerHTML = `
         <div style="color: #bfae96; text-transform: uppercase; font-size: 10px; border-bottom: 1px solid #3a3025; padding-bottom: 2px; font-weight: bold;">📜 Хранилище Цитадели</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 12px; margin: 6px 0; color: #cdb38c; text-align: left; padding: 0 5px;">
-            <span>🛡️ Плазма: <strong style="color:#fff;">${getPlayerResource('plasma')}</strong></span>
-            <span>🔥 Кровь: <strong style="color:#fff;">${getPlayerResource('blood')}</strong></span>
-            <span>🪶 Чешуя: <strong style="color:#fff;">${getPlayerResource('scale')}</strong></span>
-            <span>💚 Слезы: <strong style="color:#fff;">${getPlayerResource('tears')}</strong></span>
+            <span>🛡️ Plasma: <strong style="color:#fff;">${getPlayerResource('plasma')}</strong></span>
+            <span>🔥 Blood: <strong style="color:#fff;">${getPlayerResource('blood')}</strong></span>
+            <span>🪶 Scale: <strong style="color:#fff;">${getPlayerResource('scale')}</strong></span>
+            <span>💚 Tears: <strong style="color:#fff;">${getPlayerResource('tears')}</strong></span>
         </div>
     `;
 }
