@@ -37,7 +37,7 @@
                 <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
             </div>
             
-            <div id="game-version" class="version-footer">v0.6.0-beta.27</div>
+            <div id="game-version" class="version-footer">v0.6.0-beta.31</div>
         </div>
 
         <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ МЕНЮ ================= -->
@@ -100,7 +100,6 @@
 
     </div>
 
-    <!-- Последовательный загрузчик с принудительной постобработкой событий -->
     <script>
         (function() {
             const scripts = [
@@ -116,7 +115,6 @@
             
             function loadScript(index) {
                 if (index >= scripts.length) {
-                    // Все файлы загружены, гарантированно запускаем инициализацию интерфейса
                     if (typeof runGameCoreInitialization === 'function') {
                         runGameCoreInitialization();
                     }
