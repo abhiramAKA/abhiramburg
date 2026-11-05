@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (НАГРАДА ЗОЛОТОМ - v0.8.7-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БОНУСОВ ГОРОДА (v0.8.8-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -12,7 +12,12 @@ function startCombatSession(level) {
     combatData.dragonMaxHP = calculatedHP; 
     combatData.dragonHP = calculatedHP;
     
-    combatData.playerAP = 1;
+    // Рассчитываем Макс Ходы (AP) на основе Башни Алхимика: базовый 1 + по 1 за каждые 5 полных уровней
+    const alchemyLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('alchemy') : 0;
+    const apBonus = Math.floor(alchemyLvl / 5);
+    combatData.playerMaxAP = 1 + apBonus;
+    combatData.playerAP = combatData.playerMaxAP;
+    
     combatData.tankTaunting = false;
     combatData.dragonBlinded = false;
     combatData.isActionPhase = false;
@@ -24,7 +29,12 @@ function startCombatSession(level) {
         bossNameEl.innerText = `ДРАКОН ${currentElement} (ТИР ${activeSessionLevel})`;
     }
     
+    // Динамический перерасчет Max HP героев на основе уровня Военного Лагеря (+10 за уровень)
+    const squadLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('squad') : 0;
+    const hpBonus = squadLvl * 10;
+    
     combatData.squad.forEach(hero => {
+        hero.maxHP = (hero.id === "tank" ? 150 : hero.id === "damage" ? 90 : hero.id === "archer" ? 100 : 80) + hpBonus;
         hero.hp = hero.maxHP;
         hero.sp = 0;
     });
@@ -46,9 +56,9 @@ function chargeHeroSuperpowers(effects) {
         let d = combatData.squad.find(h => h.id === "damage");
         if (d && d.hp > 0) d.sp = Math.min(d.maxSP, d.sp + effects['🔥'] * 6);
     }
-    if (effects['🎯']) {
+    if (effects['⚡']) { // Проверка изменена на молнию
         let a = combatData.squad.find(h => h.id === "archer");
-        if (a && a.hp > 0) a.sp = Math.min(a.maxSP, a.sp + effects['🎯'] * 6);
+        if (a && a.hp > 0) a.sp = Math.min(a.maxSP, a.sp + effects['⚡'] * 6);
     }
     if (effects['💚']) {
         let m = combatData.squad.find(h => h.id === "mage");
@@ -58,14 +68,17 @@ function chargeHeroSuperpowers(effects) {
 }
 
 function usePlayerActionPoint() {
-    combatData.playerAP = 0;
+    combatData.playerAP--;
     if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
     
-    if (typeof isBoardLocked !== 'undefined') isBoardLocked = true;
-    document.getElementById('combat-ap-display').innerText = "Ход Дракона...";
-    document.getElementById('combat-ap-display').style.color = "#ff4500";
-    
-    setTimeout(executeDragonTurnAI, 700);
+    if (combatData.playerAP <= 0) {
+        if (typeof isBoardLocked !== 'undefined') isBoardLocked = true;
+        document.getElementById('combat-ap-display').innerText = "Ход Дракона...";
+        document.getElementById('combat-ap-display').style.color = "#ff4500";
+        setTimeout(executeDragonTurnAI, 700);
+    } else {
+        document.getElementById('combat-ap-display').innerText = `Осталось ходов: ${combatData.playerAP}`;
+    }
 }
 
 function executeDragonTurnAI() {
@@ -123,7 +136,9 @@ function activateHeroSuperpower(heroId) {
     hero.sp = 0; 
     if (typeof playMatch3Sound === 'function') playMatch3Sound(hero.icon);
     
-    const subHeroDamage = 25;
+    // Рассчитываем урон саппортов на основе Древней Кузницы (+5 за уровень)
+    const forgeLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('forge') : 0;
+    const subHeroDamage = 25 + forgeLvl * 5;
     
     switch(heroId) {
         case "tank":
@@ -153,13 +168,8 @@ function checkBattleResolution() {
     if (combatData.dragonHP <= 0) {
         const earnedGold = Math.floor(activeSessionLevel * 50 + Math.random() * 50);
         alert(`ВЕЛИКАЯ ПОБЕДА! Дракон Тира ${activeSessionLevel} повержен!\nНаграда: 🪙 ${earnedGold} Золота!`);
-        
-        if (typeof addPlayerGold === 'function') {
-            addPlayerGold(earnedGold);
-        }
-        if (typeof saveCompletedTier === 'function') {
-            saveCompletedTier(activeSessionLevel);
-        }
+        if (typeof addPlayerGold === 'function') addPlayerGold(earnedGold);
+        if (typeof saveCompletedTier === 'function') saveCompletedTier(activeSessionLevel);
         if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
         showScreen('main-menu');
     } else {
