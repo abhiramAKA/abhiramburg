@@ -4,24 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>КХАМАЧ — Восхождение Рейдов</title>
-    <script>
-        const cacheBusterTime = Date.now();
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = `styles.css?t=${cacheBusterTime}`;
-        document.head.appendChild(link);
-    </script>
+    <link rel="stylesheet" href="styles.css?v=v0.7.0">
 </head>
 <body>
+    <!-- Холст для искр костра -->
     <canvas id="bg-canvas"></canvas>
 
+    <!-- Общий контейнер интерфейса -->
     <div id="game-interface">
         
         <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
         <div id="main-menu" class="game-window" style="display: flex;">
             <h1>КХАМАЧ</h1>
             <span class="subtitle">Рейды в Горнило Рун</span>
-            <p>Древний Дракон пробудился в недрах подземелья. Соберите отряд и сокрушите тварь в пошаговой битве.</p>
+            <p>Древний Дракон пробудился в недрах подземелья. Соберите свой отряд, заряжайте шкалы суперсил через камни стихий и сокрушите огнедышащую тварь в пошаговой тактической битве.</p>
             
             <div class="menu-row">
                 <button id="to-combat-btn" class="menu-btn">В БОЙ</button>
@@ -29,7 +25,6 @@
             </div>
             <div class="menu-row">
                 <button id="to-forge-btn" class="menu-btn">⚒️ Кузница</button>
-                <button id="to-settings-btn" class="info-btn">⚙️</button>
             </div>
             <div class="menu-row">
                 <button id="to-alchemy-btn" class="menu-btn">🧪 Алхимия</button>
@@ -37,11 +32,9 @@
             <div class="menu-row">
                 <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
             </div>
-            <div class="menu-row">
-                <button id="to-arena-btn" class="menu-btn">🏆 PvP Арена</button>
-            </div>
             
-            <div id="game-version" class="version-footer">v0.6.0-beta.41</div>
+            <!-- Контрольная метка сборки -->
+            <div id="game-version" class="version-footer">v0.7.0-BETA</div>
         </div>
 
         <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ МЕНЮ ================= -->
@@ -52,32 +45,19 @@
             <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
         </div>
 
-        <!-- ================= ОКНО ОПИСАНИЯ РЕЖИМОВ И НАСТРОЕК ================= -->
+        <!-- ================= ОКНО ОПИСАНИЯ РЕЖИМОВ (МЕНЮ) ================= -->
         <div id="mode-desc-screen" class="game-window" style="display: none;">
             <h2 id="mode-desc-title">РЕЖИМ ИГРЫ</h2>
-            <span class="subtitle" id="mode-desc-subtitle">Грядущие расширения</span>
-            <div id="mode-desc-text">Описание режима...</div>
-            
-            <div id="menu-audio-mixer" style="display: none; background: rgba(20,15,12,0.8); border: 1px solid #544432; padding: 15px; margin: 15px 0; border-radius: 4px; text-align: left;">
-                <div style="margin-bottom: 12px;">
-                    <label style="font-size: 13px; color: #e6c280; display: block; margin-bottom: 4px;">🎵 Громкость Музыки:</label>
-                    <input id="volume-music" type="range" min="0" max="1" step="0.05" value="0.5" style="width: 100%; cursor: pointer;">
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label style="font-size: 13px; color: #e6c280; display: block; margin-bottom: 4px;">💥 Громкость Взрывов Рун:</label>
-                    <input id="volume-fx" type="range" min="0" max="1" step="0.05" value="0.6" style="width: 100%; cursor: pointer;">
-                </div>
-                <button id="btn-mute-toggle" class="menu-btn" style="padding: 8px; font-size: 12px; width: 100%;">🔊 Звук вкл</button>
-            </div>
-
+            <span class="subtitle">Грядущие расширения</span>
+            <p id="mode-desc-text">Описание режима загружается...</p>
             <button id="close-mode-desc-btn" class="menu-btn back-btn">Назад в меню</button>
         </div>
 
-        <!-- ================= ЧИСТЫЙ СПРАВОЧНИК В БОЮ ================= -->
+        <!-- ================= СПРАВОЧНИК РУН И БОЯ (В БОЮ) ================= -->
         <div id="combat-help-screen" class="game-window combat-help-popup" style="display: none;">
             <div class="combat-help-content">
                 <h2>ГОРНИЛО РУН</h2>
-                <span class="subtitle">Тактический мануал</span>
+                <span class="subtitle">Справочник Сил</span>
                 <div id="combat-help-text-container"></div>
                 <button id="close-combat-help-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в бой</button>
             </div>
@@ -85,8 +65,11 @@
 
         <!-- ================= БОЕВОЙ ЭКРАН ================= -->
         <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 10px 15px;">
+            
+            <!-- Динамическая зона дракона -->
             <div id="dragon-raid-zone" style="position: relative;"></div>
 
+            <!-- ПАНЕЛЬ БОССА (ЗДОРОВЬЕ) -->
             <div id="boss-panel" style="margin-bottom: 4px; padding: 4px; position: relative;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
                     <div id="boss-name" style="font-size: 12px; margin: 0;">ДРАКОН НЕКРОСМУТ</div>
@@ -98,43 +81,41 @@
                 </div>
             </div>
 
+            <!-- СТАТУС РАУНДА -->
             <div id="battle-status-panel" style="margin-bottom: 4px; padding: 4px; font-size: 11px; flex-direction: column; align-items: stretch; gap: 2px;">
                 <div style="display: flex; justify-content: space-between; width: 100%;">
                     <div id="combat-round-display">Раунд: 1</div>
-                    <div id="combat-ap-display">Очки Действия: 3 / 3</div>
+                    <div id="combat-ap-display" style="color: #ffd700; font-weight: bold;">Сделайте ход на поле!</div>
                 </div>
-                <div id="combat-shield-display" style="display: none; text-align: center; color: #4a90e2; font-weight: bold; font-size: 11px; border-top: 1px dashed #3a3025; padding-top: 2px;">🛡️ Защита отряда: +0</div>
+                <!-- Индикатор таунта -->
+                <div id="combat-shield-display" style="display: none; text-align: center; color: #4a90e2; font-weight: bold; font-size: 11px; border-top: 1px dashed #3a3025; padding-top: 2px;">🛡️ Танк спровоцировал дракона!</div>
             </div>
 
-            <div id="squad-matrix" style="display: flex; justify-content: space-around; gap: 4px; margin-bottom: 6px;"></div>
+            <!-- ИНТЕРФЕЙС ОТРЯДА ГЕРОЕВ С ДВУМЯ ШКАЛАМИ -->
+            <div id="squad-matrix" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 6px;">
+                <!-- Заполняется динамически скриптом -->
+            </div>
 
-            <div id="match3-board-container" class="match3-board"></div>
+            <!-- ИГРОВОЕ ПОЛЕ MATCH-3 (8х8) -->
+            <div id="match3-board-container" class="match3-board">
+                <!-- Ячейки рун генерируются динамически -->
+            </div>
 
-            <div style="height: 38px; margin-top: 8px; display: flex; width: 100%;">
+            <!-- Кнопки управления -->
+            <div style="height: 38px; margin-top: 8px; display: flex; width: 100%; gap: 6px;">
+                <button id="end-turn-btn" class="menu-btn" style="margin: 0; padding: 0; font-size: 13px; height: 100%; background: linear-gradient(to bottom, #2c3e50 0%, #0f171e 100%); border-color: #34495e; display: none;">Завершить приказы</button>
                 <button id="leave-combat-btn" class="menu-btn back-btn" style="margin: 0; padding: 0; font-size: 13px; height: 100%;">Сбежать</button>
             </div>
         </div>
 
     </div>
 
-    <script>
-        (function() {
-            // Безопасная инициализация списка скриптов через конструктор
-            const scripts = new Array("game.js", "background.js", "match3-visual-fx.js", "match3-fx.js", "match3-input.js", "match3.js", "combat.js");
-            const t = Date.now();
-            function loadScript(index) {
-                if (index >= scripts.length) {
-                    if (typeof runGameCoreInitialization === 'function') runGameCoreInitialization();
-                    return;
-                }
-                const script = document.createElement('script');
-                script.src = scripts[index] + "?t=" + t;
-                script.async = false;
-                script.onload = function() { loadScript(index + 1); };
-                document.body.appendChild(script);
-            }
-            loadScript(0);
-        })();
-    </script>
+    <!-- ПОДКЛЮЧЕНИЕ МОДУЛЕЙ -->
+    <script src="game.js"></script>
+    <script src="background.js"></script>
+    <script src="match3-fx.js"></script>
+    <script src="match3-input.js"></script>
+    <script src="match3.js"></script>
+    <script src="combat.js"></script>
 </body>
 </html>
