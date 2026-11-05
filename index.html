@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.9.3-BETA)
+        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.9.4-BETA)
         (function() {
             const timestamp = Date.now();
             
@@ -34,7 +34,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Все модули v0.9.3 успешно загружены в память.");
+                    console.log("КХАМАЧ: Все модули v0.9.4 успешно загружены в память.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -84,7 +84,7 @@
             </div>
             
             <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v0.9.3-BETA</div>
+            <div id="game-version" class="version-footer">v0.9.4-BETA</div>
         </div>
 
         <!-- ================= ОКНО ВЫБОРА ДРАКОНА ================= -->
@@ -119,16 +119,29 @@
             <button id="close-mode-desc-btn" class="menu-btn back-btn" style="margin-top: 5px; width: 100%;">Назад в меню</button>
         </div>
 
-        <!-- ================= ВКЛАДКА ОТРЯДА (ТРЕНИРОВКИ) ================= -->
+        <!-- ================= ЗЕРКАЛЬНОЕ МЕНЮ ОТРИСОВКИ ОТРЯДА (ИДЕНТИЧНО ГЛАВНОМУ) ================= -->
         <div id="squad-screen" class="game-window" style="display: none;">
-            <h2>👥 ТРЕНИРОВОЧНЫЙ ЛАГЕРЬ</h2>
-            <span class="subtitle">Модернизация характеристик героев</span>
+            <h1>ОТРЯД</h1>
+            <span class="subtitle">Военная Цитадель Казарм</span>
             
-            <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 15px;">🪙 0 Золота</div>
+            <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🪙 0 Золота</div>
             
-            <div id="squad-buildings-list" style="max-height: 45vh; overflow-y: auto; margin-bottom: 15px; padding-right: 2px;"></div>
+            <p>Модернизируйте пассивные тренировочные полигоны вашей армии. Каждый уровень построек навсегда приумножает ключевые боевые параметры выбранного героя.</p>
             
-            <button id="close-squad-btn" class="menu-btn back-btn" style="margin-top: 5px; width: 100%;">Назад в меню</button>
+            <div class="menu-row">
+                <button id="upgrade-tank-btn" class="menu-btn">🛡️ Казармы Танка</button>
+            </div>
+            <div class="menu-row">
+                <button id="upgrade-damage-btn" class="menu-btn">🔥 Плац Дамагера</button>
+            </div>
+            <div class="menu-row">
+                <button id="upgrade-archer-btn" class="menu-btn">⚡ Стрельбище Лучника</button>
+            </div>
+            <div class="menu-row">
+                <button id="upgrade-mage-btn" class="menu-btn">💚 Обитель Мага</button>
+            </div>
+            
+            <button id="close-squad-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Назад в меню</button>
         </div>
 
         <!-- ================= СПРАВОЧНИК В БОЮ ================= -->
