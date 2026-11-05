@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (v0.7.1-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (ИСПРАВЛЕННЫЙ - v0.7.2-BETA)
    ========================================================================== */
 
 function buildDragonDOM() {
@@ -30,7 +30,7 @@ function buildDragonDOM() {
 
 function startCombatSession() {
     combatData.currentRound = 1;
-    combatData.dragonMaxHP = 120; // 1 раунд = 120 HP
+    combatData.dragonMaxHP = 120; 
     combatData.dragonHP = 120;
     combatData.playerAP = 1;
     combatData.tankTaunting = false;
@@ -53,6 +53,7 @@ function startCombatSession() {
 }
 
 function applyRuneCombination(effects) {
+    // Взрывы рун заполняют ИСКЛЮЧИТЕЛЬНО золотые шкалы Суперсил персонажей
     if (effects['🛡️']) {
         let t = combatData.squad.find(h => h.id === "tank");
         if (t && t.hp > 0) t.sp = Math.min(t.maxSP, t.sp + effects['🛡️'] * 6);
@@ -119,9 +120,8 @@ function executeDragonTurnAI() {
             dragonModel.classList.add('dragon-idle');
         }
         
-        // Автоматический переход: увеличиваем раунд и пересчитываем HP дракона, если он выжил
         combatData.currentRound++;
-        combatData.dragonMaxHP = combatData.currentRound * 120; // 1-й=120, 2-й=240, 3-й=360
+        combatData.dragonMaxHP = combatData.currentRound * 120; 
         
         combatData.playerAP = combatData.playerMaxAP;
         if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
@@ -149,6 +149,7 @@ function activateHeroSuperpower(heroId) {
             combatData.tankTaunting = true;
             break;
         case "damage":
+            // Дракон теряет здоровье ТОЛЬКО здесь, при честном прожатии готовой ульты Дамагера
             combatData.dragonHP = Math.max(0, combatData.dragonHP - 120);
             break;
         case "archer":
