@@ -1,15 +1,15 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ЖИВЫХ ЭФФЕКТОВ ПОД 4 СТИХИИ (v0.7.0-ALPHA.1)
+   КХАМАЧ — МОДУЛЬ ЖИВЫХ ЭФФЕКТОВ (AUDIO, HAPTIC, PARTICLES) (v0.7.1-BETA)
    ========================================================================== */
 
 let audioCtx = null;
-let isMusicPlaying = false;
+let isMusicPlaying = false; 
 
 const FX_RUNE_COLORS = {
-    '⛰️': { primary: '#8a7350', secondary: '#cdb38c' },
-    '🔥': { primary: '#ff4500', secondary: '#ffaa00' },
-    '💧': { primary: '#1e90ff', secondary: '#87cefa' },
-    '💨': { primary: '#00fa9a', secondary: '#e0ffff' }
+    '🔥': { primary: '#ff4500', secondary: '#ffaa00' }, 
+    '🛡️': { primary: '#4a90e2', secondary: '#b8d8ff' }, 
+    '💚': { primary: '#2ecc71', secondary: '#a3e4d7' }, 
+    '🎯': { primary: '#f1c40f', secondary: '#f9e79f' }
 };
 
 function initAudioContext() {
@@ -28,7 +28,7 @@ function playAmbientNode() {
         const now = audioCtx.currentTime;
         const baseNotes = [110.00, 130.81, 146.83, 164.81, 196.00];
         const freq1 = baseNotes[Math.floor(Math.random() * baseNotes.length)];
-        const freq2 = freq1 * 1.5;
+        const freq2 = freq1 * 1.5; 
         const duration = 4 + Math.random() * 2;
 
         [freq1, freq2].forEach((freq, idx) => {
@@ -41,9 +41,9 @@ function playAmbientNode() {
             const targetVolume = idx === 0 ? 0.015 : 0.008;
             
             gain.gain.setValueAtTime(0, now);
-            gain.gain.linearRampToValueAtTime(targetVolume, now + 1.5);
+            gain.gain.linearRampToValueAtTime(targetVolume, now + 1.5); 
             gain.gain.setValueAtTime(targetVolume, now + duration - 1.5);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + duration); 
             
             osc.connect(gain);
             gain.connect(audioCtx.destination);
@@ -63,9 +63,8 @@ function playAmbientNode() {
 }
 
 function startBackgroundMusic() {
-    initAudioContext();
-    if (isMusicPlaying) return;
     isMusicPlaying = true;
+    initAudioContext();
     playAmbientNode();
 }
 
@@ -87,73 +86,71 @@ function playMatch3Sound(type) {
         
         if (type === 'swap') {
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(300, now);
-            osc.frequency.exponentialRampToValueAtTime(600, now + 0.06);
-            gain.gain.setValueAtTime(0.08, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+            osc.frequency.setValueAtTime(280, now);
+            osc.frequency.exponentialRampToValueAtTime(550, now + 0.08);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
             osc.start(now);
-            osc.stop(now + 0.06);
+            osc.stop(now + 0.08);
         } else if (type === 'intro') {
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(600, now);
-            osc.frequency.exponentialRampToValueAtTime(900, now + 0.1);
-            gain.gain.setValueAtTime(0.03, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+            osc.frequency.setValueAtTime(520, now);
+            osc.frequency.exponentialRampToValueAtTime(850, now + 0.12);
+            gain.gain.setValueAtTime(0.04, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
             osc.start(now);
-            osc.stop(now + 0.1);
+            osc.stop(now + 0.12);
         } else {
             switch(type) {
-                case '⛰️':
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(180, now);
-                    osc.frequency.linearRampToValueAtTime(80, now + 0.2);
+                case '🔥': 
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(140, now);
+                    osc.frequency.linearRampToValueAtTime(40, now + 0.25);
                     gain.gain.setValueAtTime(0.25, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
                     break;
                     
-                case '🔥':
+                case '🎯': 
                     osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(150, now);
-                    osc.frequency.linearRampToValueAtTime(50, now + 0.22);
-                    gain.gain.setValueAtTime(0.22, now);
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.linearRampToValueAtTime(150, now + 0.18);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+                    break;
+                    
+                case '🛡️': 
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    break;
+                    
+                case '💚': 
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(330, now);
+                    osc.frequency.exponentialRampToValueAtTime(660, now + 0.22);
+                    gain.gain.setValueAtTime(0.15, now);
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
                     break;
                     
-                case '💧':
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(350, now);
-                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
-                    gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-                    break;
-                    
-                case '💨':
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(400, now);
-                    osc.frequency.linearRampToValueAtTime(800, now + 0.25);
-                    gain.gain.setValueAtTime(0.12, now);
-                    gain.gain.exponentialRampToValueAtTime(0.005, now + 0.25);
-                    break;
-                    
                 default:
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(200, now);
-                    gain.gain.setValueAtTime(0.1, now);
-                    osc.start(now);
-                    osc.stop(now + 0.1);
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.linearRampToValueAtTime(50, now + 0.2);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
             }
             osc.start(now);
             osc.stop(now + 0.3);
         }
     } catch (e) {
-        console.warn("Аудио заблокировано политикой безопасности.", e);
+        console.warn("Аудио-эффект заблокирован.", e);
     }
 }
 
 function triggerMatch3Haptic(ms) {
-    if (navigator.vibrate) {
-        navigator.vibrate(ms);
-    }
+    if (navigator.vibrate) navigator.vibrate(ms);
 }
 
 function spawnRuneExplosionSparks(r, c, runeType) {
@@ -172,12 +169,11 @@ function spawnRuneExplosionSparks(r, c, runeType) {
         spark.className = 'rune-spark';
         spark.style.left = `${startX}px`;
         spark.style.top = `${startY}px`;
-        
         spark.style.background = colors.secondary;
         spark.style.boxShadow = `0 0 6px ${colors.primary}, 0 0 12px ${colors.secondary}`;
         
         const angle = (i * (360 / sparkCount) + Math.random() * 20) * (Math.PI / 180);
-        const distance = Math.random() * 35 + 20;
+        const distance = Math.random() * 40 + 25;
         const dx = Math.cos(angle) * distance;
         const dy = Math.sin(angle) * distance;
         
