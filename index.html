@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.8.1-BETA)
+        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.8.3-BETA)
         (function() {
             const timestamp = Date.now();
             
@@ -26,12 +26,14 @@
                 'match3-fx.js',
                 'match3-input.js',
                 'match3.js',
+                'match3-progression.js',
+                'combat-dom.js',
                 'combat.js'
             ];
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Все модули v0.8.1 успешно загружены в память.");
+                    console.log("КХАМАЧ: Все модули v0.8.3 успешно загружены в память.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -77,21 +79,20 @@
             </div>
             
             <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v0.8.1-BETA</div>
+            <div id="game-version" class="version-footer">v0.8.3-BETA</div>
         </div>
 
-        <!-- ================= ОКНО ВЫБОРА ДРАКОНА (С КРУТКОЙ) ================= -->
+        <!-- ================= ОКНО ВЫБОРА ДРАКОНА ================= -->
         <div id="dragon-select-screen" class="game-window" style="display: none;">
             <h2>ДОСКА ОБЪЯВЛЕНИЙ ОХОТЫ</h2>
             <span class="subtitle">24 Бестиария Горнила</span>
             <p>Выберите доступного дракона. Следующий уровень угрозы откроется только после полной ликвидации текущей цели.</p>
             
-            <!-- Скролл-контейнер для размещения всех 24 уровней на мобильных экранах -->
-            <div id="dragon-levels-grid" style="max-height: 50vh; overflow-y: auto; padding-right: 5px; margin-bottom: 15px; border: 1px solid #4a3e31; background: rgba(0,0,0,0.3); border-radius: 4px;">
-                <!-- Кнопки генерируются динамически через game.js -->
+            <div id="dragon-levels-grid" style="max-height: 40vh; overflow-y: auto; padding: 4px; margin-bottom: 15px; border: 1px solid #4a3e31; background: rgba(0,0,0,0.4); border-radius: 4px;">
+                <!-- Кнопки полностью генерируются динамически через match3-progression.js -->
             </div>
             
-            <button id="from-select-to-menu-btn" class="menu-btn back-btn" style="margin-top: 0;">Назад в меню</button>
+            <button id="from-select-to-menu-btn" class="menu-btn back-btn" style="margin-top: 0; width: 100%;">Назад в меню</button>
         </div>
 
         <!-- ================= ЭКРАН СПРАВКИ МЕНЮ ================= -->
@@ -104,7 +105,7 @@
 
         <!-- ================= ОКНО ОПИСАНИЯ РЕЖИМОВ ================= -->
         <div id="mode-desc-screen" class="game-window" style="display: none;">
-            <h2 id="mode-desc-title">РЕЖИМ ИГРЫ</h2>
+            h2 id="mode-desc-title">РЕЖИМ ИГРЫ</h2>
             <span class="subtitle">Грядущие расширения</span>
             <p id="mode-desc-text">Описание режима загружается...</p>
             <button id="close-mode-desc-btn" class="menu-btn back-btn">Назад в меню</button>
