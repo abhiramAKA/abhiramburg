@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БОНУСОВ ГОРОДА (v0.8.8-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И ВОИНСКИХ ПОСТРОЕК (v0.8.9-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -12,10 +12,7 @@ function startCombatSession(level) {
     combatData.dragonMaxHP = calculatedHP; 
     combatData.dragonHP = calculatedHP;
     
-    // Рассчитываем Макс Ходы (AP) на основе Башни Алхимика: базовый 1 + по 1 за каждые 5 полных уровней
-    const alchemyLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('alchemy') : 0;
-    const apBonus = Math.floor(alchemyLvl / 5);
-    combatData.playerMaxAP = 1 + apBonus;
+    combatData.playerMaxAP = 1;
     combatData.playerAP = combatData.playerMaxAP;
     
     combatData.tankTaunting = false;
@@ -29,12 +26,13 @@ function startCombatSession(level) {
         bossNameEl.innerText = `ДРАКОН ${currentElement} (ТИР ${activeSessionLevel})`;
     }
     
-    // Динамический перерасчет Max HP героев на основе уровня Военного Лагеря (+10 за уровень)
-    const squadLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('squad') : 0;
-    const hpBonus = squadLvl * 10;
+    // БОНУС ТАНКА: Оружейная дает Танку +20 к макс. HP за уровень
+    const tankLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('tank') : 0;
+    const tankHpBonus = tankLvl * 20;
     
     combatData.squad.forEach(hero => {
-        hero.maxHP = (hero.id === "tank" ? 150 : hero.id === "damage" ? 90 : hero.id === "archer" ? 100 : 80) + hpBonus;
+        let base = (hero.id === "tank" ? 150 : hero.id === "damage" ? 90 : hero.id === "archer" ? 100 : 80);
+        hero.maxHP = base + (hero.id === "tank" ? tankHpBonus : 0);
         hero.hp = hero.maxHP;
         hero.sp = 0;
     });
@@ -56,7 +54,7 @@ function chargeHeroSuperpowers(effects) {
         let d = combatData.squad.find(h => h.id === "damage");
         if (d && d.hp > 0) d.sp = Math.min(d.maxSP, d.sp + effects['🔥'] * 6);
     }
-    if (effects['⚡']) { // Проверка изменена на молнию
+    if (effects['⚡']) {
         let a = combatData.squad.find(h => h.id === "archer");
         if (a && a.hp > 0) a.sp = Math.min(a.maxSP, a.sp + effects['⚡'] * 6);
     }
@@ -76,8 +74,6 @@ function usePlayerActionPoint() {
         document.getElementById('combat-ap-display').innerText = "Ход Дракона...";
         document.getElementById('combat-ap-display').style.color = "#ff4500";
         setTimeout(executeDragonTurnAI, 700);
-    } else {
-        document.getElementById('combat-ap-display').innerText = `Осталось ходов: ${combatData.playerAP}`;
     }
 }
 
@@ -136,27 +132,34 @@ function activateHeroSuperpower(heroId) {
     hero.sp = 0; 
     if (typeof playMatch3Sound === 'function') playMatch3Sound(hero.icon);
     
-    // Рассчитываем урон саппортов на основе Древней Кузницы (+5 за уровень)
-    const forgeLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('forge') : 0;
-    const subHeroDamage = 25 + forgeLvl * 5;
+    // Считываем уровни построек воинов
+    const damageLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('damage') : 0;
+    const archerLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('archer') : 0;
+    const mageLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('mage') : 0;
+
+    // Расчет кастомного урона и лечения от построек
+    const dmgClassUnyielding = 120 + damageLvl * 15;
+    const archerClassUnyielding = 25 + archerLvl * 10;
+    const mageClassUnyielding = 25; 
+    const mageHealAmount = 25 + mageLvl * 5;
     
     switch(heroId) {
         case "tank":
             combatData.tankTaunting = true;
-            combatData.dragonHP = Math.max(0, combatData.dragonHP - subHeroDamage);
+            combatData.dragonHP = Math.max(0, combatData.dragonHP - 25);
             break;
         case "damage":
-            combatData.dragonHP = Math.max(0, combatData.dragonHP - 120);
+            combatData.dragonHP = Math.max(0, combatData.dragonHP - dmgClassUnyielding);
             break;
         case "archer":
             combatData.dragonBlinded = true;
-            combatData.dragonHP = Math.max(0, combatData.dragonHP - subHeroDamage);
+            combatData.dragonHP = Math.max(0, combatData.dragonHP - archerClassUnyielding);
             break;
         case "mage":
             combatData.squad.forEach(h => {
-                if (h.hp > 0) h.hp = Math.min(h.maxHP, h.hp + 25);
+                if (h.hp > 0) h.hp = Math.min(h.maxHP, h.hp + mageHealAmount);
             });
-            combatData.dragonHP = Math.max(0, combatData.dragonHP - subHeroDamage);
+            combatData.dragonHP = Math.max(0, combatData.dragonHP - mageClassUnyielding);
             break;
     }
     
