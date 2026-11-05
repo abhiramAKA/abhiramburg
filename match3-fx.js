@@ -1,29 +1,27 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ГРАФИЧЕСКИХ ИСКР И ЧАСТИЦ (РАЗДЕЛЕННЫЙ - v0.7.4-BETA)
+   КХАМАЧ — МОДУЛЬ КЛИЕНТСКИХ ИСКР И ХАПТИКИ (ВЫНЕСЕННЫЙ БЛОК) (v0.7.9-BETA)
    ========================================================================== */
 
-const FX_RUNE_COLORS = {
-    '🔥': { primary: '#ff4500', secondary: '#ffaa00' }, 
-    '🛡️': { primary: '#4a90e2', secondary: '#b8d8ff' }, 
-    '💚': { primary: '#2ecc71', secondary: '#a3e4d7' }, 
-    '🎯': { primary: '#f1c40f', secondary: '#f9e79f' }
+const FX_RUNE_COLORS_VISUAL = {
+    '🔥': { primary: '#ff4500', secondary: '#ffaa00' },
+    '🛡️': { primary: '#4a90e2', secondary: '#b8d8ff' },
+    '💚': { primary: '#2ecc71', secondary: '#a3e4d7' },
+    '⚡️': { primary: '#f1c40f', secondary: '#f9e79f' },
+    '💀': { primary: '#9b59b6', secondary: '#ebdef0' }
 };
 
-function triggerMatch3Haptic(ms) {
-    if (navigator.vibrate) {
-        navigator.vibrate(ms);
-    }
+function triggerMatch3HapticVisual(ms) {
+    if (navigator.vibrate) navigator.vibrate(ms);
 }
 
-function spawnRuneExplosionSparks(r, c, runeType) {
+function spawnRuneExplosionSparksVisual(r, c, runeType) {
     const boardContainer = document.getElementById('match3-board-container');
     const cellEl = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
     if (!boardContainer || !cellEl) return;
     
     const startX = cellEl.offsetLeft + cellEl.offsetWidth / 2;
     const startY = cellEl.offsetTop + cellEl.offsetHeight / 2;
-    
-    const colors = FX_RUNE_COLORS[runeType] || { primary: '#ffaa00', secondary: '#ffcc00' };
+    const colors = FX_RUNE_COLORS_VISUAL[runeType] || { primary: '#ffaa00', secondary: '#ffcc00' };
     const sparkCount = 8;
     
     for (let i = 0; i < sparkCount; i++) {
