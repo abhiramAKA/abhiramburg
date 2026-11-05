@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И ВОИНСКИХ ПОСТРОЕК (v1.4.0-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И ВОИНСКИХ ПОСТРОЕК (v1.7.0-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -134,19 +134,22 @@ function activateHeroSuperpower(heroId) {
     hero.sp = 0; 
     if (typeof playMatch3Sound === 'function') playMatch3Sound(hero.icon);
     
+    // Считываем уровни построек лагеря из localStorage
     const damageLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('damage') : 0;
     const archerLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('archer') : 0;
     const mageLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('mage') : 0;
 
-    const dmgClassUnyielding = 120 + damageLvl * 15;
-    const archerClassUnyielding = 25 + archerLvl * 10;
-    const mageClassUnyielding = 25; 
-    const mageHealAmount = 25 + mageLvl * 5;
+    // Математика масштабирования суперсил по спецификации
+    const tankDamage = 25; // Базовый урон Танка стабилен, постройки дают ему Max HP
+    const dmgClassUnyielding = 120 + damageLvl * 15; // +15 урона за уровень Плаца
+    const archerClassUnyielding = 25 + archerLvl * 10; // +10 урона за уровень Стрельбища
+    const mageClassUnyielding = 25; // Базовый урон мага
+    const mageHealAmount = 25 + mageLvl * 5; // +5 к групповому исцелению за уровень Обители
     
     switch(heroId) {
         case "tank":
             combatData.tankTaunting = true;
-            combatData.dragonHP = Math.max(0, combatData.dragonHP - 25);
+            combatData.dragonHP = Math.max(0, combatData.dragonHP - tankDamage);
             break;
         case "damage":
             combatData.dragonHP = Math.max(0, combatData.dragonHP - dmgClassUnyielding);
