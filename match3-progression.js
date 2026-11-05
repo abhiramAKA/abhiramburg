@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ПРОГРЕССИИ И ДОСКИ 24 ТИРОВ (НОВЫЙ МОДУЛЬ - v0.8.3-BETA)
+   КХАМАЧ — МОДУЛЬ ПРОГРЕССИИ И ДОСКИ 24 ТИРОВ (ОБНОВЛЕН - v1.4.0-BETA)
    ========================================================================== */
 
 function getMaxUnlockedTier() {
@@ -22,6 +22,8 @@ function renderDragonSelectionGrid() {
     const maxUnlocked = getMaxUnlockedTier();
     const elements = ["Огонь", "Лед", "Тьма", "Свет"];
     
+    const backpackFull = typeof getBackpackItem === 'function' && getBackpackItem() !== null && getBackpackItem() !== '';
+    
     for (let t = 1; t <= 24; t++) {
         const element = elements[(t - 1) % 4];
         const isLocked = t > maxUnlocked;
@@ -32,16 +34,23 @@ function renderDragonSelectionGrid() {
         
         const btn = document.createElement('button');
         btn.className = 'menu-btn dragon-level-btn';
-        if (isLocked) btn.classList.add('disabled');
+        
+        if (isLocked || backpackFull) {
+            btn.classList.add('disabled');
+        }
         btn.dataset.level = t;
         
         const hp = 120 + (t - 1) * 60;
         
-        btn.innerHTML = isLocked 
-            ? `🔒 Тир ${t} (Победите Тир ${t-1})` 
-            : `🐉 Тир ${t} [${element}] — ${hp} HP`;
+        if (isLocked) {
+            btn.innerHTML = `🔒 Тир ${t} (Победите Тир ${t-1})`;
+        } else if (backpackFull) {
+            btn.innerHTML = `⚠️ Рюкзак заполнен! Вернитесь в город`;
+        } else {
+            btn.innerHTML = `🐉 Тир ${t} [${element}] — ${hp} HP`;
+        }
             
-        if (!isLocked) {
+        if (!isLocked && !backpackFull) {
             btn.addEventListener('click', (e) => {
                 selectedDragonLevel = parseInt(e.currentTarget.dataset.level);
                 if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
