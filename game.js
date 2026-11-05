@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.19)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.20)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.19";
+const GAME_VERSION = "v0.6.0-beta.20";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -22,7 +22,7 @@ let combatData = {
     ]
 };
 
-let match3BoardData =;
+let match3BoardData = [];
 let selectedCell = null;
 
 // Тексты правил и справочника рун
@@ -93,6 +93,10 @@ function setupMenuListeners() {
     const toCombatBtn = document.getElementById('to-combat-btn');
     if (toCombatBtn) {
         toCombatBtn.addEventListener('click', () => {
+            // Принудительно будим аудио-контекст по клику пользователя
+            if (typeof initAudioContext === 'function') {
+                initAudioContext();
+            }
             showScreen('combat-screen');
             if (typeof startCombatSession === 'function') {
                 startCombatSession();
@@ -128,7 +132,6 @@ function setupMenuListeners() {
     if (leaveCombatBtn) {
         leaveCombatBtn.addEventListener('click', () => {
             if (confirm("Вы уверены, что хотите сбежать из рейда?")) {
-                // ВЫКЛЮЧАЕМ музыку при побеге из боя в меню
                 if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
                 showScreen('main-menu');
             }
