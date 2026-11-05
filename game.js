@@ -1,11 +1,11 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ИНТЕРАКТИВНАЯ МУЗЫКА - v0.6.0-beta.39)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ИНТЕРАКТИВНАЯ МУЗЫКА - v0.6.0-beta.40)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.39";
+const GAME_VERSION = "v0.6.0-beta.40";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
-const RUNE_TYPES = ['🔥', '🛡️', '💚', '⚡️', '💀'];
+const RUNE_TYPES = new Array('🔥', '🛡️', '💚', '⚡️', '💀');
 
 let combatData = {
     dragonHP: 1000,
@@ -21,7 +21,7 @@ let combatData = {
     ]
 };
 
-let match3BoardData =;
+let match3BoardData = new Array();
 let selectedCell = null;
 
 const GAME_TEXTS = {
@@ -74,7 +74,7 @@ function initVersionDisplay() {
 }
 
 function showScreen(screenId) {
-    const screens = ['main-menu', 'info-screen', 'mode-desc-screen', 'combat-screen'];
+    const screens = new Array('main-menu', 'info-screen', 'mode-desc-screen', 'combat-screen');
     screens.forEach(id => {
         const screenEl = document.getElementById(id);
         if (screenEl) screenEl.style.display = (id === screenId) ? 'flex' : 'none';
