@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ИСПРАВЛЕННЫЙ МОДУЛЬНЫЙ ЗАГРУЗЧИК (v1.2.0-BETA)
+        // ИСПРАВЛЕННЫЙ МОДУЛЬНЫЙ ЗАГРУЗЧИК (v1.3.0-BETA)
         (function() {
             const timestamp = Date.now();
             
@@ -29,12 +29,13 @@
                 'squad-engine.js',
                 'town-dom.js',
                 'combat-dom.js',
-                'combat.js'
+                'combat.js',
+                'game-listeners.js'
             ];
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Модули v1.2.0 успешно декомпозированы.");
+                    console.log("КХАМАЧ: Модули v1.3.0 успешно декомпозированы.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -87,7 +88,7 @@
             </div>
             
             <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v1.2.0-BETA</div>
+            <div id="game-version" class="version-footer">v1.3.0-BETA</div>
         </div>
 
         <!-- Контейнеры для динамических модулей генерации DOM -->
