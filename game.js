@@ -1,23 +1,21 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (v0.7.0-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (v0.7.1-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v0.7.0-BETA";
+const GAME_VERSION = "v0.7.1-BETA";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
-// Строго 4 типа рун под 4 героев
 const RUNE_TYPES = ['🔥', '🛡️', '🎯', '💚'];
 
 let combatData = {
-    dragonHP: 1000,
-    dragonMaxHP: 1000,
+    dragonHP: 120, // Динамически пересчитывается при старте
+    dragonMaxHP: 120,
     playerAP: 1, 
     playerMaxAP: 1,
     currentRound: 1,
-    tankTaunting: false, // Флаг Провокации Танка
-    dragonBlinded: false, // Флаг Ослепления Лучника (срез атаки на 50%)
-    isActionPhase: false, // Флаг ручной фазы Суперсил
+    tankTaunting: false, 
+    dragonBlinded: false, 
     squad: [
         { id: "tank", name: "Танк", hp: 150, maxHP: 150, sp: 0, maxSP: 100, icon: "🛡️", color: "#4a90e2" },
         { id: "damage", name: "Дамагер", hp: 90, maxHP: 90, sp: 0, maxSP: 100, icon: "🔥", color: "#ff4500" },
@@ -31,14 +29,14 @@ let selectedCell = null;
 
 const GAME_TEXTS = {
     mainInfo: `
-        <p><strong>Правила Боя v0.7.0:</strong></p>
+        <p><strong>Правила Боя v0.7.1:</strong></p>
         <p>1. Каждый раунд вы делаете ровно <strong>1 ход на поле Match-3</strong>.</p>
-        <p>2. Взрывы рун заряжают шкалу Суперсилы конкретного героя. 1 взорванный камень = +6% энергии.</p>
+        <p>2. Взрывы рун заряжают Суперсилу героев (+6% за камень).</p>
         <p>3. Дракон атакует автоматически <strong>сразу после вашего хода на поле</strong>.</p>
-        <p>4. После атаки босса наступает Фаза Приказов. Если шкала героя полная (100%), он загорается <strong>сияющим ореолом</strong>. Кликните на него, чтобы активировать Суперсилу!</p>
+        <p>4. Прожимайте Суперсилы сияющих героев в любой момент раунда, чтобы уничтожить босса!</p>
     `,
     combatHelp: `
-        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🛡️ Суперсила Танка:</strong> Накладывает провокацию. В следующем раунде Дракон гарантированно ударит только Танка, защищая отряд.</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🛡️ Суперсила Танка:</strong> Провокация. Дракон в следующем раунде гарантированно ударит только Танка.</p>
         <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🔥 Суперсила Дамагера:</strong> Наносит Дракону сокрушительный чистый урон (120 ед.).</p>
         <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🎯 Суперсила Лучника:</strong> Ослепляет Дракона — следующая атака босса нанесет на 50% меньше урона!</p>
         <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>💚 Суперсила Мага:</strong> Моментально исцеляет здоровье (+25 HP) сразу всему отряду.</p>
@@ -46,9 +44,9 @@ const GAME_TEXTS = {
 };
 
 const MODE_DESCRIPTIONS = {
-    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНИЦА", text: "Священное место, где из костей и чешуи поверженных драконов можно выковывать мифическую экипировку, повышающую базовые эффекты Суперсил ваших героев." },
-    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", text: "Здесь вы сможете дистиллировать драконью кровь, варить катализаторы маны, которые постоянно ускоряют заполнение шкал Суперсилы от взрыва камней." },
-    squad: { title: "👥 КНИГА ЗАКЛИНАНИЙ И ОТРЯД", text: "Военный лагерь. Позволяет повышать уровни героев и открывать Книгу Заклинаний, куда в будущем можно будет устанавливать новые ультимативные приемы за очки Суперобразов." }
+    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНИЦА", text: "Священное место, где из костей и чешуи поверженных драконов можно выковывать мифическую экипировку." },
+    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", text: "Здесь вы сможете дистиллировать драконью кровь и варить катализаторы маны." },
+    squad: { title: "👥 КНИГА ЗАКЛИНАНИЙ И ОТРЯД", text: "Военный лагерь. Позволяет повышать уровни героев и открывать новые ультимативные приемы." }
 };
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -59,25 +57,20 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function initVersionDisplay() {
     const versionElement = document.getElementById('game-version');
-    if (versionElement) {
-        versionElement.innerText = GAME_VERSION;
-    }
+    if (versionElement) versionElement.innerText = GAME_VERSION;
 }
 
 function showScreen(screenId) {
     const screens = ['main-menu', 'info-screen', 'mode-desc-screen', 'combat-screen'];
     screens.forEach(id => {
         const screenEl = document.getElementById(id);
-        if (screenEl) {
-            screenEl.style.display = (id === screenId) ? 'flex' : 'none';
-        }
+        if (screenEl) screenEl.style.display = (id === screenId) ? 'flex' : 'none';
     });
 }
 
 function openModeDescription(modeKey) {
     const modeData = MODE_DESCRIPTIONS[modeKey];
     if (!modeData) return;
-    
     document.getElementById('mode-desc-title').innerText = modeData.title;
     document.getElementById('mode-desc-text').innerHTML = modeData.text;
     showScreen('mode-desc-screen');
@@ -87,7 +80,7 @@ function setupMenuListeners() {
     const toCombatBtn = document.getElementById('to-combat-btn');
     if (toCombatBtn) {
         toCombatBtn.addEventListener('click', () => {
-            if (typeof initAudioContext === 'function') initAudioContext();
+            if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
             showScreen('combat-screen');
             if (typeof startCombatSession === 'function') startCombatSession();
         });
@@ -104,18 +97,13 @@ function setupMenuListeners() {
 
     const fromInfoToMenuBtn = document.getElementById('from-info-to-menu-btn');
     if (fromInfoToMenuBtn) {
-        fromInfoToMenuBtn.addEventListener('click', () => {
-            showScreen('main-menu');
-        });
+        fromInfoToMenuBtn.addEventListener('click', () => showScreen('main-menu'));
     }
 
     document.getElementById('to-forge-btn').addEventListener('click', () => openModeDescription('forge'));
     document.getElementById('to-alchemy-btn').addEventListener('click', () => openModeDescription('alchemy'));
     document.getElementById('to-squad-btn').addEventListener('click', () => openModeDescription('squad'));
-
-    document.getElementById('close-mode-desc-btn').addEventListener('click', () => {
-        showScreen('main-menu');
-    });
+    document.getElementById('close-mode-desc-btn').addEventListener('click', () => showScreen('main-menu'));
 
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
     if (leaveCombatBtn) {
@@ -124,22 +112,6 @@ function setupMenuListeners() {
                 if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
                 showScreen('main-menu');
             }
-        });
-    }
-
-    const endTurnBtn = document.getElementById('end-turn-btn');
-    if (endTurnBtn) {
-        endTurnBtn.addEventListener('click', () => {
-            combatData.isActionPhase = false;
-            combatData.playerAP = combatData.playerMaxAP;
-            combatData.currentRound++;
-            
-            endTurnBtn.style.display = 'none';
-            document.getElementById('combat-ap-display').innerText = "Сделайте ход на поле!";
-            document.getElementById('combat-ap-display').style.color = "#ffd700";
-            
-            if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
-            updateCombatInterfaceDOM();
         });
     }
 }
@@ -152,7 +124,6 @@ function setupCombatHelpListeners() {
         combatHelpBtn.addEventListener('click', () => {
             const txtContainer = document.getElementById('combat-help-text-container');
             if (txtContainer) txtContainer.innerHTML = GAME_TEXTS.combatHelp;
-            
             const helpScreen = document.getElementById('combat-help-screen');
             if (helpScreen) helpScreen.style.display = 'flex';
         });
