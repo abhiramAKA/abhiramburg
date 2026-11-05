@@ -1,6 +1,6 @@
 /* ==========================================================================
    КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (v0.7.3-BETA)
-   ========================================================================= */
+   ========================================================================== */
 
 function buildDragonDOM() {
     const raidZone = document.getElementById('dragon-raid-zone');
@@ -53,7 +53,7 @@ function startCombatSession() {
     }
 }
 
-// Зарядка SP, полностью очищенная от старого костыльного кода урона
+// Единственный легальный способ заполнения шкал энергии SP персонажей
 function chargeHeroSuperpowers(effects) {
     if (effects['🛡️']) {
         let t = combatData.squad.find(h => h.id === "tank");
@@ -150,7 +150,7 @@ function activateHeroSuperpower(heroId) {
             combatData.tankTaunting = true;
             break;
         case "damage":
-            // ЕДИНСТВЕННАЯ точка списания здоровья босса в кодовой базе!
+            // ТОЧКА УРОНА: Единственное место во всем проекте, где уходит HP босса
             combatData.dragonHP = Math.max(0, combatData.dragonHP - 120);
             break;
         case "archer":
