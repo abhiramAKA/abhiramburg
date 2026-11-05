@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ИНТЕРАКТИВНАЯ МУЗЫКА - v0.6.0-beta.35)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ИНТЕРАКТИВНАЯ МУЗЫКА - v0.6.0-beta.39)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.35";
+const GAME_VERSION = "v0.6.0-beta.39";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const RUNE_TYPES = ['🔥', '🛡️', '💚', '⚡️', '💀'];
@@ -21,13 +21,14 @@ let combatData = {
     ]
 };
 
-let match3BoardData = [];
+let match3BoardData =;
 let selectedCell = null;
 
 const GAME_TEXTS = {
     mainInfo: `
-        <p><strong>Система Очков Действия:</strong> Вам дается 3 ОД на раунд. Каждый обмен рун на поле тратит 1 ОД.</p>
-        <p>Собирайте комбинации из 3 и более рун. Дракон контратакует строго после того, как вы потратите все 3 ОД.</p>
+        <h2>ЛОГОВО ЧУДОВИЩА</h2>
+        <span class="subtitle">Поле Брани</span>
+        <p>Земля содрогается от поступи древнего змея. Скоро здесь появится боевое поле, и каждая собранная триада камней обрушит ярость вашего отряда на врага.</p>
     `,
     combatHelp: `
         <p style="text-align: left; font-size: 13px; margin-bottom: 5px;"><strong>🔥 Огонь / ⚡️ Молния:</strong> Атака босса (15 / 10 урона).</p>
@@ -37,9 +38,26 @@ const GAME_TEXTS = {
 };
 
 const MODE_DESCRIPTIONS = {
-    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНИЦА", subtitle: "Грядущие расширения", text: "Место ковки мифического снаряжения." },
-    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", subtitle: "Грядущие расширения", text: "Здесь варят зелья Очков Действия." },
-    squad: { title: "👥 УПРАВЛЕНИЕ ОТРЯДОМ", subtitle: "Военный лагерь ваших героев", text: "Военный лагерь ваших героев." }
+    forge: { 
+        title: "⚒️ ДРЕВНЕЕ ГОРНИЛО", 
+        subtitle: "Кузница предметов", 
+        text: "<p>В полумраке кузницы тяжело вздыхают мехи. Старый мастер готов принять трофеи из черева великого ящера. Из чешуи и хребтовых костей он скует доспех, не знающий износа, а из клыка — клинок, разящий без промаха.</p>" 
+    },
+    alchemy: { 
+        title: "🧪 ТАЙНЫЙ ОЧАГ", 
+        subtitle: "Лаборатория Алхимика", 
+        text: "<p>Свитки, покрытые пылью веков, и склянки со светящимися эссенциями заполняют полки. Алхимик Абхирамбурга способен дистиллировать кровь Дракона в чистый опыт для ваших верных воинов или превратить прах в золото.</p>" 
+    },
+    squad: { 
+        title: "👥 ВАШЕ ВОИНСТВО", 
+        subtitle: "Мой Отряд", 
+        text: "<p>Ваш отряд замер у походного костра в ожидании приказов. Сила Кхамача растет с каждой битвой. Здесь вы сможете распределять вехи развития, повышать классы бойцов и снаряжать их в дорогу.</p><p style='color:#e6c280; font-size:13px; border-top:1px dashed #4a3f2c; padding-top:8px;'><strong>Предводитель:</strong> Рыцарь смерти (1 ур)<br>⚔️ Атака: 25 | ❤️ Жизнь: 120</p>" 
+    },
+    arena: {
+        title: "🏆 КОЛИЗЕЙ ОТРЕКШИХСЯ",
+        subtitle: "PvP Арена",
+        text: "<p>Песок арены пропитан кровью сотен рейдеров, дерзнувших оспорить право на Горнило Рун. Здесь, под пристальным взором Некросмута, Кхамач сталкивает воинов в бесконечной схватке. Собери триаду камней быстрее соперника, или твой прах пополнит залы вечного безмолвия.</p>"
+    }
 };
 
 function runGameCoreInitialization() {
@@ -126,6 +144,7 @@ function setupMenuListeners() {
     document.getElementById('to-settings-btn').addEventListener('click', openSettingsWindow);
     document.getElementById('to-alchemy-btn').addEventListener('click', () => openModeDescription('alchemy'));
     document.getElementById('to-squad-btn').addEventListener('click', () => openModeDescription('squad'));
+    document.getElementById('to-arena-btn').addEventListener('click', () => openModeDescription('arena'));
     document.getElementById('close-mode-desc-btn').addEventListener('click', () => showScreen('main-menu'));
 
     document.getElementById('leave-combat-btn').addEventListener('click', () => {
