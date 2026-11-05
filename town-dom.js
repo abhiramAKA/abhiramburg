@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ ГЕНЕРАТОР ИНТЕРФЕЙСОВ ГОРОДА (ИСПРАВЛЕН - v1.6.0-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ ГЕНЕРАТОР ИНТЕРФЕЙСОВ ГОРОДА (ОБНОВЛЕН - v2.4.0-BETA)
    ========================================================================== */
 
 function injectTownScreensDOM() {
@@ -24,27 +24,36 @@ function injectTownScreensDOM() {
             <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
         </div>
 
-        <!-- ================= ОКНО КУЗНИЦЫ / АЛХИМИИ ================= -->
+        <!-- ================= ОКНО КУЗНИЦЫ / ЛАБОРАТОРИИ ================= -->
         <div id="mode-desc-screen" class="game-window" style="display: none;">
             <h2 id="mode-desc-title">РЕЖИМ ИГРЫ</h2>
             <span class="subtitle">Управление зданиями</span>
             <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🪙 0 Золота</div>
             <div id="mode-desc-text">Описание режима загружается...</div>
-            <button id="mode-buy-btn" class="menu-btn" style="margin-bottom: 10px; background: linear-gradient(to bottom, #1d421e 0%, #102411 100%); border-color: #316e34; color: #aae6ab;">🛒 ВЫКУПИТЬ ЗДЕНИЕ (500 🪙)</button>
-            <button id="mode-process-btn" class="menu-btn" style="margin-bottom: 10px; background: linear-gradient(to bottom, #42351d 0%, #241d10 100%); border-color: #6e5931; color: #e6caa2; display: none;">⚒️ НАЧАТЬ ПЕРЕРАБОТКУ (50 🪙)</button>
+            <button id="mode-buy-btn" class="menu-btn" style="margin-bottom: 10px; background: linear-gradient(to bottom, #1d421e 0%, #102411 100%); border-color: #316e34; color: #aae6ab;">🛒 ВЫКУПИТЬ ЗДЕНИЕ (100 🪙)</button>
             <button id="close-mode-desc-btn" class="menu-btn back-btn" style="margin-top: 5px; width: 100%;">Назад в меню</button>
         </div>
 
-        <!-- ================= ЗЕРКАЛЬНОЕ МЕНЮ ОТРИСОВКИ ОТРЯДА ================= -->
+        <!-- ================= ЗЕРКАЛЬНОЕ МЕНЮ ОТРЯДА (ИДЕНТИЧНО ГЛАВНОМУ) ================= -->
         <div id="squad-screen" class="game-window" style="display: none;">
             <h1>ОТРЯД</h1>
             <span class="subtitle">Военная Цитадель Казарм</span>
             <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🪙 0 Золота</div>
-            <p>Модернизируйте пассивные тренировочные полигоны вашей армии. Каждый уровень построек навсегда приумножает параметры выбранного героя.</p>
-            <div class="menu-row"><button id="upgrade-tank-btn" class="menu-btn">🛡️ Казармы Танка</button></div>
-            <div class="menu-row"><button id="upgrade-damage-btn" class="menu-btn">🔥 Плац Дамагера</button></div>
-            <div class="menu-row"><button id="upgrade-archer-btn" class="menu-btn">⚡ Стрельбище Лучника</button></div>
-            <div class="menu-row"><button id="upgrade-mage-btn" class="menu-btn">💚 Обитель Мага</button></div>
+            <p>Модернизируйте пассивные тренировочные полигоны вашей армии. Возведите постройки, чтобы открыть тайные вехи развития воинов.</p>
+            
+            <div class="menu-row">
+                <button id="upgrade-tank-btn" class="menu-btn">⛺ Тренировочный лагерь</button>
+            </div>
+            <div class="menu-row">
+                <button id="upgrade-damage-btn" class="menu-btn">🛡️ Казармы</button>
+            </div>
+            <div class="menu-row">
+                <button id="upgrade-archer-btn" class="menu-btn">⚡ Стрельбище</button>
+            </div>
+            <div class="menu-row">
+                <button id="upgrade-mage-btn" class="menu-btn">💚 Обитель</button>
+            </div>
+            
             <button id="close-squad-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Назад в меню</button>
         </div>
     `;
