@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (РАЗДЕЛЬНЫЙ ГОРОД И СТРОЕНИЯ - v0.9.0-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (НАВИГАЦИЯ МЕНЮ И ГОРОДА - v0.9.1-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v0.9.0-BETA";
+const GAME_VERSION = "v0.9.1-BETA";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -155,13 +155,11 @@ function setupMenuListeners() {
     
     document.getElementById('from-info-to-menu-btn').addEventListener('click', () => showScreen('main-menu'));
     
-    // Возвращаем старые обработчики главного меню
     document.getElementById('to-forge-btn').addEventListener('click', () => openModeDescription('forge'));
     document.getElementById('to-alchemy-btn').addEventListener('click', () => openModeDescription('alchemy'));
     document.getElementById('to-squad-btn').addEventListener('click', () => openModeDescription('squad'));
     document.getElementById('close-mode-desc-btn').addEventListener('click', () => showScreen('main-menu'));
     
-    // Кнопка города
     document.getElementById('to-town-btn').addEventListener('click', () => showScreen('town-screen'));
     document.getElementById('close-town-btn').addEventListener('click', () => showScreen('main-menu'));
 
