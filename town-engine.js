@@ -1,116 +1,140 @@
 /* ==========================================================================
-   КХАМАЧ — ЭКОНОМИКА ГОРОДА И СТРОИТЕЛЬСТВА ЗА ЗОЛОТО (ОБНОВЛЕН - v1.2.0-BETA)
+   КХАМАЧ — ЭКОНОМИКА И СИСТЕМА КРАФТА АРТЕФАКТОВ (ОБНОВЛЕН - v1.3.0-BETA)
    ========================================================================== */
 
-function getPlayerGold() {
-    const gold = localStorage.getItem('khamach_gold');
-    return gold ? parseInt(gold) : 0;
-}
+const INLINE_TOWN_TEXTS = {
+    mainInfo: `<p><strong>«Логово Чудовища»:</strong> Сражайся на поле боя, и собранные триады рун обрушат ярость героев на врага.</p>`,
+    squadInfo: `<p><strong>«Штаб Отряда»:</strong> Тренируй лагеря воинов за золото, добытое с драконов, чтобы повысить здоровье и атаку.</p>`,
+    combatHelp: `<p>🛡️-Танк: Провокация. 🔥-Дамагер: Чистый урон. ⚡-Лучник: Слепота босса. 💚-Маг: Масс-хил.</p>`
+};
 
-function addPlayerGold(amount) {
-    const currentGold = getPlayerGold();
-    localStorage.setItem('khamach_gold', currentGold + amount);
-    updateTownGoldDisplay();
-}
+const INLINE_MODE_DESCRIPTIONS = {
+    forge: { title: "⚒️ ДРЕВНЕЕ ГОРНИЛО", buyText: "Кузнице требуется восстановление инструментов за 🪙 500.", activeText: "Инструменты исправны. Кузнец готов перерабатывать Чешую дракона или выковать мифическое оружие." },
+    alchemy: { title: "🧪 ТАЙНЫЙ ОЧАГ", buyText: "Алхимику требуется закупка редких реагентов за 🪙 500.", activeText: "Реагенты закуплены. Мастер готов дистиллировать Кровь дракона или сварить Сердце Змея." }
+};
 
-function getPlayerResource(resKey) {
-    const res = localStorage.getItem(`khamach_res_${resKey}`);
-    return res ? parseInt(res) : 0;
-}
+function getTownText(key) { return INLINE_TOWN_TEXTS[key] || ''; }
 
-function addPlayerResource(resKey, amount) {
-    const current = getPlayerResource(resKey);
-    localStorage.setItem(`khamach_res_${resKey}`, current + amount);
-}
+function getPlayerGold() { return parseInt(localStorage.getItem('khamach_gold') || '0'); }
+function addPlayerGold(amount) { localStorage.setItem('khamach_gold', getPlayerGold() + amount); updateTownGoldDisplay(); }
+function getPlayerResource(key) { return parseInt(localStorage.getItem(`khamach_res_${key}`) || '0'); }
+function addPlayerResource(key, amount) { localStorage.setItem(`khamach_res_${key}`, getPlayerResource(key) + amount); }
+function isBuildingPurchased(id) { return localStorage.getItem(`khamach_purchased_${id}`) === 'true'; }
 
-function isBuildingPurchased(buildingId) {
-    return localStorage.getItem(`khamach_purchased_${buildingId}`) === 'true';
-}
-
-function buyTownBuilding(buildingId) {
+function buyTownBuilding(id) {
     const cost = 500;
-    const currentGold = getPlayerGold();
-    if (currentGold >= cost && !isBuildingPurchased(buildingId)) {
-        localStorage.setItem('khamach_gold', currentGold - cost);
-        localStorage.setItem(`khamach_purchased_${buildingId}`, 'true');
+    if (getPlayerGold() >= cost && !isBuildingPurchased(id)) {
+        localStorage.setItem('khamach_gold', getPlayerGold() - cost);
+        localStorage.setItem(`khamach_purchased_${id}`, 'true');
         updateTownGoldDisplay();
         return true;
     }
     return false;
 }
 
-function getBuildingLevel(buildingId) {
-    const lvl = localStorage.getItem(`khamach_build_${buildingId}`);
-    return lvl ? parseInt(lvl) : 0;
-}
-
-function upgradeBuilding(buildingId) {
-    const currentLvl = getBuildingLevel(buildingId);
-    const goldCost = 150; 
-    const currentGold = getPlayerGold();
-
-    if (currentGold >= goldCost) {
-        localStorage.setItem('khamach_gold', currentGold - goldCost);
-        localStorage.setItem(`khamach_build_${buildingId}`, currentLvl + 1);
-        updateTownGoldDisplay();
-        return true;
+function openModeDescription(modeKey) {
+    currentOpenedModeKey = modeKey;
+    const modeData = INLINE_MODE_DESCRIPTIONS[modeKey];
+    if (!modeData) return;
+    
+    document.getElementById('mode-desc-title').innerText = modeData.title;
+    const buyBtn = document.getElementById('mode-buy-btn');
+    const processBtn = document.getElementById('mode-process-btn');
+    const textEl = document.getElementById('mode-desc-text');
+    
+    if (!isBuildingPurchased(modeKey)) {
+        textEl.innerHTML = `<p>${modeData.buyText}</p>`;
+        buyBtn.style.display = 'block';
+        processBtn.style.display = 'none';
+    } else {
+        const resKey = modeKey === 'forge' ? 'scales' : 'blood';
+        const itemStatus = localStorage.getItem(`khamach_artifact_${modeKey}`) === 'true' ? "⚔️ СКОНСТРУИРОВАН" : "❌ Отсутствует";
+        
+        textEl.innerHTML = `
+            <p>${modeData.activeText}</p>
+            <div style="background: rgba(0,0,0,0.5); padding: 8px; border: 1px dashed #544432; margin-bottom: 10px;">
+                <p style="margin: 4px 0;">Ресурсы на складе: <strong>${getPlayerResource(resKey)} ед.</strong></p>
+                <p style="margin: 4px 0; color: #ffd700;">Статус артефакта ветки: <strong>${itemStatus}</strong></p>
+            </div>
+            <p style="font-size: 11px; color: #8a7350;">Нажмите кнопку ремесла, чтобы выбрать: переработку сырья в пассивные перки или ковку артефакта.</p>
+        `;
+        buyBtn.style.display = 'none';
+        processBtn.style.display = 'block';
     }
-    return false;
+    showScreen('mode-desc-screen');
 }
 
-function processCraftResource(modeKey) {
+function openCraftSelectionMenu(modeKey) {
+    const choice = prompt("Выберите тип ремесла:\n1 - Переработка сырья (1 шт + 50 🪙) -> Пассивный бонус\n2 - Создание Мифического Артефакта (3 шт переработ. бонусов + 300 🪙)");
+    
+    if (choice === "1") {
+        executeResourceProcessing(modeKey);
+    } else if (choice === "2") {
+        executeArtifactCrafting(modeKey);
+    }
+}
+
+function executeResourceProcessing(modeKey) {
     const goldCost = 50;
-    const currentGold = getPlayerGold();
     const resKey = modeKey === 'forge' ? 'scales' : 'blood';
-    const currentRes = getPlayerResource(resKey);
-
-    if (currentGold < goldCost) {
-        alert("Недостаточно золота для оплаты работы мастера (требуется 🪙 50)!");
-        return false;
+    if (getPlayerGold() < goldCost || getPlayerResource(resKey) < 1) {
+        alert("Недостаточно ресурсов (нужно 1 ресурс и 50 🪙)!");
+        return;
     }
-    if (currentRes < 1) {
-        alert("У вас нет материалов для переработки! Добудьте их в рейдах на Драконов.");
-        return false;
-    }
-
-    localStorage.setItem('khamach_gold', currentGold - goldCost);
-    localStorage.setItem(`khamach_res_${resKey}`, currentRes - 1);
+    localStorage.setItem('khamach_gold', getPlayerGold() - goldCost);
+    localStorage.setItem(`khamach_res_${resKey}`, getPlayerResource(resKey) - 1);
     
     const perkKey = modeKey === 'forge' ? 'khamach_perk_shield' : 'khamach_perk_sp';
-    const currentPerk = parseInt(localStorage.getItem(perkKey) || '0');
-    localStorage.setItem(perkKey, currentPerk + 1);
-    
-    updateTownGoldDisplay();
-    return true;
+    localStorage.setItem(perkKey, parseInt(localStorage.getItem(perkKey) || '0') + 1);
+    alert("Сырье успешно дистиллировано мастерами!");
+    openModeDescription(modeKey);
 }
 
-function getMetaPerkValue(perkKey) {
-    return parseInt(localStorage.getItem(perkKey) || '0');
+function executeArtifactCrafting(modeKey) {
+    const goldCost = 300;
+    const perkKey = modeKey === 'forge' ? 'khamach_perk_shield' : 'khamach_perk_sp';
+    const currentPerks = parseInt(localStorage.getItem(perkKey) || '0');
+    
+    if (localStorage.getItem(`khamach_artifact_${modeKey}`) === 'true') {
+        alert("Этот уникальный артефакт уже выкован в вашей цитадели!");
+        return;
+    }
+    if (getPlayerGold() < goldCost || currentPerks < 3) {
+        alert("Недостаточно условий! Требуется накопить минимум 3 уровня переработки сырья и 300 🪙.");
+        return;
+    }
+    
+    localStorage.setItem('khamach_gold', getPlayerGold() - goldCost);
+    localStorage.setItem(perkKey, currentPerks - 3);
+    localStorage.setItem(`khamach_artifact_${modeKey}`, 'true');
+    
+    alert(modeKey === 'forge' ? "⚒️ КЛИНОК НЕКРОСМУТА ВЫКОВАН! Дамагер получает сокрушительный бонус к критам!" : "🔮 СЕРДЦЕ ЗМЕЯ СВАРЕНО! Маг обретает тайный шанс сохранения ОД!");
+    openModeDescription(modeKey);
 }
+
+function getBuildingLevel(id) { return parseInt(localStorage.getItem(`khamach_build_${id}`) || '0'); }
+function getMetaPerkValue(key) { return parseInt(localStorage.getItem(key) || '0'); }
 
 function updateTownGoldDisplay() {
-    const goldElements = document.querySelectorAll('.gold-counter-display');
-    goldElements.forEach(el => {
-        el.innerText = `🪙 ${getPlayerGold()} Золота`;
-    });
-
+    document.querySelectorAll('.gold-counter-display').forEach(el => { el.innerText = `🪙 ${getPlayerGold()} Золота`; });
     const invContainer = document.getElementById('main-menu-inventory');
-    if (invContainer) {
-        const scales = getPlayerResource('scales');
-        const blood = getPlayerResource('blood');
-        const perkShield = getMetaPerkValue('khamach_perk_shield');
-        const perkSp = getMetaPerkValue('khamach_perk_sp');
+    if (!invContainer) return;
+    
+    const hasForgeItem = localStorage.getItem('khamach_artifact_forge') === 'true' ? "⚔️Клинок" : "❌";
+    const hasAlchItem = localStorage.getItem('khamach_artifact_alchemy') === 'true' ? "🔮Сердце" : "❌";
 
-        invContainer.innerHTML = `
-            <div style="color: #bfae96; text-transform: uppercase; font-size: 10px; letter-spacing: 1px; margin-bottom: 4px; border-bottom: 1px solid #3a3025; padding-bottom: 2px; font-weight: bold;">📜 Сокровищница Цитадели</div>
-            <div style="display: flex; justify-content: space-around; margin-bottom: 4px; color: #cdb38c;">
-                <span>🦴 Чешуя: <strong>${scales}</strong></span>
-                <span>🩸 Кровь: <strong>${blood}</strong></span>
-            </div>
-            <div style="display: flex; justify-content: space-around; font-size: 11px; color: #8a7350;">
-                <span>🛡️ Стартовый щит: <strong style="color:#4a90e2;">+${perkShield * 5}</strong></span>
-                <span>⚡ Стартовая ярость: <strong style="color:#ffd700;">+${perkSp * 5}%</strong></span>
-            </div>
-        `;
-    }
+    invContainer.innerHTML = `
+        <div style="color: #bfae96; text-transform: uppercase; font-size: 10px; border-bottom: 1px solid #3a3025; padding-bottom: 2px; font-weight: bold;">📜 Арсенал Цитадели</div>
+        <div style="display: flex; justify-content: space-around; margin: 4px 0; color: #cdb38c;">
+            <span>Чешуя: <strong>${getPlayerResource('scales')}</strong></span>
+            <span>Кровь: <strong>${getPlayerResource('blood')}</strong></span>
+        </div>
+        <div style="display: flex; justify-content: space-around; font-size: 11px; color: #8a7350;">
+            <span>Бонус Лат: <strong style="color:#4a90e2;">+${getMetaPerkValue('khamach_perk_shield')*5}</strong></span>
+            <span>Бонус Настоя: <strong style="color:#ffd700;">+${getMetaPerkValue('khamach_perk_sp')*5}%</strong></span>
+        </div>
+        <div style="font-size: 10px; color: #e6c280; border-top: 1px dashed #3a3025; margin-top: 4px; padding-top: 2px;">
+            Реликвии: Кузня: <strong>${hasForgeItem}</strong> | Алхимия: <strong>${hasAlchItem}</strong>
+        </div>
+    `;
 }
