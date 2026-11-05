@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (НАВИГАЦИЯ МЕНЮ И ГОРОДА - v0.9.1-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (РЕНОВАТИЗАЦИЯ СТРУКТУРЫ ОТРАДА - v0.9.2-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v0.9.1-BETA";
+const GAME_VERSION = "v0.9.2-BETA";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -33,6 +33,10 @@ const GAME_TEXTS = {
         <p><strong>«Логово Чудовища»:</strong></p>
         <p>Земля содрогается от поступи древнего змея. Сражайся на поле боя, и каждая собранная триада камней обрушит ярость вашего отряда на врага.</p>
     `,
+    squadInfo: `
+        <p><strong>«Военный Штаб Отряда»:</strong></p>
+        <p>Здесь сосредоточены пассивные тренировочные лагеря ваших воинов. Развивайте оружейные, стрельбища и алтари за золото, добытое с драконов, чтобы многократно приумножить характеристики отряда перед вылазкой в Горнило.</p>
+    `,
     combatHelp: `
         <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🛡️ Суперсила Танка:</strong> Провокация. Наносит урон дракону.</p>
         <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🔥 Суперсила Дамагера:</strong> Наносит Дракону сокрушительный чистый урон.</p>
@@ -42,9 +46,8 @@ const GAME_TEXTS = {
 };
 
 const MODE_DESCRIPTIONS = {
-    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНИЦА", text: "Священное место, где из костей и чешуи поверженных драконов можно выковывать мифическую экипировку." },
-    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", text: "Здесь вы сможете дистиллировать драконью кровь и варить катализаторы маны." },
-    squad: { title: "👥 КНИГА ЗАКЛИНАНИЙ И ОТРЯД", text: "Военный лагерь. Позволяет повышать уровни героев и открывать новые ультимативные приемы." }
+    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНИЦА", text: "Священное место, где из костей и чешуи поверженных драконов можно выковывать мифическую экипировку. Нажмите Купить, чтобы обновить кузнечные инструменты." },
+    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", text: "Здесь вы сможете дистиллировать драконью кровь и варить катализаторы маны. Нажмите Купить, чтобы приобрести редкие реагенты." }
 };
 
 if (document.readyState === 'loading') {
@@ -66,7 +69,7 @@ function initVersionDisplay() {
 }
 
 function showScreen(screenId) {
-    const screens = ['main-menu', 'dragon-select-screen', 'info-screen', 'mode-desc-screen', 'town-screen', 'combat-screen'];
+    const screens = ['main-menu', 'dragon-select-screen', 'info-screen', 'mode-desc-screen', 'squad-screen', 'combat-screen'];
     screens.forEach(id => {
         const screenEl = document.getElementById(id);
         if (screenEl) {
@@ -76,10 +79,10 @@ function showScreen(screenId) {
     if (screenId === 'dragon-select-screen' && typeof renderDragonSelectionGrid === 'function') {
         renderDragonSelectionGrid();
     }
-    if (screenId === 'town-screen') {
-        renderTownBuildingsList();
+    if (screenId === 'squad-screen') {
+        renderSquadBuildingsList();
     }
-    if (screenId === 'main-menu' || screenId === 'town-screen') {
+    if (screenId === 'main-menu' || screenId === 'squad-screen') {
         if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
     }
 }
@@ -92,8 +95,8 @@ function openModeDescription(modeKey) {
     showScreen('mode-desc-screen');
 }
 
-function renderTownBuildingsList() {
-    const listContainer = document.getElementById('town-buildings-list');
+function renderSquadBuildingsList() {
+    const listContainer = document.getElementById('squad-buildings-list');
     if (!listContainer) return;
     listContainer.innerHTML = '';
 
@@ -135,7 +138,7 @@ function renderTownBuildingsList() {
             if (currentGold < cost) btn.classList.add('disabled');
             btn.addEventListener('click', () => {
                 if (typeof upgradeBuilding === 'function' && upgradeBuilding(b.id)) {
-                    renderTownBuildingsList();
+                    renderSquadBuildingsList();
                 }
             });
         }
@@ -153,15 +156,22 @@ function setupMenuListeners() {
         showScreen('info-screen');
     });
     
+    document.getElementById('squad-info-btn').addEventListener('click', () => {
+        document.getElementById('info-screen-text').innerHTML = GAME_TEXTS.squadInfo;
+        showScreen('info-screen');
+    });
+    
     document.getElementById('from-info-to-menu-btn').addEventListener('click', () => showScreen('main-menu'));
     
     document.getElementById('to-forge-btn').addEventListener('click', () => openModeDescription('forge'));
     document.getElementById('to-alchemy-btn').addEventListener('click', () => openModeDescription('alchemy'));
-    document.getElementById('to-squad-btn').addEventListener('click', () => openModeDescription('squad'));
+    document.getElementById('to-squad-btn').addEventListener('click', () => showScreen('squad-screen'));
     document.getElementById('close-mode-desc-btn').addEventListener('click', () => showScreen('main-menu'));
-    
-    document.getElementById('to-town-btn').addEventListener('click', () => showScreen('town-screen'));
-    document.getElementById('close-town-btn').addEventListener('click', () => showScreen('main-menu'));
+    document.getElementById('close-squad-btn').addEventListener('click', () => showScreen('main-menu'));
+
+    document.getElementById('mode-buy-btn').addEventListener('click', () => {
+        alert("Покупка временно недоступна в данной BETA-версии!");
+    });
 
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
     if (leaveCombatBtn) {
