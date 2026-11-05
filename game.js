@@ -1,167 +1,177 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>КХАМАЧ — Восхождение Рейдов</title>
-    <script>
-        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.7.9-BETA)
-        (function() {
-            const timestamp = Date.now();
-            
-            // Загружаем CSS со сбросом кэша
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = 'styles.css?t=' + timestamp;
-            document.head.appendChild(link);
+/* ==========================================================================
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ДИСПЕТЧЕР ЭКРАНОВ - v0.8.0-BETA)
+   ========================================================================== */
 
-            // Очередь скриптов для строгого последовательного подключения
-            const scripts = [
-                'game.js',
-                'background.js',
-                'audio-engine.js',
-                'match3-fx.js',
-                'match3-input.js',
-                'match3.js',
-                'combat.js'
-            ];
+const GAME_VERSION = "v0.8.0-BETA";
 
-            function injectScript(index) {
-                if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Все модули v0.7.9 успешно загружены в память.");
-                    // Явный вызов на случай, если DOM уже готов до завершения асинхронных загрузок
-                    if (typeof initDispatcherModule === 'function') {
-                        initDispatcherModule();
-                    }
-                    return;
-                }
-                
-                const script = document.createElement('script');
-                script.src = scripts[index] + '?t=' + timestamp;
-                script.async = false; 
-                script.onload = function() { injectScript(index + 1); };
-                document.head.appendChild(script);
+const BOARD_ROWS = 8;
+const BOARD_COLS = 8;
+const RUNE_TYPES = ['🔥', '🛡️', '🎯', '💚'];
+
+let combatData = {
+    dragonHP: 120, 
+    dragonMaxHP: 120,
+    playerAP: 1, 
+    playerMaxAP: 1,
+    currentRound: 1,
+    tankTaunting: false, 
+    dragonBlinded: false, 
+    squad: [
+        { id: "tank", name: "Танк", hp: 150, maxHP: 150, sp: 0, maxSP: 100, icon: "🛡️", color: "#4a90e2" },
+        { id: "damage", name: "Дамагер", hp: 90, maxHP: 90, sp: 0, maxSP: 100, icon: "🔥", color: "#ff4500" },
+        { id: "archer", name: "Лучник", hp: 100, maxHP: 100, sp: 0, maxSP: 100, icon: "🎯", color: "#f1c40f" },
+        { id: "mage", name: "Маг", hp: 80, maxHP: 80, sp: 0, maxSP: 100, icon: "💚", color: "#2ecc71" }
+    ]
+};
+
+let match3BoardData = [];
+let selectedCell = null;
+let selectedDragonLevel = 1;
+
+const GAME_TEXTS = {
+    mainInfo: `
+        <p><strong>Правила Боя v0.8.0:</strong></p>
+        <p>1. Каждый раунд вы делаете ровно <strong>1 ход на поле Match-3</strong>.</p>
+        <p>2. Взрывы рун заряжают Суперсилу героев (+6% за камень).</p>
+        <p>3. Дракон атакует автоматически <strong>сразу после вашего хода на поле</strong>.</p>
+        <p>4. Прожимайте Суперсилы сияющих героев в любой момент раунда, чтобы уничтожить босса!</p>
+    `,
+    combatHelp: `
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🛡️ Суперсила Танка:</strong> Провокация. Дракон в следующем раунде гарантированно ударит только Танка.</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🔥 Суперсила Дамагера:</strong> Наносит Дракону сокрушительный чистый урон (120 ед.).</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🎯 Суперсила Лучника:</strong> Ослепляет Дракона — следующая атака босса нанесет на 50% меньше урона!</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>💚 Суперсила Мага:</strong> Моментально исцеляет здоровье (+25 HP) сразу всему отряду.</p>
+    `
+};
+
+const MODE_DESCRIPTIONS = {
+    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНИЦА", text: "Священное место, где из костей и чешуи поверженных драконов можно выковывать мифическую экипировку." },
+    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", text: "Здесь вы сможете дистиллировать драконью кровь и варить катализаторы маны." },
+    squad: { title: "👥 КНИГА ЗАКЛИНАНИЙ И ОТРЯД", text: "Военный лагерь. Позволяет повышать уровни героев и открывать новые ультимативные приемы." }
+};
+
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', initDispatcherModule);
+} else {
+    initDispatcherModule();
+}
+
+function initDispatcherModule() {
+    initVersionDisplay();
+    setupMenuListeners();
+    setupCombatHelpListeners();
+}
+
+function initVersionDisplay() {
+    const versionElement = document.getElementById('game-version');
+    if (versionElement) versionElement.innerText = GAME_VERSION;
+}
+
+function showScreen(screenId) {
+    const screens = ['main-menu', 'dragon-select-screen', 'info-screen', 'mode-desc-screen', 'combat-screen'];
+    screens.forEach(id => {
+        const screenEl = document.getElementById(id);
+        if (screenEl) {
+            screenEl.style.display = (id === screenId) ? 'flex' : 'none';
+        }
+    });
+}
+
+function openModeDescription(modeKey) {
+    const modeData = MODE_DESCRIPTIONS[modeKey];
+    if (!modeData) return;
+    document.getElementById('mode-desc-title').innerText = modeData.title;
+    document.getElementById('mode-desc-text').innerHTML = modeData.text;
+    showScreen('mode-desc-screen');
+}
+
+function setupMenuListeners() {
+    const toCombatBtn = document.getElementById('to-combat-btn');
+    if (toCombatBtn) {
+        toCombatBtn.addEventListener('click', () => {
+            showScreen('dragon-select-screen');
+        });
+    }
+
+    const levelBtns = document.querySelectorAll('.dragon-level-btn');
+    levelBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            selectedDragonLevel = parseInt(e.currentTarget.dataset.level);
+            if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
+            showScreen('combat-screen');
+            if (typeof startCombatSession === 'function') {
+                startCombatSession(selectedDragonLevel);
             }
+        });
+    });
 
-            injectScript(0);
-        })();
-    </script>
-</head>
-<body>
-    <!-- Холст для искр костра -->
-    <canvas id="bg-canvas"></canvas>
+    const fromSelectToMenuBtn = document.getElementById('from-select-to-menu-btn');
+    if (fromSelectToMenuBtn) {
+        fromSelectToMenuBtn.addEventListener('click', () => showScreen('main-menu'));
+    }
 
-    <!-- Общий контейнер интерфейса -->
-    <div id="game-interface">
-        
-        <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
-        <div id="main-menu" class="game-window" style="display: flex;">
-            <h1>КХАМАЧ</h1>
-            <span class="subtitle">Рейды в Горнило Рун</span>
-            <p>Древний Дракон пробудился в недрах подземелья. Соберите свой отряд, заряжайте шкалы суперсил через камни стихий и сокрушите огнедышащую тварь в пошаговой тактической битве.</p>
-            
-            <div class="menu-row">
-                <button id="to-combat-btn" class="menu-btn">В БОЙ</button>
-                <button id="info-btn" class="info-btn">❓</button>
-            </div>
-            <div class="menu-row">
-                <button id="to-forge-btn" class="menu-btn">⚒️ Кузница</button>
-            </div>
-            <div class="menu-row">
-                <button id="to-alchemy-btn" class="menu-btn">🧪 Алхимия</button>
-            </div>
-            <div class="menu-row">
-                <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
-            </div>
-            
-            <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v0.7.9-BETA</div>
-        </div>
+    const infoBtn = document.getElementById('info-btn');
+    if (infoBtn) {
+        infoBtn.addEventListener('click', () => {
+            const infoTextEl = document.getElementById('info-screen-text');
+            if (infoTextEl) infoTextEl.innerHTML = GAME_TEXTS.mainInfo;
+            showScreen('info-screen');
+        });
+    }
 
-        <!-- ================= ОКНО ВЫБОРА ДРАКОНА ================= -->
-        <div id="dragon-select-screen" class="game-window" style="display: none;">
-            <h2>ВЫБОР ДОБЫЧИ</h2>
-            <span class="subtitle">Уровень угрозы подземелья</span>
-            <p>Выберите, какого дракона ваш отряд готов выследить. Чем сильнее чудовище, тем выше требования к вашей тактике.</p>
-            
-            <div class="menu-row">
-                <button class="menu-btn dragon-level-btn" data-level="1">🐉 Зеленый Дракон (Лвл 1 — 120 HP)</button>
-            </div>
-            <div class="menu-row">
-                <button class="menu-btn dragon-level-btn" data-level="2">🔥 Огненный Дракон (Лвл 2 — 180 HP)</button>
-            </div>
-            <div class="menu-row">
-                <button class="menu-btn dragon-level-btn" data-level="3">💀 Некродракон (Лвл 3 — 240 HP)</button>
-            </div>
-            
-            <button id="from-select-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
-        </div>
+    const fromInfoToMenuBtn = document.getElementById('from-info-to-menu-btn');
+    if (fromInfoToMenuBtn) {
+        fromInfoToMenuBtn.addEventListener('click', () => showScreen('main-menu'));
+    }
 
-        <!-- ================= ЭКРАН СПРАВКИ МЕНЮ ================= -->
-        <div id="info-screen" class="game-window" style="display: none;">
-            <h2>КОНТЕКСТНАЯ СПРАВКА</h2>
-            <span class="subtitle">Базовый Инструктаж</span>
-            <p id="info-screen-text">Загрузка правил...</p>
-            <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
-        </div>
+    const toForgeBtn = document.getElementById('to-forge-btn');
+    if (toForgeBtn) {
+        toForgeBtn.addEventListener('click', () => openModeDescription('forge'));
+    }
 
-        <!-- ================= ОКНО ОПИСАНИЯ РЕЖИМОВ ================= -->
-        <div id="mode-desc-screen" class="game-window" style="display: none;">
-            <h2 id="mode-desc-title">РЕЖИМ ИГРЫ</h2>
-            <span class="subtitle">Грядущие расширения</span>
-            <p id="mode-desc-text">Описание режима загружается...</p>
-            <button id="close-mode-desc-btn" class="menu-btn back-btn">Назад в меню</button>
-        </div>
+    const toAlchemyBtn = document.getElementById('to-alchemy-btn');
+    if (toAlchemyBtn) {
+        toAlchemyBtn.addEventListener('click', () => openModeDescription('alchemy'));
+    }
 
-        <!-- ================= СПРАВОЧНИК В БОЮ ================= -->
-        <div id="combat-help-screen" class="game-window combat-help-popup" style="display: none;">
-            <div class="combat-help-content">
-                <h2>ГОРНИЛО РУН</h2>
-                <span class="subtitle">Справочник Сил</span>
-                <div id="combat-help-text-container"></div>
-                <button id="close-combat-help-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в бой</button>
-            </div>
-        </div>
+    const toSquadBtn = document.getElementById('to-squad-btn');
+    if (toSquadBtn) {
+        toSquadBtn.addEventListener('click', () => openModeDescription('squad'));
+    }
 
-        <!-- ================= БОЕВОЙ ЭКРАН ================= -->
-        <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 10px 15px;">
-            <div id="dragon-raid-zone" style="position: relative;"></div>
+    const closeModeDescBtn = document.getElementById('close-mode-desc-btn');
+    if (closeModeDescBtn) {
+        closeModeDescBtn.addEventListener('click', () => showScreen('main-menu'));
+    }
 
-            <!-- ПАНЕЛЬ БОССА -->
-            <div id="boss-panel" style="margin-bottom: 4px; padding: 4px; position: relative;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                    <div id="boss-name" style="font-size: 12px; margin: 0;">ДРАКОН НЕКРОСМУТ</div>
-                    <button id="combat-help-btn" class="info-btn" style="width: 24px; height: 24px; font-size: 12px; box-shadow: none; border-radius: 4px;">❓</button>
-                </div>
-                <div class="hp-bar-container" style="height: 10px;">
-                    <div id="boss-hp-bar" class="hp-bar" style="width: 100%;"></div>
-                    <div id="boss-hp-text" style="font-size: 9px; line-height: 10px;">120 / 120</div>
-                </div>
-            </div>
+    const leaveCombatBtn = document.getElementById('leave-combat-btn');
+    if (leaveCombatBtn) {
+        leaveCombatBtn.addEventListener('click', () => {
+            if (confirm("Вы уверены, что хотите сбежать из рейда?")) {
+                if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
+                showScreen('main-menu');
+            }
+        });
+    }
+}
 
-            <!-- СТАТУС РАУНДА -->
-            <div id="battle-status-panel" style="margin-bottom: 4px; padding: 4px; font-size: 11px; flex-direction: column; align-items: stretch; gap: 2px;">
-                <div style="display: flex; justify-content: space-between; width: 100%;">
-                    <div id="combat-round-display">Раунд: 1</div>
-                    <div id="combat-ap-display" style="color: #ffd700; font-weight: bold;">Сделайте ход на поле!</div>
-                </div>
-                <div id="combat-shield-display" style="display: none; text-align: center; color: #4a90e2; font-weight: bold; font-size: 11px; border-top: 1px dashed #3a3025; padding-top: 2px;">🛡️ Танк спровоцировал дракона!</div>
-            </div>
-
-            <!-- ИНТЕРФЕЙС ОТРЯДА -->
-            <div id="squad-matrix" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 6px;"></div>
-
-            <!-- ИГРОВОЕ ПОЛЕ MATCH-3 -->
-            <div id="match3-board-container" class="match3-board"></div>
-
-            <div style="height: 38px; margin-top: 8px; display: flex; width: 100%;">
-                <button id="leave-combat-btn" class="menu-btn back-btn" style="margin: 0; padding: 0; font-size: 13px; height: 100%;">Сбежать</button>
-            </div>
-        </div>
-
-    </div>
-</body>
-</html>
+function setupCombatHelpListeners() {
+    const combatHelpBtn = document.getElementById('combat-help-btn');
+    const closeCombatHelpBtn = document.getElementById('close-combat-help-btn');
+    
+    if (combatHelpBtn) {
+        combatHelpBtn.addEventListener('click', () => {
+            const txtContainer = document.getElementById('combat-help-text-container');
+            if (txtContainer) txtContainer.innerHTML = GAME_TEXTS.combatHelp;
+            const helpScreen = document.getElementById('combat-help-screen');
+            if (helpScreen) helpScreen.style.display = 'flex';
+        });
+    }
+    
+    if (closeCombatHelpBtn) {
+        closeCombatHelpBtn.addEventListener('click', () => {
+            const helpScreen = document.getElementById('combat-help-screen');
+            if (helpScreen) helpScreen.style.display = 'none';
+        });
+    }
+}
