@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v2.5.0-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ОБНОВЛЕН - v2.8.0-BETA)
    ========================================================================== */
 
 function setupAllGameListeners() {
@@ -18,7 +18,6 @@ function setupAllGameListeners() {
     
     document.getElementById('from-info-to-menu-btn').addEventListener('click', () => showScreen('main-menu'));
     
-    // Исправлено: Привязка кликов к главным кнопкам Кузни, Лаборатории и Кланов
     document.getElementById('to-forge-btn').addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('forge'); });
     document.getElementById('to-alchemy-btn').addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('alchemy'); });
     document.getElementById('to-clans-btn').addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('clans'); });
