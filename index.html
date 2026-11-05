@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.9.0-BETA)
+        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.9.1-BETA)
         (function() {
             const timestamp = Date.now();
             
@@ -34,7 +34,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Все модули v0.9.0 успешно загружены в память.");
+                    console.log("КХАМАЧ: Все модули v0.9.1 успешно загружены в память.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -86,7 +86,7 @@
             </div>
             
             <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v0.9.0-BETA</div>
+            <div id="game-version" class="version-footer">v0.9.1-BETA</div>
         </div>
 
         <!-- ================= ОКНО ВЫБОРА ДРАКОНА ================= -->
@@ -118,7 +118,7 @@
             <button id="close-mode-desc-btn" class="menu-btn back-btn">Назад в меню</button>
         </div>
 
-        <!-- ================= В КЛАДКА ГОРОДА (ПОСТРОЙКИ ВОИНОВ) ================= -->
+        <!-- ================= ВКЛАДКА ГОРОДА (ПОСТРОЙКИ ВОИНОВ) ================= -->
         <div id="town-screen" class="game-window" style="display: none;">
             <h2>ГОРОДСКАЯ ПЛОЩАДЬ</h2>
             <span class="subtitle">Пассивные Тренировочные Лагеря воинов</span>
