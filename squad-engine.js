@@ -1,77 +1,53 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ТРЕНИРОВКИ ВОИНОВ ЗА ТРОФЕЙНЫЕ НИШТЯКИ (v2.4.0-BETA)
+   КХАМАЧ — МОДУЛЬ ОПИСАНИЯ И ХАРАКТЕРИСТИК ГЕРОЕВ ОТРЯДА (ОБНОВЛЕН - v2.5.0-BETA)
    ========================================================================== */
 
-function getBuildingTypeName(id) {
-    if (id === 'tank') return '⛺ Тренировочный лагерь';
-    if (id === 'damage') return '🛡️ Казармы';
-    if (id === 'archer') return '⚡ Стрельбище';
-    return '💚 Обитель';
-}
+const HERO_LORE_DESCRIPTIONS = {
+    tank: {
+        title: "🛡️ РЫЦАРЬ СМЕРТИ (ТАНК)",
+        text: "«Латные рукавицы намертво сжимают ростовой щит из костей. Он — несокрушимая скала Абхирамбурга, принимающая на себя всю ярость извергаемого драконьего пламени. Его ультимейт провоцирует монстра, защищая союзников ценой собственной крови.»"
+    },
+    damage: {
+        title: "🔥 БЕРСЕРК ГОРНИЛА (ДАМАГЕР)",
+        text: "«Одержимый первобытным гневом рун Кхамача, этот безумный воин не признает защиты. Его парные топоры жаждут лишь одного — вскрыть хребет древнего змея. Каждая собранная огненная триада приближает момент разрушительного чистого удара.»"
+    },
+    archer: {
+        title: "⚡ СЛЕДОПЫТ ГРОЗЫ (ЛУЧНИК)",
+        text: "«Его стрелы оперены чешуей драконов света, а тетива поет песнь молний. Метким выстрелом в глазное черево Следопыт способен ослепить чудовище, дезориентируя его в пространстве и снижая весь входящий урон по нашему отряду ровно в два раза.»"
+    },
+    mage: {
+        title: "💚 ОТРИЦАТЕЛЬ СМЕРТИ (МАГ)",
+        text: "«Тайные эссенции жизни текут по его венам. Хранитель Обители балансирует на грани миров, собирая изумрудные руны, чтобы одним заклинанием залечить рваные раны отряда и вдохнуть новые силы в павших собратьев.»"
+    }
+};
 
 function initSquadModuleListeners() {
     const buildings = ['tank', 'damage', 'archer', 'mage'];
     buildings.forEach(id => {
         const btn = document.getElementById(`upgrade-${id}-btn`);
         if (btn) {
-            btn.addEventListener('click', () => handleBuildingPurchaseClick(id));
+            btn.addEventListener('click', () => {
+                const lore = HERO_LORE_DESCRIPTIONS[id];
+                if (lore) {
+                    alert(`${lore.title}\n\n${lore.text}`);
+                }
+            });
         }
     });
 }
 
 function updateSquadButtonsDOM() {
-    const buildings = ['tank', 'damage', 'archer', 'mage'];
-    const currentGold = typeof getPlayerGold === 'function' ? getPlayerGold() : 0;
+    const buildings = [
+        { id: 'tank', btnId: 'upgrade-tank-btn', name: '⛺ Тренировочный лагерь' },
+        { id: 'damage', btnId: 'upgrade-damage-btn', name: '🛡️ Казармы' },
+        { id: 'archer', btnId: 'upgrade-archer-btn', name: '⚡ Стрельбище' },
+        { id: 'mage', btnId: 'upgrade-mage-btn', name: '💚 Обитель' }
+    ];
 
-    buildings.forEach(id => {
-        const btn = document.getElementById(`upgrade-${id}-btn`);
+    buildings.forEach(b => {
+        const btn = document.getElementById(b.btnId);
         if (!btn) return;
-
-        const isPurchased = localStorage.getItem(`khamach_squad_build_${id}`) === 'true';
-        const name = getBuildingTypeName(id);
-
-        if (isPurchased) {
-            btn.innerText = `${name} (⚙️ ГОТОВО / ВОЗВЕДЕНО)`;
-            btn.style.background = "linear-gradient(to bottom, #1d3a1e 0%, #0f2110 100%)";
-            btn.style.borderColor = "#316e34";
-        } else {
-            btn.innerText = `${name} — 100 🪙`;
-            btn.style.background = ""; // Возвращаем готический стандарт
-            btn.style.borderColor = "";
-            
-            if (currentGold < 100) {
-                btn.classList.add('disabled');
-            } else {
-                btn.classList.remove('disabled');
-            }
-        }
+        btn.innerText = b.name;
+        btn.classList.remove('disabled'); // Все кнопки отряда всегда кликабельны для чтения лора
     });
-}
-
-function handleBuildingPurchaseClick(id) {
-    const isPurchased = localStorage.getItem(`khamach_squad_build_${id}`) === 'true';
-    const name = getBuildingTypeName(id);
-
-    if (isPurchased) {
-        alert(`Здание «${name}» уже успешно возведено и функционирует в вашей цитадели!`);
-        return;
-    }
-
-    const currentGold = typeof getPlayerGold === 'function' ? getPlayerGold() : 0;
-    const cost = 100;
-
-    if (confirm(`Вы хотите возвести «${name}» за 100 🪙 золота?`)) {
-        if (currentGold >= cost) {
-            localStorage.setItem('khamach_gold', currentGold - cost);
-            localStorage.setItem(`khamach_squad_build_${id}`, 'true');
-            localStorage.setItem(`khamach_build_${id}`, 1); // Активируем 1 уровень для боевых расчетов
-            
-            if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
-            updateSquadButtonsDOM();
-            
-            alert(`Строительство здания «${name}» успешно завершено!`);
-        } else {
-            alert(`Недостаточно золота! Чтобы выкупить постройку, требуется 🪙 ${cost}.`);
-        }
-    }
 }
