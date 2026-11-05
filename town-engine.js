@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЭКОНОМИКА ЦИТАДЕЛИ И СКЛАДЫ НИШТЯКОВ ДРАКОНА (ОБНОВЛЕН - v2.3.0-BETA)
+   КХАМАЧ — ЭКОНОМИКА ЦИТАДЕЛИ И СКЛАДЫ НИШТЯКОВ ДРАКОНА (ОБНОВЛЕН - v2.5.0-BETA)
    ========================================================================== */
 
 const INLINE_TOWN_TEXTS = {
@@ -9,8 +9,9 @@ const INLINE_TOWN_TEXTS = {
 };
 
 const INLINE_MODE_DESCRIPTIONS = {
-    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНЯ", buyText: "Кузне требуется восстановление инструментов за 🪙 100.", activeText: "Инструменты исправны. Кузня готова плавить редкие материалы или выковать мифическое оружие." },
-    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", buyText: "Лаборатории требуется закупка редких реагентов за 🪙 100.", activeText: "Реагенты закуплены. Лаборатория готова варить Сердце Змея." }
+    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНЯ", reqText: "В полумраке кузницы тяжело вздыхают мехи. Здесь из костей и чешуи великих ящеров куется мифический доспех, не знающий износа.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Кузня открывается на 12-м уровне развития отряда!</strong>" },
+    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", reqText: "Полки уставлены древними фолиантами и склянками с мерцающими эссенциями. Алхимик Абхирамбурга способен дистиллировать кровь змея в чистую ярость.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Лаборатория открывается на 12-м уровне развития отряда!</strong>" },
+    clans: { title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", reqText: "Песок Арены и залы Великих Гильдий замерли в ожидании героев. Здесь возводятся Врата Разломов и куется коллективное Величие в Мире 2.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Клановый шлюз открывается на 12-м уровне развития отряда!</strong>" }
 };
 
 function getTownText(key) { return INLINE_TOWN_TEXTS[key] || ''; }
@@ -21,17 +22,6 @@ function getPlayerResource(key) { return parseInt(localStorage.getItem(`khamach_
 function addPlayerResource(key, amount) { localStorage.setItem(`khamach_res_${key}`, getPlayerResource(key) + amount); if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay(); }
 function isBuildingPurchased(id) { return localStorage.getItem(`khamach_purchased_${id}`) === 'true'; }
 
-function buyTownBuilding(id) {
-    const cost = 100; // Изменено на 100 по ТЗ для легкого теста
-    if (getPlayerGold() >= cost && !isBuildingPurchased(id)) {
-        localStorage.setItem('khamach_gold', getPlayerGold() - cost);
-        localStorage.setItem(`khamach_purchased_${id}`, 'true');
-        updateTownGoldDisplay();
-        return true;
-    }
-    return false;
-}
-
 function openModeDescription(modeKey) {
     currentOpenedModeKey = modeKey;
     const modeData = INLINE_MODE_DESCRIPTIONS[modeKey];
@@ -39,19 +29,11 @@ function openModeDescription(modeKey) {
     
     document.getElementById('mode-desc-title').innerText = modeData.title;
     const buyBtn = document.getElementById('mode-buy-btn');
-    const processBtn = document.getElementById('mode-process-btn');
     const textEl = document.getElementById('mode-desc-text');
     
-    if (!isBuildingPurchased(modeKey)) {
-        textEl.innerHTML = `<p>${modeData.buyText}</p>`;
-        buyBtn.style.display = 'block';
-        buyBtn.innerText = `🛒 ВЫКУПИТЬ ЗДЕНИЕ (100 🪙)`; // Переименована цена на кнопке
-        processBtn.style.display = 'none';
-    } else {
-        textEl.innerHTML = `<p>${modeData.activeText}</p><p>Используйте меню «Отряд» для тренировки героев за добытые ништяки.</p>`;
-        buyBtn.style.display = 'none';
-        processBtn.style.display = 'none';
-    }
+    textEl.innerHTML = `<p>${modeData.reqText}</p>`;
+    buyBtn.style.display = 'none'; // Кнопка купить скрыта, так как уровень еще недоступен
+    
     showScreen('mode-desc-screen');
 }
 
@@ -64,7 +46,7 @@ function updateTownGoldDisplay() {
     if (!invContainer) return;
     
     invContainer.innerHTML = `
-        <div style="color: #bfae96; text-transform: uppercase; font-size: 10px; border-bottom: 1px solid #3a3025; padding-bottom: 2px; font-weight: bold;">📜 Хранилище Цитадели</div>
+        <div style="color: #bfae96; text-transform: uppercase; font-size: 10px; border-bottom: 1px solid #3a3025; padding-bottom: 2px; font-weight: bold;">📜 Хранилище Цिताдели</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 12px; margin: 6px 0; color: #cdb38c; text-align: left; padding: 0 5px;">
             <span>🛡️ Плазма: <strong style="color:#fff;">${getPlayerResource('plasma')}</strong></span>
             <span>🔥 Кровь: <strong style="color:#fff;">${getPlayerResource('blood')}</strong></span>
