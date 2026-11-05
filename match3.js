@@ -1,6 +1,6 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ИСПРАВЛЕННЫЙ УРОН - v0.7.2-BETA)
-   ========================================================================== */
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ИСПРАВЛЕННЫЙ УРОН - v0.7.3-BETA)
+   ========================================================================= */
 
 let isBoardLocked = false;
 
@@ -186,8 +186,8 @@ function checkMatchesAndExecute() {
                     }
                 }
             }
-            // Передаем эффекты взрывов СТРОГО для зарядки шкал энергии SP персонажей
-            if (typeof applyRuneCombination === 'function') applyRuneCombination(executionEffects);
+            // Вызов полностью изолированной функции зарядки Суперсил
+            if (typeof chargeHeroSuperpowers === 'function') chargeHeroSuperpowers(executionEffects);
             renderBoardDOM(false, newRunesCoords);
             
             setTimeout(() => {
