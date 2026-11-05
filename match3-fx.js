@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АУДИО-ДВИЖОК С ПАНЕЛЬЮ УПРАВЛЕНИЯ ГРОМКОСТЬЮ (v0.6.0-beta.34)
+   КХАМАЧ — АУДИО-ДВИЖОК С ПАНЕЛЬЮ УПРАВЛЕНИЯ ГРОМКОСТЬЮ (v0.6.0-beta.35)
    ========================================================================== */
 
 let audioCtx = null;
@@ -8,7 +8,6 @@ let nextNodeTimeout = null;
 let delayNode = null;
 let delayGain = null;
 
-// Глобальные настройки громкости (от 0.0 до 1.0)
 let gameVolumeMusic = 0.5;
 let gameVolumeFX = 0.6;
 let gameIsMuted = false;
@@ -47,7 +46,7 @@ function playAmbientNode() {
         const now = audioCtx.currentTime;
         let duration = 4.0 + Math.random() * 1.5;
         
-        // Массив частот для минорного готического эмбиента
+        // Массив частот для минорного готического эмбиента [A3, C4, D4, E4, G4]
         const roots = [220.00, 261.63, 293.66, 329.63, 392.00];
         const baseRoot = roots[Math.floor(Math.random() * roots.length)];
         const chordFrequencies = [baseRoot, baseRoot * 1.1892, baseRoot * 1.4983];
