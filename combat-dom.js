@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ПОЛНОГО РЕНДЕРИНГА БОЕВОГО ИНТЕРФЕЙСА (ИСПРАВЛЕН - v1.1.1-BETA)
+   КХАМАЧ — МОДУЛЬ ПОЛНОГО РЕНДЕРИНГА БОЕВОГО ИНТЕРФЕЙСА (ОБНОВЛЕН - v2.2.0-BETA)
    ========================================================================== */
 
 function injectCombatInterfaceBaseDOM() {
@@ -116,9 +116,14 @@ function updateCombatInterfaceDOM() {
         let hpPct = (hero.hp / hero.maxHP) * 100;
         let spPct = (hero.sp / hero.maxSP) * 100;
         
+        // Извлекаем уровень воина из localStorage
+        const heroLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel(hero.id) : 0;
+        
         card.innerHTML = `
             <div class="hero-card-avatar" style="color: ${hero.color};">${hero.icon}</div>
-            <div class="hero-card-name">${hero.name}</div>
+            <div class="hero-card-name" style="font-size: 8px; line-height: 1.1;">
+                ${hero.name}<br><span style="color: #ffd700;">Ур. ${heroLvl}</span>
+            </div>
             <div class="hero-bar-container">
                 <div class="hero-bar-fill hp-fill" style="width: ${hpPct}%;"></div>
                 <div class="hero-bar-text">${hero.hp}/${hero.maxHP}</div>
