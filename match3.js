@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ОЧИЩЕННОЕ ЯДРО ЛОГИКИ) (v0.6.0-beta.21)
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ОЧИЩЕННОЕ ЯДРО ЛОГИКИ) (v0.6.0-beta.41)
    ========================================================================== */
 
 let isBoardLocked = false;
@@ -10,15 +10,15 @@ function initMatch3Board() {
     if (!boardContainer) return;
     
     boardContainer.innerHTML = '';
-    match3BoardData = [];
+    match3BoardData = new Array();
     isBoardLocked = false;
     selectedCell = null;
     if (typeof resetSwipeTracker === 'function') resetSwipeTracker();
     
     for (let r = 0; r < BOARD_ROWS; r++) {
-        match3BoardData[r] = [];
+        match3BoardData[r] = new Array();
         for (let c = 0; c < BOARD_COLS; c++) {
-            let allowedTypes = RUNE_TYPES.filter(type => {
+            let allowedTypes = RUNE_TYPES.filter(function(type) {
                 if (r >= 2 && match3BoardData[r-1][c] === type && match3BoardData[r-2][c] === type) return false;
                 if (c >= 2 && match3BoardData[r][c-1] === type && match3BoardData[r][c-2] === type) return false;
                 return true;
@@ -27,10 +27,10 @@ function initMatch3Board() {
             match3BoardData[r][c] = randomType;
         }
     }
-    renderBoardDOM(true, []);
+    renderBoardDOM(true, new Array());
 }
 
-function renderBoardDOM(isIntro = false, newRunesCoords = []) {
+function renderBoardDOM(isIntro, newRunesCoords) {
     const boardContainer = document.getElementById('match3-board-container');
     if (!boardContainer) return;
     boardContainer.innerHTML = '';
@@ -46,23 +46,19 @@ function renderBoardDOM(isIntro = false, newRunesCoords = []) {
             if (isIntro) {
                 cell.classList.add('rune-appear');
                 const delay = Math.abs(3.5 - r) * 0.035 + Math.abs(3.5 - c) * 0.035;
-                cell.style.animationDelay = `${delay}s`;
+                cell.style.animationDelay = delay + "s";
                 
-                setTimeout(() => { 
+                setTimeout(function() { 
                     if (isIntro && !isBoardLocked && typeof playMatch3Sound === 'function') {
                         playMatch3Sound('intro');
                     }
                 }, delay * 1000);
-            } else if (newRunesCoords && newRunesCoords.some(coord => coord.row === r && coord.col === c)) {
+            } else if (newRunesCoords && newRunesCoords.some(function(coord) { return coord.row === r && coord.col === c; })) {
                 cell.classList.add('rune-fall');
             }
             
             cell.addEventListener('click', handleCellClick);
-            
-            if (typeof setupInputListeners === 'function') {
-                setupInputListeners(cell);
-            }
-            
+            if (typeof setupInputListeners === 'function') setupInputListeners(cell);
             boardContainer.appendChild(cell);
         }
     }
@@ -87,9 +83,9 @@ function handleCellClick(e) {
         if (isNeighbor) {
             animateAndSwapRunes(prevR, prevC, r, c);
         } else {
-            renderBoardDOM();
+            renderBoardDOM(false, new Array());
             selectedCell = { row: r, col: c };
-            const currentCell = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+            const currentCell = document.querySelector('[data-row="' + r + '"][data-col="' + c + '"]');
             if (currentCell) currentCell.style.backgroundColor = 'rgba(230, 194, 128, 0.3)';
             return;
         }
@@ -101,16 +97,16 @@ function animateAndSwapRunes(r1, c1, r2, c2) {
     isBoardLocked = true;
     if (typeof playMatch3Sound === 'function') playMatch3Sound('swap');
     
-    const cell1 = document.querySelector(`[data-row="${r1}"][data-col="${c1}"]`);
-    const cell2 = document.querySelector(`[data-row="${r2}"][data-col="${c2}"]`);
+    const cell1 = document.querySelector('[data-row="' + r1 + '"][data-col="' + c1 + '"]');
+    const cell2 = document.querySelector('[data-row="' + r2 + '"][data-col="' + c2 + '"]');
     if (!cell1 || !cell2) { isBoardLocked = false; return; }
     
     const deltaX = cell2.offsetLeft - cell1.offsetLeft;
     const deltaY = cell2.offsetTop - cell1.offsetTop;
-    cell1.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-    cell2.style.transform = `translate(${-deltaX}px, ${-deltaY}px)`;
+    cell1.style.transform = 'translate(' + deltaX + 'px, ' + deltaY + 'px)';
+    cell2.style.transform = 'translate(' + (-deltaX) + 'px, ' + (-deltaY) + 'px)';
     
-    setTimeout(() => {
+    setTimeout(function() {
         let temp = match3BoardData[r1][c1];
         match3BoardData[r1][c1] = match3BoardData[r2][c2];
         match3BoardData[r2][c2] = temp;
@@ -124,13 +120,13 @@ function animateAndSwapRunes(r1, c1, r2, c2) {
             temp = match3BoardData[r1][c1];
             match3BoardData[r1][c1] = match3BoardData[r2][c2];
             match3BoardData[r2][c2] = temp;
-            setTimeout(() => { renderBoardDOM(); isBoardLocked = false; }, 220);
+            setTimeout(function() { renderBoardDOM(false, new Array()); isBoardLocked = false; }, 220);
         }
     }, 220);
 }
 
 function checkMatchesAndExecute() {
-    let matchedMatrix = Array(BOARD_ROWS).fill().map(() => Array(BOARD_COLS).fill(false));
+    let matchedMatrix = new Array(BOARD_ROWS).fill(null).map(function() { return new Array(BOARD_COLS).fill(false); });
     let found = false;
     let mainRuneType = null;
     
@@ -161,12 +157,12 @@ function checkMatchesAndExecute() {
         if (typeof triggerMatch3Haptic === 'function') triggerMatch3Haptic(60);
         
         let executionEffects = { '🔥': 0, '🛡️': 0, '💚': 0, '⚡️': 0, '💀': 0 };
-        let newRunesCoords = [];
+        let newRunesCoords = new Array();
         
         for (let r = 0; r < BOARD_ROWS; r++) {
             for (let c = 0; c < BOARD_COLS; c++) {
                 if (matchedMatrix[r][c]) {
-                    const cellEl = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                    const cellEl = document.querySelector('[data-row="' + r + '"][data-col="' + c + '"]');
                     let type = match3BoardData[r][c];
                     if (cellEl) cellEl.classList.add('rune-explode');
                     if (typeof spawnRuneExplosionSparks === 'function') {
@@ -177,7 +173,7 @@ function checkMatchesAndExecute() {
             }
         }
         
-        setTimeout(() => {
+        setTimeout(function() {
             for (let r = 0; r < BOARD_ROWS; r++) {
                 for (let c = 0; c < BOARD_COLS; c++) {
                     if (matchedMatrix[r][c]) {
@@ -188,7 +184,7 @@ function checkMatchesAndExecute() {
             }
             if (typeof applyRuneCombination === 'function') applyRuneCombination(executionEffects);
             renderBoardDOM(false, newRunesCoords);
-            setTimeout(() => {
+            setTimeout(function() {
                 let chainMatched = checkMatchesAndExecute();
                 if (!chainMatched) isBoardLocked = false;
             }, 350);
