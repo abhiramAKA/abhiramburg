@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (БЕЗ ЛОГИКИ ОТРЯДА - v0.9.6-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (БЕЗ ЛОГИКИ ОТРЯДА - v1.0.0-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v0.9.6-BETA";
+const GAME_VERSION = "v1.0.0-BETA";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -27,6 +27,7 @@ let combatData = {
 let match3BoardData = [];
 let selectedCell = null;
 let selectedDragonLevel = 1;
+let currentOpenedModeKey = null;
 
 const GAME_TEXTS = {
     mainInfo: `
@@ -46,8 +47,8 @@ const GAME_TEXTS = {
 };
 
 const MODE_DESCRIPTIONS = {
-    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНИЦА", text: "Священное место, где из костей и чешуи поверженных драконов можно выковывать мифическую экипировку. Нажмите Купить, чтобы обновить кузнечные инструменты." },
-    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", text: "Здесь вы сможете дистиллировать драконью кровь и варить катализаторы маны. Нажмите Купить, чтобы приобрести редкие реагенты." }
+    forge: { title: "⚒️ ДРЕВНЕЕ ГОРНИЛО", buyText: "В полумраке кузницы тяжело вздыхают мехи. Старый мастер готов принять трофеи из чрева ящера, но сначала нужно выкупить и восстановить инструменты кузни за 🪙 500.", activeText: "Инструменты восстановлены. Кузнец готов перековать Драконью Чешую в укрепление лат отряда." },
+    alchemy: { title: "🧪 ТАЙНЫЙ ОЧАГ", buyText: "Свитки, покрытые пылью веков, и склянки заполняют полки. Алхимик Абхирамбурга способен дистиллировать кровь Дракона, но лаборатории требуется закупка дорогих реагентов за 🪙 500.", activeText: "Реагенты закуплены. Алхимик готов дистиллировать Драконью Кровь в начальный эликсир ярости воинов." }
 };
 
 if (document.readyState === 'loading') {
@@ -83,16 +84,48 @@ function showScreen(screenId) {
     if (screenId === 'squad-screen' && typeof updateSquadButtonsDOM === 'function') {
         updateSquadButtonsDOM();
     }
-    if (screenId === 'main-menu' || screenId === 'squad-screen') {
+    if (screenId === 'main-menu' || screenId === 'squad-screen' || screenId === 'mode-desc-screen') {
         if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
     }
 }
 
 function openModeDescription(modeKey) {
+    currentOpenedModeKey = modeKey;
     const modeData = MODE_DESCRIPTIONS[modeKey];
     if (!modeData) return;
+    
     document.getElementById('mode-desc-title').innerText = modeData.title;
-    document.getElementById('mode-desc-text').innerHTML = modeData.text;
+    
+    const buyBtn = document.getElementById('mode-buy-btn');
+    const processBtn = document.getElementById('mode-process-btn');
+    const textEl = document.getElementById('mode-desc-text');
+    
+    const purchased = typeof isBuildingPurchased === 'function' ? isBuildingPurchased(modeKey) : false;
+    
+    if (!purchased) {
+        textEl.innerHTML = `<p>${modeData.buyText}</p>`;
+        buyBtn.style.display = 'block';
+        processBtn.style.display = 'none';
+    } else {
+        const resKey = modeKey === 'forge' ? 'scales' : 'blood';
+        const resName = modeKey === 'forge' ? '🦴 Чешуя Дракона' : '🧪 Кровь Дракона';
+        const perkName = modeKey === 'forge' ? '🛡️ Стартовая Броня отряда' : '⚡ Стартовая Ярость (SP)';
+        
+        const count = typeof getPlayerResource === 'function' ? getPlayerResource(resKey) : 0;
+        const currentPerkLvl = typeof getMetaPerkValue === 'function' ? getMetaPerkValue(modeKey === 'forge' ? 'khamach_perk_shield' : 'khamach_perk_sp') : 0;
+        
+        textEl.innerHTML = `
+            <p>${modeData.activeText}</p>
+            <div style="background: rgba(0,0,0,0.5); padding: 10px; border: 1px dashed #544432; margin-bottom: 15px;">
+                <p style="margin: 5px 0;">На складе цитадели: <strong>${count} ед.</strong> ${resName}</p>
+                <p style="margin: 5px 0; color: #ffd700;">Бонус переработки: <strong>+${currentPerkLvl * 5} ед.</strong> к параметру ${perkName}</p>
+            </div>
+            <p style="font-size: 13px; color: #8a7350;">Стоимость ремесла: 1 ед. ресурса + 🪙 50 золота мастерам за работу.</p>
+        `;
+        buyBtn.style.display = 'none';
+        processBtn.style.display = 'block';
+    }
+    
     showScreen('mode-desc-screen');
 }
 
@@ -119,7 +152,23 @@ function setupMenuListeners() {
     document.getElementById('close-squad-btn').addEventListener('click', () => showScreen('main-menu'));
 
     document.getElementById('mode-buy-btn').addEventListener('click', () => {
-        alert("Покупка временно недоступна в данной BETA-версии!");
+        if (currentOpenedModeKey && typeof buyTownBuilding === 'function') {
+            if (buyTownBuilding(currentOpenedModeKey)) {
+                alert("Здание успешно выкуплено и восстановлено!");
+                openModeDescription(currentOpenedModeKey);
+            } else {
+                alert("Недостаточно золота для выкупа! Требуется 🪙 500.");
+            }
+        }
+    });
+
+    document.getElementById('mode-process-btn').addEventListener('click', () => {
+        if (currentOpenedModeKey && typeof processCraftResource === 'function') {
+            if (processCraftResource(currentOpenedModeKey)) {
+                alert("Материал успешно переработан! Мощь вашей цитадели возросла.");
+                openModeDescription(currentOpenedModeKey);
+            }
+        }
     });
 
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
