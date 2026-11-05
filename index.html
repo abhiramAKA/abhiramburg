@@ -8,14 +8,17 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // УЛЬТИМАТИВНЫЙ СИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.7.6-BETA)
+        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.7.7-BETA)
         (function() {
             const timestamp = Date.now();
             
-            // Жестко инжектим корневой CSS диспетчер со сбросом кэша
-            document.write('<link rel="stylesheet" href="styles.css?t=' + timestamp + '">');
+            // Загружаем CSS со сбросом кэша
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'styles.css?t=' + timestamp;
+            document.head.appendChild(link);
 
-            // Массив модулей в строгом готическом порядке зависимости
+            // Очередь скриптов для строгого последовательного подключения
             const scripts = [
                 'game.js',
                 'background.js',
@@ -26,10 +29,22 @@
                 'combat.js'
             ];
 
-            // Инжектим теги последовательно, блокируя рендеринг до полной сборки памяти
-            scripts.forEach(function(src) {
-                document.write('<script src="' + src + '?t=' + timestamp + '"><\/script>');
-            });
+            function injectScript(index) {
+                if (index >= scripts.length) {
+                    // Все файлы загружены — обновляем версию на экране и активируем меню
+                    console.log("КХАМАЧ: Все модули v0.7.7 успешно загружены в память.");
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = scripts[index] + '?t=' + timestamp;
+                script.async = false; // Сохраняем строгую готическую иерархию
+                script.onload = function() { injectScript(index + 1); };
+                document.head.appendChild(script);
+            }
+
+            // Запускаем инжекцию модулей
+            injectScript(0);
         })();
     </script>
 </head>
@@ -60,8 +75,8 @@
                 <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
             </div>
             
-            <!-- Контрольная метка версии -->
-            <div id="game-version" class="version-footer">v0.7.6-BETA</div>
+            <!-- Контрольная метка версии сборки -->
+            <div id="game-version" class="version-footer">v0.7.7-BETA</div>
         </div>
 
         <!-- ================= ЭКРАН СПРАВКИ МЕНЮ ================= -->
