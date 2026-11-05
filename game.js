@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ФИКС СИНТАКСИСА И СЛУШАТЕЛЕЙ - v0.9.3-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ГОТИЧЕСКИЙ ВОЕННЫЙ ЛАГЕРЬ - v0.9.4-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v0.9.3-BETA";
+const GAME_VERSION = "v0.9.4-BETA";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -80,7 +80,7 @@ function showScreen(screenId) {
         renderDragonSelectionGrid();
     }
     if (screenId === 'squad-screen') {
-        renderSquadBuildingsList();
+        updateSquadButtonsDOM();
     }
     if (screenId === 'main-menu' || screenId === 'squad-screen') {
         if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
@@ -95,56 +95,47 @@ function openModeDescription(modeKey) {
     showScreen('mode-desc-screen');
 }
 
-function renderSquadBuildingsList() {
-    const listContainer = document.getElementById('squad-buildings-list');
-    if (!listContainer) return;
-    listContainer.innerHTML = '';
-
+function updateSquadButtonsDOM() {
     const buildings = [
-        { id: 'tank', name: '🛡️ Оружейная Танка', desc: 'Каждый уровень дает Танку +20 к Макс. HP' },
-        { id: 'damage', name: '🔥 Кузница Дамагера', desc: 'Каждый уровень дает Дамагеру +15 к урону ульты' },
-        { id: 'archer', name: '⚡ Стрельбище Лучника', desc: 'Каждый уровень дает Лучнику +10 к урону' },
-        { id: 'mage', name: '💚 Алтарь Мага', desc: 'Каждый уровень дает Магу +5 к силе лечения' }
+        { id: 'tank', btnId: 'upgrade-tank-btn', name: '🛡️ Казармы Танка' },
+        { id: 'damage', btnId: 'upgrade-damage-btn', name: '🔥 Плац Дамагера' },
+        { id: 'archer', btnId: 'upgrade-archer-btn', name: '⚡ Стрельбище Лучника' },
+        { id: 'mage', btnId: 'upgrade-mage-btn', name: '💚 Обитель Мага' }
     ];
 
     const currentGold = typeof getPlayerGold === 'function' ? getPlayerGold() : 0;
     const cost = 150;
 
     buildings.forEach(b => {
+        const btn = document.getElementById(b.btnId);
+        if (!btn) return;
+
         const lvl = typeof getBuildingLevel === 'function' ? getBuildingLevel(b.id) : 0;
-        const card = document.createElement('div');
-        card.style.background = 'rgba(0,0,0,0.3)';
-        card.style.border = '1px solid #4a3e31';
-        card.style.padding = '8px';
-        card.style.marginBottom = '8px';
-        card.style.borderRadius = '4px';
-        card.style.textAlign = 'left';
-
-        card.innerHTML = `
-            <div style="font-weight:bold; color:#e6c280; font-size:14px;">${b.name} (Ур. ${lvl}/15)</div>
-            <div style="font-size:11px; color:#bfae96; margin:4px 0 6px 0;">${b.desc}</div>
-        `;
-
-        const btn = document.createElement('button');
-        btn.className = 'menu-btn';
-        btn.style.padding = '6px';
-        btn.style.fontSize = '12px';
-
+        
         if (lvl >= 15) {
-            btn.innerText = 'МАКС. УРОВЕНЬ';
+            btn.innerText = `${b.name} (Макс. Ур. 15)`;
             btn.classList.add('disabled');
         } else {
-            btn.innerText = `Улучшить (150 🪙)`;
-            if (currentGold < cost) btn.classList.add('disabled');
-            btn.addEventListener('click', () => {
-                if (typeof upgradeBuilding === 'function' && upgradeBuilding(b.id)) {
-                    renderSquadBuildingsList();
-                }
-            });
+            btn.innerText = `${b.name} (Ур. ${lvl} → ${lvl + 1}) — 150 🪙`;
+            if (currentGold < cost) {
+                btn.classList.add('disabled');
+            } else {
+                btn.classList.remove('disabled');
+            }
         }
-        card.appendChild(btn);
-        listContainer.appendChild(card);
     });
+}
+
+function handleSquadUpgradeClick(buildingId) {
+    const lvl = typeof getBuildingLevel === 'function' ? getBuildingLevel(buildingId) : 0;
+    if (lvl >= 15) return;
+
+    if (typeof upgradeBuilding === 'function' && upgradeBuilding(buildingId)) {
+        updateSquadButtonsDOM();
+        alert("Строительство военного лагеря завершено успешно!");
+    } else {
+        alert("Недостаточно золота для апгрейда лагеря! Отправляйтесь в рейд.");
+    }
 }
 
 function setupMenuListeners() {
@@ -168,6 +159,11 @@ function setupMenuListeners() {
     document.getElementById('to-squad-btn').addEventListener('click', () => showScreen('squad-screen'));
     document.getElementById('close-mode-desc-btn').addEventListener('click', () => showScreen('main-menu'));
     document.getElementById('close-squad-btn').addEventListener('click', () => showScreen('main-menu'));
+
+    document.getElementById('upgrade-tank-btn').addEventListener('click', () => handleSquadUpgradeClick('tank'));
+    document.getElementById('upgrade-damage-btn').addEventListener('click', () => handleSquadUpgradeClick('damage'));
+    document.getElementById('upgrade-archer-btn').addEventListener('click', () => handleSquadUpgradeClick('archer'));
+    document.getElementById('upgrade-mage-btn').addEventListener('click', () => handleSquadUpgradeClick('mage'));
 
     document.getElementById('mode-buy-btn').addEventListener('click', () => {
         alert("Покупка временно недоступна в данной BETA-версии!");
