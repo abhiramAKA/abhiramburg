@@ -1,28 +1,28 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТИХИЙ (v0.7.0-ALPHA.1)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (v0.7.0-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v0.7.0-alpha.1";
+const GAME_VERSION = "v0.7.0-BETA";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
-const RUNE_TYPES = ['⛰️', '🔥', '💧', '💨'];
+// Строго 4 типа рун под 4 героев
+const RUNE_TYPES = ['🔥', '🛡️', '🎯', '💚'];
 
 let combatData = {
-    currentLevel: 1,
-    dragonHP: 200,
-    dragonMaxHP: 200,
-    dragonBaseDamage: 10,
-    dragonMassDamage: 20,
-    playerAP: 3,
-    playerMaxAP: 3,
+    dragonHP: 1000,
+    dragonMaxHP: 1000,
+    playerAP: 1, 
+    playerMaxAP: 1,
     currentRound: 1,
-    playerShield: 0,
+    tankTaunting: false, // Флаг Провокации Танка
+    dragonBlinded: false, // Флаг Ослепления Лучника (срез атаки на 50%)
+    isActionPhase: false, // Флаг ручной фазы Суперсил
     squad: [
-        { name: "Танк Земли", hp: 60, maxHP: 60, role: "⛰️", icon: "⛰️" },
-        { name: "Берсерк Огня", hp: 50, maxHP: 50, role: "🔥", icon: "🔥" },
-        { name: "Снайпер Воды", hp: 45, maxHP: 45, role: "💧", icon: "💧" },
-        { name: "Маг Воздуха", hp: 40, maxHP: 40, role: "💨", icon: "💨" }
+        { id: "tank", name: "Танк", hp: 150, maxHP: 150, sp: 0, maxSP: 100, icon: "🛡️", color: "#4a90e2" },
+        { id: "damage", name: "Дамагер", hp: 90, maxHP: 90, sp: 0, maxSP: 100, icon: "🔥", color: "#ff4500" },
+        { id: "archer", name: "Лучник", hp: 100, maxHP: 100, sp: 0, maxSP: 100, icon: "🎯", color: "#f1c40f" },
+        { id: "mage", name: "Маг", hp: 80, maxHP: 80, sp: 0, maxSP: 100, icon: "💚", color: "#2ecc71" }
     ]
 };
 
@@ -31,23 +31,24 @@ let selectedCell = null;
 
 const GAME_TEXTS = {
     mainInfo: `
-        <p><strong>Система Четырех Стихий:</strong> Поле сокращено до 4 элементов. Комбинации собираются значительно легче!</p>
-        <p>Каждый уровень Дракон становится сильнее, наращивает здоровье и урон.</p>
-        <p><strong>Камни-препятствия (🧱):</strong> Начиная со 2-го уровня, на поле появляются проклятые заблокированные ячейки, которые нельзя сдвинуть или уничтожить.</p>
+        <p><strong>Правила Боя v0.7.0:</strong></p>
+        <p>1. Каждый раунд вы делаете ровно <strong>1 ход на поле Match-3</strong>.</p>
+        <p>2. Взрывы рун заряжают шкалу Суперсилы конкретного героя. 1 взорванный камень = +6% энергии.</p>
+        <p>3. Дракон атакует автоматически <strong>сразу после вашего хода на поле</strong>.</p>
+        <p>4. После атаки босса наступает Фаза Приказов. Если шкала героя полная (100%), он загорается <strong>сияющим ореолом</strong>. Кликните на него, чтобы активировать Суперсилу!</p>
     `,
     combatHelp: `
-        <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>⛰️ Руна Земли:</strong> Танк генерирует +3 ед. Щита за камень. Защищает отряд от атак.</p>
-        <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>🔥 Руна Огня:</strong> Берсерк наносит +4 ед. разрушительного ближнего урона за камень.</p>
-        <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>💧 Руна Воды:</strong> Снайпер наносит +3 ед. точечного урона с дистанции за камень.</p>
-        <p style="text-align: left; font-size: 13px; margin-bottom: 10px;"><strong>💨 Руна Воздуха:</strong> Маг исцеляет всех живых героев на +2 ед. за камень.</p>
-        <p style="border-top: 1px dashed #4a3f2c; padding-top: 10px; font-size: 13px; text-align: left;"><strong>⚠️ Важно:</strong> Если профильный герой погибает, его руны на поле перестают приносить пользу!</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🛡️ Суперсила Танка:</strong> Накладывает провокацию. В следующем раунде Дракон гарантированно ударит только Танка, защищая отряд.</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🔥 Суперсила Дамагера:</strong> Наносит Дракону сокрушительный чистый урон (120 ед.).</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🎯 Суперсила Лучника:</strong> Ослепляет Дракона — следующая атака босса нанесет на 50% меньше урона!</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>💚 Суперсила Мага:</strong> Моментально исцеляет здоровье (+25 HP) сразу всему отряду.</p>
     `
 };
 
 const MODE_DESCRIPTIONS = {
-    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНИЦА", text: "Модуль улучшения стихийного снаряжения. Будет доступен в следующих версиях." },
-    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", text: "Смешивание эссенций земли, огня, воды и воздуха. Будет доступно в следующих версиях." },
-    squad: { title: "👥 УПРАВЛЕНИЕ ОТРЯДОМ", text: "Прокачка характеристик ваших четырех стихийных бойцов. Будет доступно в следующих версиях." }
+    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНИЦА", text: "Священное место, где из костей и чешуи поверженных драконов можно выковывать мифическую экипировку, повышающую базовые эффекты Суперсил ваших героев." },
+    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", text: "Здесь вы сможете дистиллировать драконью кровь, варить катализаторы маны, которые постоянно ускоряют заполнение шкал Суперсилы от взрыва камней." },
+    squad: { title: "👥 КНИГА ЗАКЛИНАНИЙ И ОТРЯД", text: "Военный лагерь. Позволяет повышать уровни героев и открывать Книгу Заклинаний, куда в будущем можно будет устанавливать новые ультимативные приемы за очки Суперобразов." }
 };
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -76,6 +77,7 @@ function showScreen(screenId) {
 function openModeDescription(modeKey) {
     const modeData = MODE_DESCRIPTIONS[modeKey];
     if (!modeData) return;
+    
     document.getElementById('mode-desc-title').innerText = modeData.title;
     document.getElementById('mode-desc-text').innerHTML = modeData.text;
     showScreen('mode-desc-screen');
@@ -85,14 +87,9 @@ function setupMenuListeners() {
     const toCombatBtn = document.getElementById('to-combat-btn');
     if (toCombatBtn) {
         toCombatBtn.addEventListener('click', () => {
-            if (typeof initAudioContext === 'function') {
-                initAudioContext();
-            }
-            combatData.currentLevel = 1;
+            if (typeof initAudioContext === 'function') initAudioContext();
             showScreen('combat-screen');
-            if (typeof startCombatSession === 'function') {
-                startCombatSession();
-            }
+            if (typeof startCombatSession === 'function') startCombatSession();
         });
     }
 
@@ -123,10 +120,26 @@ function setupMenuListeners() {
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
     if (leaveCombatBtn) {
         leaveCombatBtn.addEventListener('click', () => {
-            if (confirm("Вы уверены, что хотите сбежать из рейда? Уровень прогресса будет потерян.")) {
+            if (confirm("Вы уверены, что хотите сбежать из рейда?")) {
                 if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
                 showScreen('main-menu');
             }
+        });
+    }
+
+    const endTurnBtn = document.getElementById('end-turn-btn');
+    if (endTurnBtn) {
+        endTurnBtn.addEventListener('click', () => {
+            combatData.isActionPhase = false;
+            combatData.playerAP = combatData.playerMaxAP;
+            combatData.currentRound++;
+            
+            endTurnBtn.style.display = 'none';
+            document.getElementById('combat-ap-display').innerText = "Сделайте ход на поле!";
+            document.getElementById('combat-ap-display').style.color = "#ffd700";
+            
+            if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
+            updateCombatInterfaceDOM();
         });
     }
 }
@@ -139,6 +152,7 @@ function setupCombatHelpListeners() {
         combatHelpBtn.addEventListener('click', () => {
             const txtContainer = document.getElementById('combat-help-text-container');
             if (txtContainer) txtContainer.innerHTML = GAME_TEXTS.combatHelp;
+            
             const helpScreen = document.getElementById('combat-help-screen');
             if (helpScreen) helpScreen.style.display = 'flex';
         });
