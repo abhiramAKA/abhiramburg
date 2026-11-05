@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК РЕЙДОВ (БОЕВОЙ МАРШ - v0.6.0-beta.30)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК РЕЙДОВ (БОЕВОЙ МАРШ - v0.6.0-beta.31)
    ========================================================================== */
 
 function buildDragonDOM() {
@@ -36,7 +36,6 @@ function startCombatSession() {
     combatData.playerShield = 0;
     combatData.squad.forEach(hero => hero.hp = hero.maxHP);
     
-    // Включаем боевую музыку и запускаем генератор ударов сердца рейдовиков
     if (typeof changeMusicState === 'function') {
         changeMusicState('combat');
     }
