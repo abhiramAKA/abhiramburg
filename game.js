@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ДИСПЕТЧЕР ЭКРАНОВ - v0.8.3-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ОБНОВЛЕНИЕ СПРАВКИ И ГОРОДА - v0.8.6-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v0.8.3-BETA";
+const GAME_VERSION = "v0.8.6-BETA";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -27,20 +27,18 @@ let combatData = {
 let match3BoardData = [];
 let selectedCell = null;
 let selectedDragonLevel = 1;
+let activeModeKey = "";
 
 const GAME_TEXTS = {
     mainInfo: `
-        <p><strong>Правила Боя v0.8.3:</strong></p>
-        <p>1. Каждый раунд вы делаете ровно <strong>1 ход на поле Match-3</strong>.</p>
-        <p>2. Взрывы рун заряжают Суперсилу героев (+6% за камень).</p>
-        <p>3. Дракон атакует автоматически <strong>сразу после вашего хода на поле</strong>.</p>
-        <p>4. Прожимайте Суперсилы сияющих героев в любой момент раунда, чтобы уничтожить босса!</p>
+        <p><strong>«Логово Чудовища»:</strong></p>
+        <p>Земля содрогается от поступи древнего змея. Сражайся на поле боя, и каждая собранная триада камней обрушит ярость вашего отряда на врага.</p>
     `,
     combatHelp: `
-        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🛡️ Суперсила Танка:</strong> Провокация. Дракон в следующем раунде гарантированно ударит только Танка.</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🛡️ Суперсила Танка:</strong> Провокация. Дракон в следующем раунде гарантированно ударит только Танка. Наносит 25 ед. урона.</p>
         <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🔥 Суперсила Дамагера:</strong> Наносит Дракону сокрушительный чистый урон (120 ед.).</p>
-        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🎯 Суперсила Лучника:</strong> Ослепляет Дракона — следующая атака босса нанесет на 50% меньше урона!</p>
-        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>💚 Суперсила Мага:</strong> Моментально исцеляет здоровье (+25 HP) сразу всему отряду.</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🎯 Суперсила Лучника:</strong> Ослепляет Дракона — следующая атака босса нанесет на 50% меньше урона! Наносит 25 ед. урона.</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>💚 Суперсила Мага:</strong> Моментально исцеляет здоровье (+25 HP) сразу всему отряду. Наносит 25 ед. урона.</p>
     `
 };
 
@@ -60,6 +58,7 @@ function initDispatcherModule() {
     initVersionDisplay();
     setupMenuListeners();
     setupCombatHelpListeners();
+    if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
 }
 
 function initVersionDisplay() {
@@ -79,47 +78,71 @@ function showScreen(screenId) {
     if (screenId === 'dragon-select-screen' && typeof renderDragonSelectionGrid === 'function') {
         renderDragonSelectionGrid();
     }
+    if (screenId === 'main-menu' && typeof updateTownGoldDisplay === 'function') {
+        updateTownGoldDisplay();
+    }
 }
 
 function openModeDescription(modeKey) {
+    activeModeKey = modeKey;
     const modeData = MODE_DESCRIPTIONS[modeKey];
     if (!modeData) return;
+    
     document.getElementById('mode-desc-title').innerText = modeData.title;
     document.getElementById('mode-desc-text').innerHTML = modeData.text;
+    
+    updateBuildButtonDOM();
     showScreen('mode-desc-screen');
 }
 
+function updateBuildButtonDOM() {
+    const buildBtn = document.getElementById('build-upgrade-btn');
+    if (!buildBtn || !activeModeKey) return;
+    
+    const lvl = typeof getBuildingLevel === 'function' ? getBuildingLevel(activeModeKey) : 0;
+    const currentGold = typeof getPlayerGold === 'function' ? getPlayerGold() : 0;
+    const cost = 150;
+    
+    if (lvl === 0) {
+        buildBtn.innerText = `ПОСТРОИТЬ (Цена: 150 🪙)`;
+    } else {
+        buildBtn.innerText = `УЛУЧШИТЬ ДО УР. ${lvl + 1} (Цена: 150 🪙)`;
+    }
+    
+    if (currentGold < cost) {
+        buildBtn.classList.add('disabled');
+    } else {
+        buildBtn.classList.remove('disabled');
+    }
+}
+
 function setupMenuListeners() {
-    const toCombatBtn = document.getElementById('to-combat-btn');
-    if (toCombatBtn) {
-        toCombatBtn.addEventListener('click', () => {
-            showScreen('dragon-select-screen');
-        });
-    }
-
-    const fromSelectToMenuBtn = document.getElementById('from-select-to-menu-btn');
-    if (fromSelectToMenuBtn) {
-        fromSelectToMenuBtn.addEventListener('click', () => showScreen('main-menu'));
-    }
-
-    const infoBtn = document.getElementById('info-btn');
-    if (infoBtn) {
-        infoBtn.addEventListener('click', () => {
-            const infoTextEl = document.getElementById('info-screen-text');
-            if (infoTextEl) infoTextEl.innerHTML = GAME_TEXTS.mainInfo;
-            showScreen('info-screen');
-        });
-    }
-
-    const fromInfoToMenuBtn = document.getElementById('from-info-to-menu-btn');
-    if (fromInfoToMenuBtn) {
-        fromInfoToMenuBtn.addEventListener('click', () => showScreen('main-menu'));
-    }
-
+    document.getElementById('to-combat-btn').addEventListener('click', () => showScreen('dragon-select-screen'));
+    document.getElementById('from-select-to-menu-btn').addEventListener('click', () => showScreen('main-menu'));
+    
+    document.getElementById('info-btn').addEventListener('click', () => {
+        document.getElementById('info-screen-text').innerHTML = GAME_TEXTS.mainInfo;
+        showScreen('info-screen');
+    });
+    
+    document.getElementById('from-info-to-menu-btn').addEventListener('click', () => showScreen('main-menu'));
+    
     document.getElementById('to-forge-btn').addEventListener('click', () => openModeDescription('forge'));
     document.getElementById('to-alchemy-btn').addEventListener('click', () => openModeDescription('alchemy'));
     document.getElementById('to-squad-btn').addEventListener('click', () => openModeDescription('squad'));
     document.getElementById('close-mode-desc-btn').addEventListener('click', () => showScreen('main-menu'));
+
+    const buildUpgradeBtn = document.getElementById('build-upgrade-btn');
+    if (buildUpgradeBtn) {
+        buildUpgradeBtn.addEventListener('click', () => {
+            if (typeof upgradeBuilding === 'function' && upgradeBuilding(activeModeKey)) {
+                updateBuildButtonDOM();
+                alert("Строительство успешно завершено!");
+            } else {
+                alert("Недостаточно золота для постройки! Сражайтесь с драконами.");
+            }
+        });
+    }
 
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
     if (leaveCombatBtn) {
@@ -133,22 +156,12 @@ function setupMenuListeners() {
 }
 
 function setupCombatHelpListeners() {
-    const combatHelpBtn = document.getElementById('combat-help-btn');
-    const closeCombatHelpBtn = document.getElementById('close-combat-help-btn');
+    document.getElementById('combat-help-btn').addEventListener('click', () => {
+        document.getElementById('combat-help-text-container').innerHTML = GAME_TEXTS.combatHelp;
+        document.getElementById('combat-help-screen').style.display = 'flex';
+    });
     
-    if (combatHelpBtn) {
-        combatHelpBtn.addEventListener('click', () => {
-            const txtContainer = document.getElementById('combat-help-text-container');
-            if (txtContainer) txtContainer.innerHTML = GAME_TEXTS.combatHelp;
-            const helpScreen = document.getElementById('combat-help-screen');
-            if (helpScreen) helpScreen.style.display = 'flex';
-        });
-    }
-    
-    if (closeCombatHelpBtn) {
-        closeCombatHelpBtn.addEventListener('click', () => {
-            const helpScreen = document.getElementById('combat-help-screen');
-            if (helpScreen) helpScreen.style.display = 'none';
-        });
-    }
+    document.getElementById('close-combat-help-btn').addEventListener('click', () => {
+        document.getElementById('combat-help-screen').style.display = 'none';
+    });
 }
