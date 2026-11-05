@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.7.8-BETA)
+        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.7.9-BETA)
         (function() {
             const timestamp = Date.now();
             
@@ -31,7 +31,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Все модули v0.7.8 успешно загружены в память.");
+                    console.log("КХАМАЧ: Все модули v0.7.9 успешно загружены в память.");
                     return;
                 }
                 
@@ -74,7 +74,26 @@
             </div>
             
             <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v0.7.8-BETA</div>
+            <div id="game-version" class="version-footer">v0.7.9-BETA</div>
+        </div>
+
+        <!-- ================= ОКНО ВЫБОРА ДРАКОНА ================= -->
+        <div id="dragon-select-screen" class="game-window" style="display: none;">
+            <h2>ВЫБОР ДОБЫЧИ</h2>
+            <span class="subtitle">Уровень угрозы подземелья</span>
+            <p>Выберите, какого дракона ваш отряд готов выследить. Чем сильнее чудовище, тем выше требования к вашей тактике.</p>
+            
+            <div class="menu-row">
+                <button class="menu-btn dragon-level-btn" data-level="1">🐉 Зеленый Дракон (Лвл 1 — 120 HP)</button>
+            </div>
+            <div class="menu-row">
+                <button class="menu-btn dragon-level-btn" data-level="2">🔥 Огненный Дракон (Лвл 2 — 180 HP)</button>
+            </div>
+            <div class="menu-row">
+                <button class="menu-btn dragon-level-btn" data-level="3">💀 Некродракон (Лвл 3 — 240 HP)</button>
+            </div>
+            
+            <button id="from-select-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
         </div>
 
         <!-- ================= ЭКРАН СПРАВКИ МЕНЮ ================= -->
