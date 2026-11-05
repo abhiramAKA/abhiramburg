@@ -8,17 +8,14 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ДИНАМИЧЕСКИЙ АВТОЗАГРУЗЧИК CACHE BUSTING (v0.7.6-BETA)
+        // УЛЬТИМАТИВНЫЙ СИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.7.6-BETA)
         (function() {
-            const timestamp = Date.now(); // Генерирует уникальный хвост времени в миллисекундах
+            const timestamp = Date.now();
             
-            // 1. Принудительно инжектим стили
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = 'styles.css?t=' + timestamp;
-            document.head.appendChild(link);
+            // Жестко инжектим корневой CSS диспетчер со сбросом кэша
+            document.write('<link rel="stylesheet" href="styles.css?t=' + timestamp + '">');
 
-            // 2. Строгий порядок асинхронной очереди загрузки JS-модулей
+            // Массив модулей в строгом готическом порядке зависимости
             const scripts = [
                 'game.js',
                 'background.js',
@@ -29,18 +26,9 @@
                 'combat.js'
             ];
 
-            function loadScript(index) {
-                if (index >= scripts.length) return;
-                const script = document.createElement('script');
-                script.src = scripts[index] + '?t=' + timestamp;
-                script.async = false; // Сохраняем строгую готическую иерархию подключения
-                script.onload = function() { loadScript(index + 1); };
-                document.body.appendChild(script);
-            }
-
-            // Запускаем инжекцию после загрузки разметки DOM
-            window.addEventListener('DOMContentLoaded', function() {
-                loadScript(0);
+            // Инжектим теги последовательно, блокируя рендеринг до полной сборки памяти
+            scripts.forEach(function(src) {
+                document.write('<script src="' + src + '?t=' + timestamp + '"><\/script>');
             });
         })();
     </script>
@@ -72,7 +60,7 @@
                 <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
             </div>
             
-            <!-- Индикатор текущей актуальной версии -->
+            <!-- Контрольная метка версии -->
             <div id="game-version" class="version-footer">v0.7.6-BETA</div>
         </div>
 
