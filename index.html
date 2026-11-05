@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>КХАМАЧ — Восхождение Рейдов</title>
-    <link rel="stylesheet" href="styles.css?v=beta22">
+    <link rel="stylesheet" href="styles.css?v=beta25">
 </head>
 <body>
-    <!-- Холст для искр костра -->
     <canvas id="bg-canvas"></canvas>
 
-    <!-- Общий контейнер интерфейса -->
     <div id="game-interface">
         
         <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
@@ -33,8 +31,7 @@
                 <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
             </div>
             
-            <!-- Контрольная метка сборки для проверки обновления кэша на смартфонах -->
-            <div id="game-version" class="version-footer">v0.6.0-beta.22</div>
+            <div id="game-version" class="version-footer">v0.6.0-beta.25</div>
         </div>
 
         <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ МЕНЮ ================= -->
@@ -65,11 +62,8 @@
 
         <!-- ================= БОЕВОЙ ЭКРАН (ОКНО РЕЙДА) ================= -->
         <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 10px 15px;">
-            
-            <!-- Динамическая зона дракона -->
             <div id="dragon-raid-zone" style="position: relative;"></div>
 
-            <!-- ПАНЕЛЬ БОССА (ЗДОРОВЬЕ) -->
             <div id="boss-panel" style="margin-bottom: 4px; padding: 4px; position: relative;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
                     <div id="boss-name" style="font-size: 12px; margin: 0;">ДРАКОН НЕКРОСМУТ</div>
@@ -81,27 +75,18 @@
                 </div>
             </div>
 
-            <!-- СТАТУС РАУНДА И ОЧКОВ ДЕЙСТВИЯ -->
             <div id="battle-status-panel" style="margin-bottom: 4px; padding: 4px; font-size: 11px; flex-direction: column; align-items: stretch; gap: 2px;">
                 <div style="display: flex; justify-content: space-between; width: 100%;">
                     <div id="combat-round-display">Раунд: 1</div>
                     <div id="combat-ap-display">Очки Действия: 3 / 3</div>
                 </div>
-                <!-- Индикатор щита -->
                 <div id="combat-shield-display" style="display: none; text-align: center; color: #4a90e2; font-weight: bold; font-size: 11px; border-top: 1px dashed #3a3025; padding-top: 2px;">🛡️ Защита отряда: +0</div>
             </div>
 
-            <!-- ИНТЕРФЕЙС ОТРЯДА ГЕРОЕВ -->
-            <div id="squad-matrix" style="display: flex; justify-content: space-around; gap: 4px; margin-bottom: 6px;">
-                <!-- Заполняется динамически -->
-            </div>
+            <div id="squad-matrix" style="display: flex; justify-content: space-around; gap: 4px; margin-bottom: 6px;"></div>
 
-            <!-- ИГРОВОЕ ПОЛЕ MATCH-3 (8х8) -->
-            <div id="match3-board-container" class="match3-board">
-                <!-- Ячейки рун генерируются динамически -->
-            </div>
+            <div id="match3-board-container" class="match3-board"></div>
 
-            <!-- Контейнер для фиксации высоты кнопки управления -->
             <div style="height: 38px; margin-top: 8px; display: flex; width: 100%;">
                 <button id="leave-combat-btn" class="menu-btn back-btn" style="margin: 0; padding: 0; font-size: 13px; height: 100%;">Сбежать</button>
             </div>
@@ -109,9 +94,9 @@
 
     </div>
 
-    <!-- ПОРЯДОК ПОДКЛЮЧЕНИЯ МОДУЛЕЙ -->
     <script src="game.js"></script>
     <script src="background.js"></script>
+    <script src="match3-visual-fx.js"></script>
     <script src="match3-fx.js"></script>
     <script src="match3-input.js"></script>
     <script src="match3.js"></script>
