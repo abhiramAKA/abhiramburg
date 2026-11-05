@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (НАГРАДА ЗОЛОТОМ - v0.8.6-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (НАГРАДА ЗОЛОТОМ - v0.8.7-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -151,7 +151,6 @@ function activateHeroSuperpower(heroId) {
 
 function checkBattleResolution() {
     if (combatData.dragonHP <= 0) {
-        // Выдача золота при победе (зависит от уровня Тира дракона)
         const earnedGold = Math.floor(activeSessionLevel * 50 + Math.random() * 50);
         alert(`ВЕЛИКАЯ ПОБЕДА! Дракон Тира ${activeSessionLevel} повержен!\nНаграда: 🪙 ${earnedGold} Золота!`);
         
