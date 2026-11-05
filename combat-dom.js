@@ -1,6 +1,63 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ РЕНДЕРИНГА БОЕВОГО ИНТЕРФЕЙСА (НОВЫЙ МОДУЛЬ - v0.8.3-BETA)
+   КХАМАЧ — МОДУЛЬ ПОЛНОГО РЕНДЕРИНГА БОЕВОГО ИНТЕРФЕЙСА (ОБНОВЛЕН - v1.1.0-BETA)
    ========================================================================== */
+
+(function() {
+    window.addEventListener('DOMContentLoaded', injectCombatInterfaceBaseDOM);
+
+    function injectCombatInterfaceBaseDOM() {
+        const container = document.getElementById('dynamic-combat-screen');
+        if (!container) return;
+
+        container.innerHTML = `
+            <!-- ================= БОЕВОЙ ЭКРАН ================= -->
+            <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 10px 15px;">
+                <div id="dragon-raid-zone" style="position: relative;"></div>
+
+                <!-- ПАНЕЛЬ БОССА -->
+                <div id="boss-panel" style="margin-bottom: 4px; padding: 4px; position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                        <div id="boss-name" style="font-size: 12px; margin: 0;">ДРАКОН НЕКРОСМУТ</div>
+                        <button id="combat-help-btn" class="info-btn" style="width: 24px; height: 24px; font-size: 12px; box-shadow: none; border-radius: 4px;">❓</button>
+                    </div>
+                    <div class="hp-bar-container" style="height: 10px;">
+                        <div id="boss-hp-bar" class="hp-bar" style="width: 100%;"></div>
+                        <div id="boss-hp-text" style="font-size: 9px; line-height: 10px;">120 / 120</div>
+                    </div>
+                </div>
+
+                <!-- СТАТУС РАУНДА -->
+                <div id="battle-status-panel" style="margin-bottom: 4px; padding: 4px; font-size: 11px; flex-direction: column; align-items: stretch; gap: 2px;">
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                        <div id="combat-round-display">Раунд: 1</div>
+                        <div id="combat-ap-display" style="color: #ffd700; font-weight: bold;">Сделайте ход на поле!</div>
+                    </div>
+                    <div id="combat-shield-display" style="display: none; text-align: center; color: #4a90e2; font-weight: bold; font-size: 11px; border-top: 1px dashed #3a3025; padding-top: 2px;">🛡️ Танк спровоцировал дракона!</div>
+                </div>
+
+                <!-- ИНТЕРФЕЙС ОТРЯДА -->
+                <div id="squad-matrix" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 6px;"></div>
+
+                <!-- ИГРОВОЕ ПОЛЕ MATCH-3 -->
+                <div id="match3-board-container" class="match3-board"></div>
+
+                <div style="height: 38px; margin-top: 8px; display: flex; width: 100%;">
+                    <button id="leave-combat-btn" class="menu-btn back-btn" style="margin: 0; padding: 0; font-size: 13px; height: 100%;">Сбежать</button>
+                </div>
+            </div>
+
+            <!-- ================= СПРАВОЧНИК В БОЮ ================= -->
+            <div id="combat-help-screen" class="game-window combat-help-popup" style="display: none;">
+                <div class="combat-help-content">
+                    <h2>ГОРНИЛО РУН</h2>
+                    <span class="subtitle">Справочник Сил</span>
+                    <div id="combat-help-text-container"></div>
+                    <button id="close-combat-help-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в бой</button>
+                </div>
+            </div>
+        `;
+    }
+})();
 
 function buildDragonDOM() {
     const raidZone = document.getElementById('dragon-raid-zone');
