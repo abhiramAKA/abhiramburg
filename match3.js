@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (v0.7.9-BETA)
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 С ЧЕСТНОЙ ГРАВИТАЦИЕЙ (v2.9.0-BETA)
    ========================================================================== */
 
 let isBoardLocked = false;
@@ -58,10 +58,7 @@ function renderBoardDOM(isIntro = false, newRunesCoords = []) {
             }
             
             cell.addEventListener('click', handleCellClick);
-            
-            if (typeof setupInputListeners === 'function') {
-                setupInputListeners(cell);
-            }
+            if (typeof setupInputListeners === 'function') setupInputListeners(cell);
             
             boardContainer.appendChild(cell);
         }
@@ -160,7 +157,7 @@ function checkMatchesAndExecute() {
         if (typeof playMatch3Sound === 'function') playMatch3Sound(mainRuneType);
         if (typeof triggerMatch3Haptic === 'function') triggerMatch3Haptic(60);
         
-        let executionEffects = { '🔥': 0, '🛡️': 0, '🎯': 0, '💚': 0 };
+        let executionEffects = { '🔥': 0, '🛡️': 0, '⚡': 0, '💚': 0 };
         let newRunesCoords = [];
         
         for (let r = 0; r < BOARD_ROWS; r++) {
@@ -173,19 +170,32 @@ function checkMatchesAndExecute() {
                         spawnRuneExplosionSparks(r, c, type);
                     }
                     executionEffects[type]++;
+                    match3BoardData[r][c] = null; // Освобождаем ячейку матрицы для гравитации
                 }
             }
         }
         
         setTimeout(() => {
-            for (let r = 0; r < BOARD_ROWS; r++) {
-                for (let c = 0; c < BOARD_COLS; c++) {
-                    if (matchedMatrix[r][c]) {
-                        match3BoardData[r][c] = RUNE_TYPES[Math.floor(Math.random() * RUNE_TYPES.length)];
-                        newRunesCoords.push({ row: r, col: c });
+            // ИСПРАВЛЕННЫЙ АЛГОРИТМ ЧЕСТНОЙ ГРАВИТАЦИИ ПО КОЛОНКАМ
+            for (let c = 0; c < BOARD_COLS; c++) {
+                // Сдвигаем существующие камни вниз
+                let emptyRow = BOARD_ROWS - 1;
+                for (let r = BOARD_ROWS - 1; r >= 0; r--) {
+                    if (match3BoardData[r][c] !== null) {
+                        if (r !== emptyRow) {
+                            match3BoardData[emptyRow][c] = match3BoardData[r][c];
+                            match3BoardData[r][c] = null;
+                        }
+                        emptyRow--;
                     }
                 }
+                // Заполняем оставшиеся верхние пустые ряды новыми рунами
+                for (let r = emptyRow; r >= 0; r--) {
+                    match3BoardData[r][c] = RUNE_TYPES[Math.floor(Math.random() * RUNE_TYPES.length)];
+                    newRunesCoords.push({ row: r, col: c });
+                }
             }
+
             if (typeof chargeHeroSuperpowers === 'function') chargeHeroSuperpowers(executionEffects);
             renderBoardDOM(false, newRunesCoords);
             
