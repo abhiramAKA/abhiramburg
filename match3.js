@@ -1,197 +1,120 @@
-/* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ОЧИЩЕННОЕ ЯДРО ЛОГИКИ) (v0.6.0-beta.16)
-   ========================================================================== */
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>КХАМАЧ — Восхождение Рейдов</title>
+    <link rel="stylesheet" href="styles.css?v=beta19">
+</head>
+<body>
+    <!-- Холст для искр костра -->
+    <canvas id="bg-canvas"></canvas>
 
-let isBoardLocked = false;
-
-function initMatch3Board() {
-    if (typeof initAudioContext === 'function') initAudioContext();
-    const boardContainer = document.getElementById('match3-board-container');
-    if (!boardContainer) return;
-    
-    boardContainer.innerHTML = '';
-    match3BoardData = [];
-    isBoardLocked = false;
-    selectedCell = null;
-    if (typeof resetSwipeTracker === 'function') resetSwipeTracker();
-    
-    for (let r = 0; r < BOARD_ROWS; r++) {
-        match3BoardData[r] = [];
-        for (let c = 0; c < BOARD_COLS; c++) {
-            let allowedTypes = RUNE_TYPES.filter(type => {
-                if (r >= 2 && match3BoardData[r-1][c] === type && match3BoardData[r-2][c] === type) return false;
-                if (c >= 2 && match3BoardData[r][c-1] === type && match3BoardData[r][c-2] === type) return false;
-                return true;
-            });
-            let randomType = allowedTypes[Math.floor(Math.random() * allowedTypes.length)];
-            match3BoardData[r][c] = randomType;
-        }
-    }
-    renderBoardDOM(true, []);
-}
-
-function renderBoardDOM(isIntro = false, newRunesCoords = []) {
-    const boardContainer = document.getElementById('match3-board-container');
-    if (!boardContainer) return;
-    boardContainer.innerHTML = '';
-    
-    for (let r = 0; r < BOARD_ROWS; r++) {
-        for (let c = 0; c < BOARD_COLS; c++) {
-            const cell = document.createElement('div');
-            cell.className = 'rune-cell';
-            cell.dataset.row = r;
-            cell.dataset.col = c;
-            cell.innerText = match3BoardData[r][c];
+    <!-- Общий контейнер интерфейса -->
+    <div id="game-interface">
+        
+        <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
+        <div id="main-menu" class="game-window" style="display: flex;">
+            <h1>КХАМАЧ</h1>
+            <span class="subtitle">Рейды в Горнило Рун</span>
+            <p>Древний Дракон пробудился в недрах подземелья. Соберите свой отряд, куйте руны власти и сокрушите огнедышащую тварь в пошаговой тактической битве.</p>
             
-            if (isIntro) {
-                cell.classList.add('rune-appear');
-                const delay = Math.abs(3.5 - r) * 0.035 + Math.abs(3.5 - c) * 0.035;
-                cell.style.animationDelay = `${delay}s`;
-                
-                setTimeout(() => { 
-                    if (isIntro && !isBoardLocked && typeof playMatch3Sound === 'function') {
-                        playMatch3Sound('intro');
-                    }
-                }, delay * 1000);
-            } else if (newRunesCoords && newRunesCoords.some(coord => coord.row === r && coord.col === c)) {
-                cell.classList.add('rune-fall');
-            }
+            <div class="menu-row">
+                <button id="to-combat-btn" class="menu-btn">В БОЙ</button>
+                <button id="info-btn" class="info-btn">❓</button>
+            </div>
+            <div class="menu-row">
+                <button id="to-forge-btn" class="menu-btn">⚒️ Кузница</button>
+            </div>
+            <div class="menu-row">
+                <button id="to-alchemy-btn" class="menu-btn">🧪 Алхимия</button>
+            </div>
+            <div class="menu-row">
+                <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
+            </div>
             
-            cell.addEventListener('click', handleCellClick);
+            <!-- Контрольная метка сборки для проверки обновления кэша на смартфонах -->
+            <div id="game-version" class="version-footer">v0.6.0-beta.19</div>
+        </div>
+
+        <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ МЕНЮ ================= -->
+        <div id="info-screen" class="game-window" style="display: none;">
+            <h2>КОНТЕКСТНАЯ СПРАВКА</h2>
+            <span class="subtitle">Базовый Инструктаж</span>
+            <p id="info-screen-text">Загрузка правил...</p>
+            <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
+        </div>
+
+        <!-- ================= ОКНО ОПИСАНИЯ РЕЖИМОВ (МЕНЮ) ================= -->
+        <div id="mode-desc-screen" class="game-window" style="display: none;">
+            <h2 id="mode-desc-title">РЕЖИМ ИГРЫ</h2>
+            <span class="subtitle">Грядущие расширения</span>
+            <p id="mode-desc-text">Описание режима загружается...</p>
+            <button id="close-mode-desc-btn" class="menu-btn back-btn">Назад в меню</button>
+        </div>
+
+        <!-- ================= СПРАВОЧНИК РУН И БОЯ (В БОЮ) ================= -->
+        <div id="combat-help-screen" class="game-window combat-help-popup" style="display: none;">
+            <div class="combat-help-content">
+                <h2>ГОРНИЛО РУН</h2>
+                <span class="subtitle">Справочник Сил</span>
+                <div id="combat-help-text-container"></div>
+                <button id="close-combat-help-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в бой</button>
+            </div>
+        </div>
+
+        <!-- ================= БОЕВОЙ ЭКРАН (ОКНО РЕЙДА) ================= -->
+        <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 10px 15px;">
             
-            if (typeof setupInputListeners === 'function') {
-                setupInputListeners(cell);
-            }
-            
-            boardContainer.appendChild(cell);
-        }
-    }
-}
+            <!-- Динамическая зона дракона -->
+            <div id="dragon-raid-zone" style="position: relative;"></div>
 
-function handleCellClick(e) {
-    if (typeof initAudioContext === 'function') initAudioContext();
-    if (combatData.playerAP <= 0 || isBoardLocked) return;
-    
-    const cell = e.currentTarget;
-    const r = parseInt(cell.dataset.row);
-    const c = parseInt(cell.dataset.col);
-    
-    if (!selectedCell) {
-        selectedCell = { row: r, col: c };
-        cell.style.backgroundColor = 'rgba(230, 194, 128, 0.3)';
-    } else {
-        const prevR = selectedCell.row;
-        const prevC = selectedCell.col;
-        const isNeighbor = (Math.abs(r - prevR) === 1 && c === prevC) || (Math.abs(c - prevC) === 1 && r === prevR);
-        
-        if (isNeighbor) {
-            animateAndSwapRunes(prevR, prevC, r, c);
-        } else {
-            renderBoardDOM();
-            selectedCell = { row: r, col: c };
-            const currentCell = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
-            if (currentCell) currentCell.style.backgroundColor = 'rgba(230, 194, 128, 0.3)';
-            return;
-        }
-        selectedCell = null;
-    }
-}
+            <!-- ПАНЕЛЬ БОССА (ЗДОРОВЬЕ) -->
+            <div id="boss-panel" style="margin-bottom: 4px; padding: 4px; position: relative;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                    <div id="boss-name" style="font-size: 12px; margin: 0;">ДРАКОН НЕКРОСМУТ</div>
+                    <button id="combat-help-btn" class="info-btn" style="width: 24px; height: 24px; font-size: 12px; box-shadow: none; border-radius: 4px;">❓</button>
+                </div>
+                <div class="hp-bar-container" style="height: 10px;">
+                    <div id="boss-hp-bar" class="hp-bar" style="width: 100%;"></div>
+                    <div id="boss-hp-text" style="font-size: 9px; line-height: 10px;">1000 / 1000</div>
+                </div>
+            </div>
 
-function animateAndSwapRunes(r1, c1, r2, c2) {
-    isBoardLocked = true;
-    if (typeof playMatch3Sound === 'function') playMatch3Sound('swap');
-    
-    const cell1 = document.querySelector(`[data-row="${r1}"][data-col="${c1}"]`);
-    const cell2 = document.querySelector(`[data-row="${r2}"][data-col="${c2}"]`);
-    if (!cell1 || !cell2) { isBoardLocked = false; return; }
-    
-    const deltaX = cell2.offsetLeft - cell1.offsetLeft;
-    const deltaY = cell2.offsetTop - cell1.offsetTop;
-    cell1.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-    cell2.style.transform = `translate(${-deltaX}px, ${-deltaY}px)`;
-    
-    setTimeout(() => {
-        let temp = match3BoardData[r1][c1];
-        match3BoardData[r1][c1] = match3BoardData[r2][c2];
-        match3BoardData[r2][c2] = temp;
-        
-        let hasMatches = checkMatchesAndExecute();
-        if (hasMatches) {
-            if (typeof usePlayerActionPoint === 'function') usePlayerActionPoint();
-        } else {
-            cell1.style.transform = 'translate(0, 0)';
-            cell2.style.transform = 'translate(0, 0)';
-            temp = match3BoardData[r1][c1];
-            match3BoardData[r1][c1] = match3BoardData[r2][c2];
-            match3BoardData[r2][c2] = temp;
-            setTimeout(() => { renderBoardDOM(); isBoardLocked = false; }, 220);
-        }
-    }, 220);
-}
+            <!-- СТАТУС РАУНДА И ОЧКОВ ДЕЙСТВИЯ -->
+            <div id="battle-status-panel" style="margin-bottom: 4px; padding: 4px; font-size: 11px; flex-direction: column; align-items: stretch; gap: 2px;">
+                <div style="display: flex; justify-content: space-between; width: 100%;">
+                    <div id="combat-round-display">Раунд: 1</div>
+                    <div id="combat-ap-display">Очки Действия: 3 / 3</div>
+                </div>
+                <!-- Индикатор щита -->
+                <div id="combat-shield-display" style="display: none; text-align: center; color: #4a90e2; font-weight: bold; font-size: 11px; border-top: 1px dashed #3a3025; padding-top: 2px;">🛡️ Защита отряда: +0</div>
+            </div>
 
-function checkMatchesAndExecute() {
-    let matchedMatrix = Array(BOARD_ROWS).fill().map(() => Array(BOARD_COLS).fill(false));
-    let found = false;
-    
-    for (let r = 0; r < BOARD_ROWS; r++) {
-        for (let c = 0; c < BOARD_COLS - 2; c++) {
-            let t = match3BoardData[r][c];
-            if (t && match3BoardData[r][c+1] === t && match3BoardData[r][c+2] === t) {
-                matchedMatrix[r][c] = matchedMatrix[r][c+1] = matchedMatrix[r][c+2] = true;
-                found = true;
-            }
-        }
-    }
-    for (let r = 0; r < BOARD_ROWS - 2; r++) {
-        for (let c = 0; c < BOARD_COLS; c++) {
-            let t = match3BoardData[r][c];
-            if (t && match3BoardData[r+1][c] === t && match3BoardData[r+2][c] === t) {
-                matchedMatrix[r][c] = matchedMatrix[r+1][c] = matchedMatrix[r+2][c] = true;
-                found = true;
-            }
-        }
-    }
-    
-    if (found) {
-        isBoardLocked = true;
-        if (typeof playMatch3Sound === 'function') playMatch3Sound('explosion');
-        if (typeof triggerMatch3Haptic === 'function') triggerMatch3Haptic(60);
-        
-        let executionEffects = { '🔥': 0, '🛡️': 0, '💚': 0, '⚡️': 0, '💀': 0 };
-        let newRunesCoords = [];
-        
-        for (let r = 0; r < BOARD_ROWS; r++) {
-            for (let c = 0; c < BOARD_COLS; c++) {
-                if (matchedMatrix[r][c]) {
-                    const cellEl = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
-                    let type = match3BoardData[r][c];
-                    if (cellEl) cellEl.classList.add('rune-explode');
-                    if (typeof spawnRuneExplosionSparks === 'function') {
-                        spawnRuneExplosionSparks(r, c, type);
-                    }
-                    executionEffects[type]++;
-                }
-            }
-        }
-        
-        setTimeout(() => {
-            for (let r = 0; r < BOARD_ROWS; r++) {
-                for (let c = 0; c < BOARD_COLS; c++) {
-                    if (matchedMatrix[r][c]) {
-                        match3BoardData[r][c] = RUNE_TYPES[Math.floor(Math.random() * RUNE_TYPES.length)];
-                        newRunesCoords.push({ row: r, col: c });
-                    }
-                }
-            }
-            if (typeof applyRuneCombination === 'function') applyRuneCombination(executionEffects);
-            renderBoardDOM(false, newRunesCoords);
-            setTimeout(() => {
-                let chainMatched = checkMatchesAndExecute();
-                if (!chainMatched) isBoardLocked = false;
-            }, 350);
-        }, 220);
-    } else {
-        isBoardLocked = false;
-    }
-    return found;
-}
+            <!-- ИНТЕРФЕЙС ОТРЯДА ГЕРОЕВ -->
+            <div id="squad-matrix" style="display: flex; justify-content: space-around; gap: 4px; margin-bottom: 6px;">
+                <!-- Заполняется динамически -->
+            </div>
+
+            <!-- ИГРОВОЕ ПОЛЕ MATCH-3 (8х8) -->
+            <div id="match3-board-container" class="match3-board">
+                <!-- Ячейки рун генерируются динамически -->
+            </div>
+
+            <!-- Контейнер для фиксации высоты кнопки управления -->
+            <div style="height: 38px; margin-top: 8px; display: flex; width: 100%;">
+                <button id="leave-combat-btn" class="menu-btn back-btn" style="margin: 0; padding: 0; font-size: 13px; height: 100%;">Сбежать</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ПОРЯДОК ПОДКЛЮЧЕНИЯ МОДУЛЕЙ -->
+    <script src="game.js"></script>
+    <script src="background.js"></script>
+    <script src="match3-fx.js"></script>
+    <script src="match3-input.js"></script>
+    <script src="match3.js"></script>
+    <script src="combat.js"></script>
+</body>
+</html>
