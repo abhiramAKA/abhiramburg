@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЯДРО С СИСТЕМОЙ ПРЕПЯТСТВИЙ И 4 СТИХИЯМИ (v0.7.0-ALPHA.1)
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (v0.7.0-BETA)
    ========================================================================== */
 
 let isBoardLocked = false;
@@ -18,33 +18,11 @@ function initMatch3Board() {
     for (let r = 0; r < BOARD_ROWS; r++) {
         match3BoardData[r] = [];
         for (let c = 0; c < BOARD_COLS; c++) {
-            match3BoardData[r][c] = null;
-        }
-    }
-
-    let targetObstacles = Math.min(15, (combatData.currentLevel - 1) * 3);
-    let placedObstacles = 0;
-    
-    while (placedObstacles < targetObstacles) {
-        let randR = Math.floor(Math.random() * BOARD_ROWS);
-        let randC = Math.floor(Math.random() * BOARD_COLS);
-        
-        if (match3BoardData[randR][randC] === null) {
-            match3BoardData[randR][randC] = '🧱';
-            placedObstacles++;
-        }
-    }
-
-    for (let r = 0; r < BOARD_ROWS; r++) {
-        for (let c = 0; c < BOARD_COLS; c++) {
-            if (match3BoardData[r][c] === '🧱') continue;
-            
             let allowedTypes = RUNE_TYPES.filter(type => {
                 if (r >= 2 && match3BoardData[r-1][c] === type && match3BoardData[r-2][c] === type) return false;
                 if (c >= 2 && match3BoardData[r][c-1] === type && match3BoardData[r][c-2] === type) return false;
                 return true;
             });
-            
             let randomType = allowedTypes[Math.floor(Math.random() * allowedTypes.length)];
             match3BoardData[r][c] = randomType;
         }
@@ -63,28 +41,26 @@ function renderBoardDOM(isIntro = false, newRunesCoords = []) {
             cell.className = 'rune-cell';
             cell.dataset.row = r;
             cell.dataset.col = c;
+            cell.innerText = match3BoardData[r][c];
             
-            let val = match3BoardData[r][c];
-            cell.innerText = val;
-            
-            if (val === '🧱') {
-                cell.style.background = 'radial-gradient(circle, #2d2d2d 0%, #151515 100%)';
-                cell.style.border = '1px solid #444';
-                cell.style.cursor = 'not-allowed';
-                cell.style.boxShadow = 'none';
-            } else {
-                if (isIntro) {
-                    cell.classList.add('rune-appear');
-                    const delay = Math.abs(3.5 - r) * 0.02 + Math.abs(3.5 - c) * 0.02;
-                    cell.style.animationDelay = `${delay}s`;
-                } else if (newRunesCoords && newRunesCoords.some(coord => coord.row === r && coord.col === c)) {
-                    cell.classList.add('rune-fall');
-                }
+            if (isIntro) {
+                cell.classList.add('rune-appear');
+                const delay = Math.abs(3.5 - r) * 0.035 + Math.abs(3.5 - c) * 0.035;
+                cell.style.animationDelay = `${delay}s`;
                 
-                cell.addEventListener('click', handleCellClick);
-                if (typeof setupInputListeners === 'function') {
-                    setupInputListeners(cell);
-                }
+                setTimeout(() => { 
+                    if (isIntro && !isBoardLocked && typeof playMatch3Sound === 'function') {
+                        playMatch3Sound('intro');
+                    }
+                }, delay * 1000);
+            } else if (newRunesCoords && newRunesCoords.some(coord => coord.row === r && coord.col === c)) {
+                cell.classList.add('rune-fall');
+            }
+            
+            cell.addEventListener('click', handleCellClick);
+            
+            if (typeof setupInputListeners === 'function') {
+                setupInputListeners(cell);
             }
             
             boardContainer.appendChild(cell);
@@ -94,29 +70,27 @@ function renderBoardDOM(isIntro = false, newRunesCoords = []) {
 
 function handleCellClick(e) {
     if (typeof initAudioContext === 'function') initAudioContext();
-    if (combatData.playerAP <= 0 || isBoardLocked) return;
+    if (combatData.playerAP <= 0 || combatData.isActionPhase || isBoardLocked) return;
     
     const cell = e.currentTarget;
     const r = parseInt(cell.dataset.row);
     const c = parseInt(cell.dataset.col);
     
-    if (match3BoardData[r][c] === '🧱') return;
-    
     if (!selectedCell) {
         selectedCell = { row: r, col: c };
-        cell.style.backgroundColor = 'rgba(230, 194, 128, 0.25)';
+        cell.style.backgroundColor = 'rgba(230, 194, 128, 0.3)';
     } else {
         const prevR = selectedCell.row;
         const prevC = selectedCell.col;
         const isNeighbor = (Math.abs(r - prevR) === 1 && c === prevC) || (Math.abs(c - prevC) === 1 && r === prevR);
         
-        if (isNeighbor && match3BoardData[prevR][prevC] !== '🧱') {
+        if (isNeighbor) {
             animateAndSwapRunes(prevR, prevC, r, c);
         } else {
             renderBoardDOM();
             selectedCell = { row: r, col: c };
             const currentCell = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
-            if (currentCell) currentCell.style.backgroundColor = 'rgba(230, 194, 128, 0.25)';
+            if (currentCell) currentCell.style.backgroundColor = 'rgba(230, 194, 128, 0.3)';
             return;
         }
         selectedCell = null;
@@ -150,9 +124,9 @@ function animateAndSwapRunes(r1, c1, r2, c2) {
             temp = match3BoardData[r1][c1];
             match3BoardData[r1][c1] = match3BoardData[r2][c2];
             match3BoardData[r2][c2] = temp;
-            setTimeout(() => { renderBoardDOM(); isBoardLocked = false; }, 180);
+            setTimeout(() => { renderBoardDOM(); isBoardLocked = false; }, 220);
         }
-    }, 180);
+    }, 220);
 }
 
 function checkMatchesAndExecute() {
@@ -163,7 +137,7 @@ function checkMatchesAndExecute() {
     for (let r = 0; r < BOARD_ROWS; r++) {
         for (let c = 0; c < BOARD_COLS - 2; c++) {
             let t = match3BoardData[r][c];
-            if (t && t !== '🧱' && match3BoardData[r][c+1] === t && match3BoardData[r][c+2] === t) {
+            if (t && match3BoardData[r][c+1] === t && match3BoardData[r][c+2] === t) {
                 matchedMatrix[r][c] = matchedMatrix[r][c+1] = matchedMatrix[r][c+2] = true;
                 found = true;
                 if (!mainRuneType) mainRuneType = t;
@@ -173,7 +147,7 @@ function checkMatchesAndExecute() {
     for (let r = 0; r < BOARD_ROWS - 2; r++) {
         for (let c = 0; c < BOARD_COLS; c++) {
             let t = match3BoardData[r][c];
-            if (t && t !== '🧱' && match3BoardData[r+1][c] === t && match3BoardData[r+2][c] === t) {
+            if (t && match3BoardData[r+1][c] === t && match3BoardData[r+2][c] === t) {
                 matchedMatrix[r][c] = matchedMatrix[r+1][c] = matchedMatrix[r+2][c] = true;
                 found = true;
                 if (!mainRuneType) mainRuneType = t;
@@ -184,9 +158,9 @@ function checkMatchesAndExecute() {
     if (found) {
         isBoardLocked = true;
         if (typeof playMatch3Sound === 'function') playMatch3Sound(mainRuneType);
-        if (typeof triggerMatch3Haptic === 'function') triggerMatch3Haptic(40);
+        if (typeof triggerMatch3Haptic === 'function') triggerMatch3Haptic(60);
         
-        let executionEffects = { '⛰️': 0, '🔥': 0, '💧': 0, '💨': 0 };
+        let executionEffects = { '🔥': 0, '🛡️': 0, '🎯': 0, '💚': 0 };
         let newRunesCoords = [];
         
         for (let r = 0; r < BOARD_ROWS; r++) {
@@ -214,13 +188,12 @@ function checkMatchesAndExecute() {
             }
             if (typeof applyRuneCombination === 'function') applyRuneCombination(executionEffects);
             renderBoardDOM(false, newRunesCoords);
+            
             setTimeout(() => {
                 let chainMatched = checkMatchesAndExecute();
-                if (!chainMatched) isBoardLocked = false;
-            }, 250);
-        }, 180);
-    } else {
-        isBoardLocked = false;
+                if (!chainMatched && combatData.playerAP > 0) isBoardLocked = false;
+            }, 350);
+        }, 220);
     }
     return found;
 }
