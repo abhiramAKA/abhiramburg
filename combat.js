@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (v0.7.0-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (v0.7.1-BETA)
    ========================================================================== */
 
 function buildDragonDOM() {
@@ -7,7 +7,6 @@ function buildDragonDOM() {
     if (!raidZone) return;
 
     raidZone.innerHTML = '';
-
     const container = document.createElement('div');
     container.className = 'dragon-container';
 
@@ -30,20 +29,17 @@ function buildDragonDOM() {
 }
 
 function startCombatSession() {
-    combatData.dragonHP = 1000;
-    combatData.playerAP = 1;
     combatData.currentRound = 1;
+    combatData.dragonMaxHP = 120; // 1 раунд = 120 HP
+    combatData.dragonHP = 120;
+    combatData.playerAP = 1;
     combatData.tankTaunting = false;
     combatData.dragonBlinded = false;
-    combatData.isActionPhase = false;
     
     combatData.squad.forEach(hero => {
         hero.hp = hero.maxHP;
         hero.sp = 0;
     });
-    
-    const endTurnBtn = document.getElementById('end-turn-btn');
-    if (endTurnBtn) endTurnBtn.style.display = 'none';
     
     document.getElementById('combat-ap-display').innerText = "Сделайте ход на поле!";
     document.getElementById('combat-ap-display').style.color = "#ffd700";
@@ -73,7 +69,6 @@ function applyRuneCombination(effects) {
         let m = combatData.squad.find(h => h.id === "mage");
         if (m && m.hp > 0) m.sp = Math.min(m.maxSP, m.sp + effects['💚'] * 6);
     }
-    
     updateCombatInterfaceDOM();
 }
 
@@ -82,28 +77,22 @@ function usePlayerActionPoint() {
     updateCombatInterfaceDOM();
     
     if (typeof isBoardLocked !== 'undefined') isBoardLocked = true;
-    
     document.getElementById('combat-ap-display').innerText = "Ход Дракона...";
     document.getElementById('combat-ap-display').style.color = "#ff4500";
     
-    setTimeout(executeDragonTurnAI, 800);
+    setTimeout(executeDragonTurnAI, 700);
 }
 
 function executeDragonTurnAI() {
     if (combatData.dragonHP <= 0) return;
 
     const dragonModel = document.getElementById('dragon-model');
-    const fireFx = document.getElementById('dragon-fire-fx');
-
     if (dragonModel) {
         dragonModel.classList.remove('dragon-idle');
         dragonModel.classList.add('dragon-attacking');
     }
 
-    // Первый уровень дракона: всегда базовая точечная атака (20 ед. урона)
     let baseDamage = 20;
-
-    // Если Лучник ослепил дракона Суперсилой, урон режется на 50%
     if (combatData.dragonBlinded) {
         baseDamage = Math.round(baseDamage * 0.5);
         combatData.dragonBlinded = false; 
@@ -111,12 +100,10 @@ function executeDragonTurnAI() {
 
     let tankHero = combatData.squad.find(h => h.id === "tank");
 
-    // ПРАВИЛО ПРОВОКАЦИИ И РАНДОМА ДЛЯ 1-ГО УРОВНЯ
     if (combatData.tankTaunting && tankHero && tankHero.hp > 0) {
         tankHero.hp = Math.max(0, tankHero.hp - baseDamage);
-        combatData.tankTaunting = false; // Провокация израсходована
+        combatData.tankTaunting = false; 
     } else {
-        // Провокации нет -> Дракон наносит точечный урон по случайному живому герою
         let aliveHeroes = combatData.squad.filter(h => h.hp > 0);
         if (aliveHeroes.length > 0) {
             let target = aliveHeroes[Math.floor(Math.random() * aliveHeroes.length)];
@@ -131,25 +118,23 @@ function executeDragonTurnAI() {
             dragonModel.classList.remove('dragon-attacking');
             dragonModel.classList.add('dragon-idle');
         }
-        if (fireFx) fireFx.classList.remove('active');
         
-        // Включаем ручную фазу приказов для игрока
-        combatData.isActionPhase = true;
+        // Автоматический переход: увеличиваем раунд и пересчитываем HP дракона, если он выжил
+        combatData.currentRound++;
+        combatData.dragonMaxHP = combatData.currentRound * 120; // 1-й=120, 2-й=240, 3-й=360
         
-        document.getElementById('combat-ap-display').innerText = "Фаза приказов: активируйте Суперсилы!";
-        document.getElementById('combat-ap-display').style.color = "#2ecc71";
+        combatData.playerAP = combatData.playerMaxAP;
+        if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
         
-        const endTurnBtn = document.getElementById('end-turn-btn');
-        if (endTurnBtn) endTurnBtn.style.display = 'block';
+        document.getElementById('combat-ap-display').innerText = "Сделайте ход на поле!";
+        document.getElementById('combat-ap-display').style.color = "#ffd700";
         
         updateCombatInterfaceDOM();
         checkBattleResolution();
-    }, 1200);
+    }, 1000);
 }
 
 function activateHeroSuperpower(heroId) {
-    if (!combatData.isActionPhase) return;
-    
     let hero = combatData.squad.find(h => h.id === heroId);
     if (!hero || hero.hp <= 0 || hero.sp < hero.maxSP) return;
     
@@ -160,19 +145,16 @@ function activateHeroSuperpower(heroId) {
     }
     
     switch(heroId) {
-        case "tank": // Танк только провоцирует босса на следующий раунд
+        case "tank":
             combatData.tankTaunting = true;
             break;
-            
-        case "damage": // Дамагер наносит чистый урон
+        case "damage":
             combatData.dragonHP = Math.max(0, combatData.dragonHP - 120);
             break;
-            
-        case "archer": // Лучник снижает силу следующей атаки на 50%
+        case "archer":
             combatData.dragonBlinded = true;
             break;
-            
-        case "mage": // Маг лечит здоровье всей четверке сразу
+        case "mage":
             combatData.squad.forEach(h => {
                 if (h.hp > 0) h.hp = Math.min(h.maxHP, h.hp + 25);
             });
@@ -197,11 +179,7 @@ function updateCombatInterfaceDOM() {
     
     const shieldDisp = document.getElementById('combat-shield-display');
     if (shieldDisp) {
-        if (combatData.tankTaunting) {
-            shieldDisp.style.display = 'block';
-        } else {
-            shieldDisp.style.display = 'none';
-        }
+        shieldDisp.style.display = combatData.tankTaunting ? 'block' : 'none';
     }
     
     const squadMatrix = document.getElementById('squad-matrix');
@@ -211,11 +189,8 @@ function updateCombatInterfaceDOM() {
             const card = document.createElement('div');
             card.className = 'hero-gothic-card';
             
-            // Ореол зажигается только если накоплено 100% энергии И идет фаза приказов
             let isReady = (hero.sp >= hero.maxSP && hero.hp > 0);
-            if (isReady && combatData.isActionPhase) {
-                card.classList.add('ready-glow');
-            }
+            if (isReady) card.classList.add('ready-glow');
             if (hero.hp <= 0) {
                 card.style.opacity = '0.3';
                 card.style.filter = 'grayscale(1)';
@@ -227,14 +202,10 @@ function updateCombatInterfaceDOM() {
             card.innerHTML = `
                 <div class="hero-card-avatar" style="color: ${hero.color};">${hero.icon}</div>
                 <div class="hero-card-name">${hero.name}</div>
-                
-                <!-- Шкала Здоровья (Красная) -->
                 <div class="hero-bar-container">
                     <div class="hero-bar-fill hp-fill" style="width: ${hpPct}%;"></div>
                     <div class="hero-bar-text">${hero.hp}/${hero.maxHP}</div>
                 </div>
-                
-                <!-- Шкала Суперсилы (Золотая) -->
                 <div class="hero-bar-container" style="border-color: #5c4314; background: #0f0a02;">
                     <div class="hero-bar-fill sp-fill" style="width: ${spPct}%;"></div>
                     <div class="hero-bar-text" style="color: #ffd700;">SP ${Math.round(spPct)}%</div>
@@ -242,11 +213,10 @@ function updateCombatInterfaceDOM() {
             `;
             
             card.addEventListener('click', () => {
-                if (hero.hp > 0 && hero.sp >= hero.maxSP && combatData.isActionPhase) {
+                if (hero.hp > 0 && hero.sp >= hero.maxSP) {
                     activateHeroSuperpower(hero.id);
                 }
             });
-            
             squadMatrix.appendChild(card);
         });
     }
@@ -255,11 +225,13 @@ function updateCombatInterfaceDOM() {
 function checkBattleResolution() {
     if (combatData.dragonHP <= 0) {
         alert("ВЕЛИКАЯ ПОБЕДА! Дракон повержен!");
+        if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
         showScreen('main-menu');
     } else {
         let allDead = combatData.squad.every(hero => hero.hp <= 0);
         if (allDead) {
             alert("ОТРЯД ПАЛ!");
+            if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
             showScreen('main-menu');
         }
     }
