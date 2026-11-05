@@ -186,7 +186,7 @@ function checkMatchesAndExecute() {
                     }
                 }
             }
-            // Вызов полностью изолированной функции зарядки Суперсил
+            // Передача ТОЛЬКО в изолированную функцию заряда SP
             if (typeof chargeHeroSuperpowers === 'function') chargeHeroSuperpowers(executionEffects);
             renderBoardDOM(false, newRunesCoords);
             
