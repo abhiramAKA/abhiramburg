@@ -1,6 +1,6 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (ИСПРАВЛЕННЫЙ - v0.7.2-BETA)
-   ========================================================================== */
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (v0.7.3-BETA)
+   ========================================================================= */
 
 function buildDragonDOM() {
     const raidZone = document.getElementById('dragon-raid-zone');
@@ -52,8 +52,8 @@ function startCombatSession() {
     }
 }
 
-function applyRuneCombination(effects) {
-    // Взрывы рун заполняют ИСКЛЮЧИТЕЛЬНО золотые шкалы Суперсил персонажей
+// Новая изолированная функция зарядки SP, защищенная от кэша старых версий
+function chargeHeroSuperpowers(effects) {
     if (effects['🛡️']) {
         let t = combatData.squad.find(h => h.id === "tank");
         if (t && t.hp > 0) t.sp = Math.min(t.maxSP, t.sp + effects['🛡️'] * 6);
@@ -149,7 +149,7 @@ function activateHeroSuperpower(heroId) {
             combatData.tankTaunting = true;
             break;
         case "damage":
-            // Дракон теряет здоровье ТОЛЬКО здесь, при честном прожатии готовой ульты Дамагера
+            // Здоровье дракона списывается ТОЛЬКО здесь по клику на готовую кнопку!
             combatData.dragonHP = Math.max(0, combatData.dragonHP - 120);
             break;
         case "archer":
