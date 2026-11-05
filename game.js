@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (БЕЗ ЛОГИКИ ОТРЯДА - v1.1.1-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (БЕЗ ЛОГИКИ ОТРЯДА - v1.2.0-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v1.1.1-BETA";
+const GAME_VERSION = "v1.2.0-BETA";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -58,11 +58,9 @@ if (document.readyState === 'loading') {
 }
 
 function initDispatcherModule() {
-    // 1. Сначала принудительно разворачиваем DOM из модулей
     if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
     if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
     
-    // 2. Только теперь настраиваем лисенеры
     initVersionDisplay();
     setupMenuListeners();
     setupCombatHelpListeners();
