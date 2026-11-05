@@ -1,6 +1,6 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ИСПРАВЛЕННЫЙ УРОН - v0.7.3-BETA)
-   ========================================================================= */
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (v0.7.9-BETA)
+   ========================================================================== */
 
 let isBoardLocked = false;
 
@@ -186,7 +186,6 @@ function checkMatchesAndExecute() {
                     }
                 }
             }
-            // Передача ТОЛЬКО в изолированную функцию заряда SP
             if (typeof chargeHeroSuperpowers === 'function') chargeHeroSuperpowers(executionEffects);
             renderBoardDOM(false, newRunesCoords);
             
