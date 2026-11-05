@@ -1,87 +1,89 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ЖИВЫХ ЭФФЕКТОВ (AUDIO, HAPTIC, PARTICLES) (v0.6.0-beta.20)
+   КХАМАЧ — МОДУЛЬ ЖИВЫХ ЭФФЕКТОВ (AUDIO, HAPTIC, PARTICLES) (v0.6.0-beta.22)
    ========================================================================== */
 
 let audioCtx = null;
-let musicInterval = null; // Интервал для фонового музыкального секвенсора
+let isMusicPlaying = false; // Флаг контроля работы фонового эмбиента
 
 // Цветовая карта магических искр под каждый элемент камня
 const FX_RUNE_COLORS = {
-    '🔥': { primary: '#ff4500', secondary: '#ffaa00' }, // Огонь (Пламенно-красный)
-    '🛡️': { primary: '#4a90e2', secondary: '#b8d8ff' }, // Защита (Лазурно-голубой)
-    '💚': { primary: '#2ecc71', secondary: '#a3e4d7' }, // Лечение (Изумрудно-зеленый)
-    '⚡️': { primary: '#f1c40f', secondary: '#f9e79f' }, // Молния (Ярко-желтый)
-    '💀': { primary: '#9b59b6', secondary: '#ebdef0' }  // Смерть (Магический фиолетовый)
+    '🔥': { primary: '#ff4500', secondary: '#ffaa00' }, // Огонь
+    '🛡️': { primary: '#4a90e2', secondary: '#b8d8ff' }, // Защита
+    '💚': { primary: '#2ecc71', secondary: '#a3e4d7' }, // Лечение
+    '⚡️': { primary: '#f1c40f', secondary: '#f9e79f' }, // Молния
+    '💀': { primary: '#9b59b6', secondary: '#ebdef0' }  // Смерть
 };
 
 function initAudioContext() {
     if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
-    // Если контекст уснул (защита браузера) — принудительно будим его
     if (audioCtx && audioCtx.state === 'suspended') {
         audioCtx.resume();
     }
 }
 
-// Запуск легкой, ненавязчивой фоновой музыки (Процедурный эмбиент)
-function startBackgroundMusic() {
-    try {
-        initAudioContext();
-        if (!audioCtx || musicInterval) return;
+// Рекурсивный генератор бесконечной эмбиент-музыки (Защищен от блокировок браузера)
+function playAmbientNode() {
+    if (!isMusicPlaying || !audioCtx || audioCtx.state === 'suspended') return;
 
-        // Базовые минорные ноты для создания атмосферы подземелья (в Гц)
-        const baseNotes = [110.00, 130.81, 146.83, 164.81, 196.00]; // A2, C3, D3, E3, G3
-        
-        musicInterval = setInterval(() => {
-            if (!audioCtx) return;
+    try {
+        const now = audioCtx.currentTime;
+        // Мягкие, глубокие минорные ноты подземелья (A2, C3, D3, E3, G3)
+        const baseNotes = [110.00, 130.81, 146.83, 164.81, 196.00];
+        const freq1 = baseNotes[Math.floor(Math.random() * baseNotes.length)];
+        const freq2 = freq1 * 1.5; // Идеальная квинта для объема
+
+        // Продолжительность звучания одной музыкальной фразы (от 4 до 6 секунд)
+        const duration = 4 + Math.random() * 2;
+
+        [freq1, freq2].forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
             
-            // Если контекст заблокирован, пробуем разбудить его еще раз
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-                return;
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now);
+            
+            // Настройка ультра-низкой громкости, чтобы эмбиент не мешал звукам взрывов
+            const targetVolume = idx === 0 ? 0.015 : 0.008;
+            
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(targetVolume, now + 1.5); // Плавное проявление ноты
+            gain.gain.setValueAtTime(targetVolume, now + duration - 1.5);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + duration); // Мягкое затухание
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start(now);
+            osc.stop(now + duration);
+
+            // Навешиваем событие цепочки только на первый осциллятор
+            if (idx === 0) {
+                osc.onended = () => {
+                    // Перезапускаем следующую случайную ноту сразу по окончании этой
+                    if (isMusicPlaying) playAmbientNode();
+                };
             }
-            
-            const now = audioCtx.currentTime;
-            
-            // Выбираем две случайные гармонирующие ноты
-            const note1 = baseNotes[Math.floor(Math.random() * baseNotes.length)];
-            const note2 = baseNotes[Math.floor(Math.random() * baseNotes.length)] * 1.5; // Пятая ступень для объема
-            
-            // Создаем два мягких синусоидальных осциллятора
-            [note1, note2].forEach((freq, idx) => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, now);
-                
-                // Делаем звук очень тихим и вкрадчивым, чтобы не утомлял
-                const volume = idx === 0 ? 0.02 : 0.01;
-                
-                gain.gain.setValueAtTime(0, now);
-                gain.gain.linearRampToValueAtTime(volume, now + 1.5); // Плавная атака
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 4.5); // Длинное затухание
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                
-                osc.start(now);
-                osc.stop(now + 4.6);
-            });
-            
-        }, 4000); // Новые аккорды звучат каждые 4 секунды
+        });
     } catch (e) {
-        console.warn("Фоновое аудио ожидает клика пользователя.", e);
+        console.warn("Ошибка генерации фоновой ноты:", e);
     }
 }
 
-// Остановка фоновой музыки
+// Включение фоновой музыки в момент клика по кнопке
+function startBackgroundMusic() {
+    initAudioContext();
+    if (isMusicPlaying) return;
+    
+    isMusicPlaying = true;
+    // Запускаем первую волну музыки мгновенно в контексте клика
+    playAmbientNode();
+}
+
+// Мгновенное глушение фоновой музыки при выходе в меню
 function stopBackgroundMusic() {
-    if (musicInterval) {
-        clearInterval(musicInterval);
-        musicInterval = null;
-    }
+    isMusicPlaying = false;
 }
 
 // Воспроизведение звуков перемещения или уникальных взрывов под каждую руну
@@ -98,7 +100,6 @@ function playMatch3Sound(type) {
         const now = audioCtx.currentTime;
         
         if (type === 'swap') {
-            // Короткий тихий щелчок скольжения рун
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(280, now);
             osc.frequency.exponentialRampToValueAtTime(550, now + 0.08);
@@ -107,7 +108,6 @@ function playMatch3Sound(type) {
             osc.start(now);
             osc.stop(now + 0.08);
         } else if (type === 'intro') {
-            // Кристальный перезвон поля на старте
             osc.type = 'sine';
             osc.frequency.setValueAtTime(520, now);
             osc.frequency.exponentialRampToValueAtTime(850, now + 0.12);
@@ -116,7 +116,6 @@ function playMatch3Sound(type) {
             osc.start(now);
             osc.stop(now + 0.12);
         } else {
-            // УНИКАЛЬНЫЕ ПРОЦЕДУРНЫЕ ЗВУКИ ПОД КАЖДЫЙ ТИП РУНЫ
             switch(type) {
                 case '🔥': // Огонь: Низкий плотный взрывной хлопок
                     osc.type = 'sawtooth';
@@ -135,7 +134,7 @@ function playMatch3Sound(type) {
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
                     break;
                     
-                case '🛡️': // Защита: Звонкий кристальный металлический отскок брони
+                case '🛡️': // Защита: Звонкий кристальный металлический отскок
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(440, now);
                     osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
@@ -143,7 +142,7 @@ function playMatch3Sound(type) {
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
                     break;
                     
-                case '💚': // Жизнь: Волшебный мягкий восходящий лечащий перелив
+                case '💚': // Жизнь: Волшебный мягкий восходящий перелив
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(330, now);
                     osc.frequency.exponentialRampToValueAtTime(660, now + 0.22);
@@ -151,7 +150,7 @@ function playMatch3Sound(type) {
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
                     break;
                     
-                case '💀': // Смерть: Тягучий, зловещий низкочастотный гул
+                case '💀': // Смерть: Тягучий зловещий низкий гул
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(90, now);
                     osc.frequency.linearRampToValueAtTime(30, now + 0.3);
@@ -181,7 +180,7 @@ function triggerMatch3Haptic(ms) {
     }
 }
 
-// Генератор умных разноцветных искр (Полностью привязан к цветам рун)
+// Generator iskr
 function spawnRuneExplosionSparks(r, c, runeType) {
     const boardContainer = document.getElementById('match3-board-container');
     const cellEl = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
