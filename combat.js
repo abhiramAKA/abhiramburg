@@ -1,6 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (ФИКС HP БОССА - v0.7.9-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ (v0.8.1-BETA)
    ========================================================================== */
+
+let activeSessionLevel = 1;
 
 function buildDragonDOM() {
     const raidZone = document.getElementById('dragon-raid-zone');
@@ -29,11 +31,11 @@ function buildDragonDOM() {
 }
 
 function startCombatSession(level) {
-    const dragonLevel = level || 1;
+    activeSessionLevel = level || 1;
     combatData.currentRound = 1;
     
-    // Фиксированный расчет здоровья на основе выбранного уровня
-    const calculatedHP = 120 + (dragonLevel - 1) * 60;
+    // Фиксированный расчет HP: шаг +60 за каждый Тир Дракона из таблицы
+    const calculatedHP = 120 + (activeSessionLevel - 1) * 60;
     combatData.dragonMaxHP = calculatedHP; 
     combatData.dragonHP = calculatedHP;
     
@@ -44,8 +46,9 @@ function startCombatSession(level) {
     
     const bossNameEl = document.getElementById('boss-name');
     if (bossNameEl) {
-        const names = { 1: "ЗЕЛЕНЫЙ ДРАКОН", 2: "ОГНЕННЫЙ ДРАКОН", 3: "НЕКРОДРАКОН" };
-        bossNameEl.innerText = names[dragonLevel] || `ДРАКОН (УР. ${dragonLevel})`;
+        const elements = ["ОГНЯ", "ЛЬДА", "ТЬМЫ", "СВЕТА"];
+        const currentElement = elements[(activeSessionLevel - 1) % 4];
+        bossNameEl.innerText = `ДРАКОН ${currentElement} (ТИР ${activeSessionLevel})`;
     }
     
     combatData.squad.forEach(hero => {
@@ -104,7 +107,8 @@ function executeDragonTurnAI() {
         dragonModel.classList.add('dragon-attacking');
     }
 
-    let baseDamage = 20;
+    // Базовый урон дракона растет вместе с его тиром
+    let baseDamage = 15 + activeSessionLevel * 5;
     if (combatData.dragonBlinded) {
         baseDamage = Math.round(baseDamage * 0.5);
         combatData.dragonBlinded = false; 
@@ -132,8 +136,6 @@ function executeDragonTurnAI() {
         }
         
         combatData.currentRound++;
-        
-        // Здоровье зафиксировано при старте. Прогрессивное нарастание максимума в раундах удалено.
         
         combatData.playerAP = combatData.playerMaxAP;
         if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
@@ -236,7 +238,13 @@ function updateCombatInterfaceDOM() {
 
 function checkBattleResolution() {
     if (combatData.dragonHP <= 0) {
-        alert("ВЕЛИКАЯ ПОБЕДА! Дракон повержен!");
+        alert(`ВЕЛИКАЯ ПОБЕДА! Дракон Тира ${activeSessionLevel} повержен!`);
+        
+        // Разблокируем следующий тир в прогрессии
+        if (typeof saveCompletedTier === 'function') {
+            saveCompletedTier(activeSessionLevel);
+        }
+        
         if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
         showScreen('main-menu');
     } else {
