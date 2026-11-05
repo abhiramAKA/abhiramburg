@@ -1,17 +1,26 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ВОЕННОГО ЛАГЕРЯ И ОТРАДА (НОВЫЙ МОДУЛЬ - v0.9.6-BETA)
+   КХАМАЧ — МОДУЛЬ МГНОВЕННОГО УЛУЧШЕНИЯ ВОЕННОГО ЛАГЕРЯ (v1.6.0-BETA)
    ========================================================================== */
 
-function initSquadModuleListeners() {
-    const upgradeTank = document.getElementById('upgrade-tank-btn');
-    const upgradeDamage = document.getElementById('upgrade-damage-btn');
-    const upgradeArcher = document.getElementById('upgrade-archer-btn');
-    const upgradeMage = document.getElementById('upgrade-mage-btn');
+function getBuildingUpgradeCost(buildingId, currentLvl) {
+    const nextLvl = currentLvl + 1;
+    if (nextLvl > 15) return 0;
+    
+    // Первый уровень по-прежнему дешевый для быстрых тестов
+    if (nextLvl === 1) return 100;
+    
+    // Поздние уровни растут линейно: 250, 500, 750, 1000...
+    return currentLvl * 250;
+}
 
-    if (upgradeTank) upgradeTank.addEventListener('click', () => handleSquadUpgradeClick('tank'));
-    if (upgradeDamage) upgradeDamage.addEventListener('click', () => handleSquadUpgradeClick('damage'));
-    if (upgradeArcher) upgradeArcher.addEventListener('click', () => handleSquadUpgradeClick('archer'));
-    if (upgradeMage) upgradeMage.addEventListener('click', () => handleSquadUpgradeClick('mage'));
+function initSquadModuleListeners() {
+    const buildings = ['tank', 'damage', 'archer', 'mage'];
+    buildings.forEach(id => {
+        const btn = document.getElementById(`upgrade-${id}-btn`);
+        if (btn) {
+            btn.addEventListener('click', () => handleSquadUpgradeClick(id));
+        }
+    });
 }
 
 function updateSquadButtonsDOM() {
@@ -23,7 +32,6 @@ function updateSquadButtonsDOM() {
     ];
 
     const currentGold = typeof getPlayerGold === 'function' ? getPlayerGold() : 0;
-    const cost = 150;
 
     buildings.forEach(b => {
         const btn = document.getElementById(b.btnId);
@@ -34,13 +42,16 @@ function updateSquadButtonsDOM() {
         if (lvl >= 15) {
             btn.innerText = `${b.name} (Макс. Ур. 15)`;
             btn.classList.add('disabled');
+            return;
+        }
+
+        const cost = getBuildingUpgradeCost(b.id, lvl);
+        btn.innerText = `${b.name} (Ур. ${lvl} → ${lvl + 1}) — ${cost} 🪙`;
+
+        if (currentGold < cost) {
+            btn.classList.add('disabled');
         } else {
-            btn.innerText = `${b.name} (Ур. ${lvl} → ${lvl + 1}) — 150 🪙`;
-            if (currentGold < cost) {
-                btn.classList.add('disabled');
-            } else {
-                btn.classList.remove('disabled');
-            }
+            btn.classList.remove('disabled');
         }
     });
 }
@@ -49,10 +60,18 @@ function handleSquadUpgradeClick(buildingId) {
     const lvl = typeof getBuildingLevel === 'function' ? getBuildingLevel(buildingId) : 0;
     if (lvl >= 15) return;
 
-    if (typeof upgradeBuilding === 'function' && upgradeBuilding(buildingId)) {
+    const cost = getBuildingUpgradeCost(buildingId, lvl);
+    const currentGold = typeof getPlayerGold === 'function' ? getPlayerGold() : 0;
+
+    if (currentGold >= cost) {
+        localStorage.setItem('khamach_gold', currentGold - cost);
+        localStorage.setItem(`khamach_build_${buildingId}`, lvl + 1);
+        
+        if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
         updateSquadButtonsDOM();
-        alert("Строительство военного лагеря завершено успешно!");
+        
+        alert(`Мгновенное улучшение завершено! ${buildingId} теперь ${lvl + 1} уровня.`);
     } else {
-        alert("Недостаточно золота для апгрейда лагеря! Отправляйтесь в рейд.");
+        alert(`Недостаточно золота для мгновенной постройки! Требуется 🪙 ${cost}.`);
     }
 }
