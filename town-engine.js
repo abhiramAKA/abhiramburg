@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЭКОНОМИКА ГОРОДА И СТРОИТЕЛЬСТВА ЗА ЗОЛОТО (ОБНОВЛЕН - v1.0.0-BETA)
+   КХАМАЧ — ЭКОНОМИКА ГОРОДА И СТРОИТЕЛЬСТВА ЗА ЗОЛОТО (ОБНОВЛЕН - v1.2.0-BETA)
    ========================================================================== */
 
 function getPlayerGold() {
@@ -51,7 +51,7 @@ function upgradeBuilding(buildingId) {
 
     if (currentGold >= goldCost) {
         localStorage.setItem('khamach_gold', currentGold - goldCost);
-        localStorage.setItem(`` + `khamach_build_${buildingId}`, currentLvl + 1);
+        localStorage.setItem(`khamach_build_${buildingId}`, currentLvl + 1);
         updateTownGoldDisplay();
         return true;
     }
@@ -93,4 +93,24 @@ function updateTownGoldDisplay() {
     goldElements.forEach(el => {
         el.innerText = `🪙 ${getPlayerGold()} Золота`;
     });
+
+    const invContainer = document.getElementById('main-menu-inventory');
+    if (invContainer) {
+        const scales = getPlayerResource('scales');
+        const blood = getPlayerResource('blood');
+        const perkShield = getMetaPerkValue('khamach_perk_shield');
+        const perkSp = getMetaPerkValue('khamach_perk_sp');
+
+        invContainer.innerHTML = `
+            <div style="color: #bfae96; text-transform: uppercase; font-size: 10px; letter-spacing: 1px; margin-bottom: 4px; border-bottom: 1px solid #3a3025; padding-bottom: 2px; font-weight: bold;">📜 Сокровищница Цитадели</div>
+            <div style="display: flex; justify-content: space-around; margin-bottom: 4px; color: #cdb38c;">
+                <span>🦴 Чешуя: <strong>${scales}</strong></span>
+                <span>🩸 Кровь: <strong>${blood}</strong></span>
+            </div>
+            <div style="display: flex; justify-content: space-around; font-size: 11px; color: #8a7350;">
+                <span>🛡️ Стартовый щит: <strong style="color:#4a90e2;">+${perkShield * 5}</strong></span>
+                <span>⚡ Стартовая ярость: <strong style="color:#ffd700;">+${perkSp * 5}%</strong></span>
+            </div>
+        `;
+    }
 }
