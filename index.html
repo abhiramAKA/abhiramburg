@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>КХАМАЧ — Восхождение Рейдов</title>
-    <link rel="stylesheet" href="styles.css?v=v0.7.3">
+    <link rel="stylesheet" href="styles.css?v=v0.7.4">
 </head>
 <body>
-    <!-- Холст для искр костра -->
     <canvas id="bg-canvas"></canvas>
 
-    <!-- Общий контейнер интерфейса -->
     <div id="game-interface">
         
         <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
@@ -33,8 +31,8 @@
                 <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
             </div>
             
-            <!-- Фиксация новой версии сборки для сброса кэша -->
-            <div id="game-version" class="version-footer">v0.7.3-BETA</div>
+            <!-- Динамическое отображение версии сборки -->
+            <div id="game-version" class="version-footer">v0.7.4-BETA</div>
         </div>
 
         <!-- ================= ЭКРАН СПРАВКИ МЕНЮ ================= -->
@@ -101,11 +99,13 @@
 
     </div>
 
-    <script src="game.js"></script>
-    <script src="background.js"></script>
-    <script src="match3-fx.js"></script>
-    <script src="match3-input.js"></script>
-    <script src="match3.js"></script>
-    <script src="combat.js"></script>
+    <!-- Обновленный порядок подключения скриптов -->
+    <script src="game.js?v=v0.7.4"></script>
+    <script src="background.js?v=v0.7.4"></script>
+    <script src="audio-engine.js?v=v0.7.4"></script>
+    <script src="match3-fx.js?v=v0.7.4"></script>
+    <script src="match3-input.js?v=v0.7.4"></script>
+    <script src="match3.js?v=v0.7.4"></script>
+    <script src="combat.js?v=v0.7.4"></script>
 </body>
 </html>
