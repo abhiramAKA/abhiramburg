@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (v0.7.0-BETA)
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (ИСПРАВЛЕННЫЙ УРОН - v0.7.2-BETA)
    ========================================================================== */
 
 let isBoardLocked = false;
@@ -70,7 +70,7 @@ function renderBoardDOM(isIntro = false, newRunesCoords = []) {
 
 function handleCellClick(e) {
     if (typeof initAudioContext === 'function') initAudioContext();
-    if (combatData.playerAP <= 0 || combatData.isActionPhase || isBoardLocked) return;
+    if (combatData.playerAP <= 0 || isBoardLocked) return;
     
     const cell = e.currentTarget;
     const r = parseInt(cell.dataset.row);
@@ -186,6 +186,7 @@ function checkMatchesAndExecute() {
                     }
                 }
             }
+            // Передаем эффекты взрывов СТРОГО для зарядки шкал энергии SP персонажей
             if (typeof applyRuneCombination === 'function') applyRuneCombination(executionEffects);
             renderBoardDOM(false, newRunesCoords);
             
