@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.7.7-BETA)
+        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.7.8-BETA)
         (function() {
             const timestamp = Date.now();
             
@@ -31,19 +31,17 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    // Все файлы загружены — обновляем версию на экране и активируем меню
-                    console.log("КХАМАЧ: Все модули v0.7.7 успешно загружены в память.");
+                    console.log("КХАМАЧ: Все модули v0.7.8 успешно загружены в память.");
                     return;
                 }
                 
                 const script = document.createElement('script');
                 script.src = scripts[index] + '?t=' + timestamp;
-                script.async = false; // Сохраняем строгую готическую иерархию
+                script.async = false; 
                 script.onload = function() { injectScript(index + 1); };
                 document.head.appendChild(script);
             }
 
-            // Запускаем инжекцию модулей
             injectScript(0);
         })();
     </script>
@@ -76,7 +74,7 @@
             </div>
             
             <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v0.7.7-BETA</div>
+            <div id="game-version" class="version-footer">v0.7.8-BETA</div>
         </div>
 
         <!-- ================= ЭКРАН СПРАВКИ МЕНЮ ================= -->
