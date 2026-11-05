@@ -35,6 +35,7 @@ function startCombatSession() {
     combatData.playerAP = 1;
     combatData.tankTaunting = false;
     combatData.dragonBlinded = false;
+    combatData.isActionPhase = false;
     
     combatData.squad.forEach(hero => {
         hero.hp = hero.maxHP;
@@ -52,7 +53,7 @@ function startCombatSession() {
     }
 }
 
-// Новая изолированная функция зарядки SP, защищенная от кэша старых версий
+// Зарядка SP, полностью очищенная от старого костыльного кода урона
 function chargeHeroSuperpowers(effects) {
     if (effects['🛡️']) {
         let t = combatData.squad.find(h => h.id === "tank");
@@ -149,7 +150,7 @@ function activateHeroSuperpower(heroId) {
             combatData.tankTaunting = true;
             break;
         case "damage":
-            // Здоровье дракона списывается ТОЛЬКО здесь по клику на готовую кнопку!
+            // ЕДИНСТВЕННАЯ точка списания здоровья босса в кодовой базе!
             combatData.dragonHP = Math.max(0, combatData.dragonHP - 120);
             break;
         case "archer":
