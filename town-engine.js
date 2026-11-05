@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЭКОНОМИКА ЦИТАДЕЛИ И ПРЯМОЙ СКЛАД НИШТЯКОВ (ОБНОВЛЕН - v2.1.0-BETA)
+   КХАМАЧ — ЭКОНОМИКА ЦИТАДЕЛИ И СКЛАДЫ НИШТЯКОВ ДРАКОНА (ОБНОВЛЕН - v2.3.0-BETA)
    ========================================================================== */
 
 const INLINE_TOWN_TEXTS = {
@@ -9,8 +9,8 @@ const INLINE_TOWN_TEXTS = {
 };
 
 const INLINE_MODE_DESCRIPTIONS = {
-    forge: { title: "⚒️ ДРЕВНЕЕ ГОРНИЛО", buyText: "Кузнице требуется восстановление инструментов за 🪙 500.", activeText: "Инструменты исправны. Кузнец готов плавить редкие материалы или выковать мифическое оружие." },
-    alchemy: { title: "🧪 ТАЙНЫЙ ОЧАГ", buyText: "Алхимику требуется закупка редких реагентов за 🪙 500.", activeText: "Реагенты закуплены. Мастер готов варить Сердце Змея." }
+    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНЯ", buyText: "Кузне требуется восстановление инструментов за 🪙 100.", activeText: "Инструменты исправны. Кузня готова плавить редкие материалы или выковать мифическое оружие." },
+    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", buyText: "Лаборатории требуется закупка редких реагентов за 🪙 100.", activeText: "Реагенты закуплены. Лаборатория готова варить Сердце Змея." }
 };
 
 function getTownText(key) { return INLINE_TOWN_TEXTS[key] || ''; }
@@ -22,7 +22,7 @@ function addPlayerResource(key, amount) { localStorage.setItem(`khamach_res_${ke
 function isBuildingPurchased(id) { return localStorage.getItem(`khamach_purchased_${id}`) === 'true'; }
 
 function buyTownBuilding(id) {
-    const cost = 500;
+    const cost = 100; // Изменено на 100 по ТЗ для легкого теста
     if (getPlayerGold() >= cost && !isBuildingPurchased(id)) {
         localStorage.setItem('khamach_gold', getPlayerGold() - cost);
         localStorage.setItem(`khamach_purchased_${id}`, 'true');
@@ -45,6 +45,7 @@ function openModeDescription(modeKey) {
     if (!isBuildingPurchased(modeKey)) {
         textEl.innerHTML = `<p>${modeData.buyText}</p>`;
         buyBtn.style.display = 'block';
+        buyBtn.innerText = `🛒 ВЫКУПИТЬ ЗДЕНИЕ (100 🪙)`; // Переименована цена на кнопке
         processBtn.style.display = 'none';
     } else {
         textEl.innerHTML = `<p>${modeData.activeText}</p><p>Используйте меню «Отряд» для тренировки героев за добытые ништяки.</p>`;
@@ -67,7 +68,7 @@ function updateTownGoldDisplay() {
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 12px; margin: 6px 0; color: #cdb38c; text-align: left; padding: 0 5px;">
             <span>🛡️ Плазма: <strong style="color:#fff;">${getPlayerResource('plasma')}</strong></span>
             <span>🔥 Кровь: <strong style="color:#fff;">${getPlayerResource('blood')}</strong></span>
-            <span>⚡ Урина: <strong style="color:#fff;">${getPlayerResource('urine')}</strong></span>
+            <span>🪶 Чешуя: <strong style="color:#fff;">${getPlayerResource('scale')}</strong></span>
             <span>💚 Слезы: <strong style="color:#fff;">${getPlayerResource('tears')}</strong></span>
         </div>
     `;
