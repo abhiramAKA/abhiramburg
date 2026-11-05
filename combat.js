@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И ВОИНСКИХ ПОСТРОЕК (v0.8.9-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И ВОИНСКИХ ПОСТРОЕК (v0.9.2-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -26,7 +26,6 @@ function startCombatSession(level) {
         bossNameEl.innerText = `ДРАКОН ${currentElement} (ТИР ${activeSessionLevel})`;
     }
     
-    // БОНУС ТАНКА: Оружейная дает Танку +20 к макс. HP за уровень
     const tankLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('tank') : 0;
     const tankHpBonus = tankLvl * 20;
     
@@ -132,12 +131,10 @@ function activateHeroSuperpower(heroId) {
     hero.sp = 0; 
     if (typeof playMatch3Sound === 'function') playMatch3Sound(hero.icon);
     
-    // Считываем уровни построек воинов
     const damageLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('damage') : 0;
     const archerLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('archer') : 0;
     const mageLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('mage') : 0;
 
-    // Расчет кастомного урона и лечения от построек
     const dmgClassUnyielding = 120 + damageLvl * 15;
     const archerClassUnyielding = 25 + archerLvl * 10;
     const mageClassUnyielding = 25; 
