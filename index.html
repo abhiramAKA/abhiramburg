@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.8.8-BETA)
+        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.8.9-BETA)
         (function() {
             const timestamp = Date.now();
             
@@ -34,7 +34,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Все модули v0.8.8 успешно загружены в память.");
+                    console.log("КХАМАЧ: Все модули v0.8.9 успешно загружены в память.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -59,12 +59,11 @@
     <!-- Общий контейнер интерфейса -->
     <div id="game-interface">
         
-        <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
+        <!-- ================= ГЛАВНОЕ МЕНЮ (ПЛОЩАДЬ) ================= -->
         <div id="main-menu" class="game-window" style="display: flex;">
             <h1>КХАМАЧ</h1>
             <span class="subtitle">Рейды в Горнило Рун</span>
             
-            <!-- Отображение золота игрока в меню города -->
             <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🪙 0 Золота</div>
             
             <p>Древний Дракон пробудился в недрах подземелья. Соберите свой отряд, заряжайте шкалы суперсил через камни стихий и сокрушите огнедышащую тварь в пошаговой тактической битве.</p>
@@ -74,17 +73,11 @@
                 <button id="info-btn" class="info-btn">❓</button>
             </div>
             <div class="menu-row">
-                <button id="to-forge-btn" class="menu-btn">⚒️ Кузница</button>
-            </div>
-            <div class="menu-row">
-                <button id="to-alchemy-btn" class="menu-btn">🧪 Алхимия</button>
-            </div>
-            <div class="menu-row">
-                <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
+                <button id="to-town-btn" class="menu-btn" style="background: linear-gradient(to bottom, #3a2e1d 0%, #1c150b 100%); border-color: #6e5531; color: #cdb38c;">🏘️ В ГОРОД</button>
             </div>
             
             <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v0.8.8-BETA</div>
+            <div id="game-version" class="version-footer">v0.8.9-BETA</div>
         </div>
 
         <!-- ================= ОКНО ВЫБОРА ДРАКОНА ================= -->
@@ -108,20 +101,16 @@
             <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
         </div>
 
-        <!-- ================= ОКНО СТРОИТЕЛЬСТВА В ГОРОДЕ ================= -->
+        <!-- ================= ЕДИНАЯ ОКРАИНА ГОРОДА (ПОСТРОЙКИ ВОИНОВ) ================= -->
         <div id="mode-desc-screen" class="game-window" style="display: none;">
-            <h2 id="mode-desc-title">РЕЖИМ ИГРЫ</h2>
-            <span class="subtitle">Градостроительство</span>
+            <h2 id="mode-desc-title">ГОРОДСКИЕ ПОСТРОЙКИ</h2>
+            <span class="subtitle">Пассивные Тренировочные Лагеря</span>
             
-            <!-- Счетчик золота внутри режима -->
             <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 15px;">🪙 0 Золота</div>
             
-            <p id="mode-desc-text">Описание режима загружается...</p>
+            <!-- Сюда динамически рендерятся 4 карточки улучшений воинов через game.js -->
+            <div id="town-buildings-list" style="max-height: 45vh; overflow-y: auto; margin-bottom: 15px; padding-right: 2px;"></div>
             
-            <!-- Кнопка действия "Построить" -->
-            <button id="build-upgrade-btn" class="menu-btn" style="margin-bottom: 10px; background: linear-gradient(to bottom, #1d421e 0%, #102411 100%); border-color: #316e34; color: #aae6ab;">ПОСТРОИТЬ</button>
-            
-            <!-- Кнопка возвращения на площадь города -->
             <button id="close-mode-desc-btn" class="menu-btn back-btn" style="margin-top: 5px; width: 100%;">В город</button>
         </div>
 
