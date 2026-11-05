@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ДИСПЕТЧЕР ЭКРАНОВ - v0.8.0-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ПРОГРЕССИЯ 24 ТИРОВ — v0.8.1-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v0.8.0-BETA";
+const GAME_VERSION = "v0.8.1-BETA";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -28,9 +28,22 @@ let match3BoardData = [];
 let selectedCell = null;
 let selectedDragonLevel = 1;
 
+// Система сохранения прогресса (храним максимальный открытый Тир Дракона)
+function getMaxUnlockedTier() {
+    const saved = localStorage.getItem('khamach_max_tier');
+    return saved ? parseInt(saved) : 1;
+}
+
+function saveCompletedTier(tier) {
+    const currentMax = getMaxUnlockedTier();
+    if (tier >= currentMax && tier < 24) {
+        localStorage.setItem('khamach_max_tier', tier + 1);
+    }
+}
+
 const GAME_TEXTS = {
     mainInfo: `
-        <p><strong>Правила Боя v0.8.0:</strong></p>
+        <p><strong>Правила Боя v0.8.1:</strong></p>
         <p>1. Каждый раунд вы делаете ровно <strong>1 ход на поле Match-3</strong>.</p>
         <p>2. Взрывы рун заряжают Суперсилу героев (+6% за камень).</p>
         <p>3. Дракон атакует автоматически <strong>сразу после вашего хода на поле</strong>.</p>
@@ -75,6 +88,57 @@ function showScreen(screenId) {
             screenEl.style.display = (id === screenId) ? 'flex' : 'none';
         }
     });
+    
+    // Если открываем экран выбора, перерисовываем список доступных драконов
+    if (screenId === 'dragon-select-screen') {
+        renderDragonSelectionGrid();
+    }
+}
+
+// Динамическая генерация сетки из 24 Тиров Драконов
+function renderDragonSelectionGrid() {
+    const gridContainer = document.getElementById('dragon-levels-grid');
+    if (!gridContainer) return;
+    
+    gridContainer.innerHTML = '';
+    const maxUnlocked = getMaxUnlockedTier();
+    
+    // Список стихий из таблицы лога для красивых названий
+    const elements = ["Огонь", "Лед", "Тьма", "Свет"];
+    
+    for (let t = 1; t <= 24; t++) {
+        const element = elements[(t - 1) % 4];
+        const isLocked = t > maxUnlocked;
+        
+        const row = document.createElement('div');
+        row.className = 'menu-row';
+        
+        const btn = document.createElement('button');
+        btn.className = 'menu-btn dragon-level-btn';
+        if (isLocked) btn.classList.add('disabled');
+        btn.dataset.level = t;
+        
+        // Расчет HP как в combat.js: базовое 120 + 60 за каждый тир
+        const hp = 120 + (t - 1) * 60;
+        
+        btn.innerHTML = isLocked 
+            ? `🔒 Тир ${t} (Победите Тир ${t-1})` 
+            : `🐉 Тир ${t} [${element}] — ${hp} HP`;
+            
+        if (!isLocked) {
+            btn.addEventListener('click', (e) => {
+                selectedDragonLevel = parseInt(e.currentTarget.dataset.level);
+                if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
+                showScreen('combat-screen');
+                if (typeof startCombatSession === 'function') {
+                    startCombatSession(selectedDragonLevel);
+                }
+            });
+        }
+        
+        row.appendChild(btn);
+        gridContainer.appendChild(row);
+    }
 }
 
 function openModeDescription(modeKey) {
@@ -92,18 +156,6 @@ function setupMenuListeners() {
             showScreen('dragon-select-screen');
         });
     }
-
-    const levelBtns = document.querySelectorAll('.dragon-level-btn');
-    levelBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            selectedDragonLevel = parseInt(e.currentTarget.dataset.level);
-            if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
-            showScreen('combat-screen');
-            if (typeof startCombatSession === 'function') {
-                startCombatSession(selectedDragonLevel);
-            }
-        });
-    });
 
     const fromSelectToMenuBtn = document.getElementById('from-select-to-menu-btn');
     if (fromSelectToMenuBtn) {
