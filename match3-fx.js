@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АУДИО-ДВИЖОК С ПАНЕЛЬЮ УПРАВЛЕНИЯ ГРОМКОСТЬЮ (v0.6.0-beta.32)
+   КХАМАЧ — АУДИО-ДВИЖОК С ПАНЕЛЬЮ УПРАВЛЕНИЯ ГРОМКОСТЬЮ (v0.6.0-beta.34)
    ========================================================================== */
 
 let audioCtx = null;
@@ -47,8 +47,8 @@ function playAmbientNode() {
         const now = audioCtx.currentTime;
         let duration = 4.0 + Math.random() * 1.5;
         
-        // Теперь и в меню, и в бою звучит приятная мелодия из меню
-        const roots =;
+        // Массив частот для минорного готического эмбиента
+        const roots = [220.00, 261.63, 293.66, 329.63, 392.00];
         const baseRoot = roots[Math.floor(Math.random() * roots.length)];
         const chordFrequencies = [baseRoot, baseRoot * 1.1892, baseRoot * 1.4983];
         
@@ -62,11 +62,10 @@ function playAmbientNode() {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             
-            osc.type = 'sine'; // Чистый приятный синус везде
+            osc.type = 'sine';
             osc.frequency.setValueAtTime(freq, now);
             osc.detune.setValueAtTime((index * 4) - 6, now);
             
-            // Расчет финальной громкости с учетом ползунка
             const baseVol = 0.015 * gameVolumeMusic;
             
             gain.gain.setValueAtTime(0, now);
@@ -118,7 +117,6 @@ function playMatch3Sound(type) {
         if (delayNode && type !== 'swap') gain.connect(delayNode); 
         const now = audioCtx.currentTime;
         
-        // Множитель громкости эффектов
         const fxVol = gameVolumeFX;
         
         if (type === 'swap') {
