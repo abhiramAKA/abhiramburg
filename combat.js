@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И ВОИНСКИХ ПОСТРОЕК (v1.7.0-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БАЛАНСА БОССА (v2.1.0-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -48,29 +48,20 @@ function startCombatSession(level) {
 }
 
 function chargeHeroSuperpowers(effects) {
-    if (effects['🛡️']) {
-        let t = combatData.squad.find(h => h.id === "tank");
-        if (t && t.hp > 0) t.sp = Math.min(t.maxSP, t.sp + effects['🛡️'] * 6);
-    }
-    if (effects['🔥']) {
-        let d = combatData.squad.find(h => h.id === "damage");
-        if (d && d.hp > 0) d.sp = Math.min(d.maxSP, d.sp + effects['🔥'] * 6);
-    }
-    if (effects['⚡']) {
-        let a = combatData.squad.find(h => h.id === "archer");
-        if (a && a.hp > 0) a.sp = Math.min(a.maxSP, a.sp + effects['⚡'] * 6);
-    }
-    if (effects['💚']) {
-        let m = combatData.squad.find(h => h.id === "mage");
-        if (m && m.hp > 0) m.sp = Math.min(m.maxSP, m.sp + effects['💚'] * 6);
-    }
+    combatData.squad.forEach(hero => {
+        if (hero.hp <= 0) return;
+        let icon = hero.id === 'tank' ? '🛡️' : hero.id === 'damage' ? '🔥' : hero.id === 'archer' ? '⚡' : '💚';
+        if (effects[icon]) {
+            let charge = effects[icon] * 6;
+            hero.sp = Math.min(hero.maxSP, hero.sp + charge);
+        }
+    });
     if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
 }
 
 function usePlayerActionPoint() {
     combatData.playerAP--;
     if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
-    
     if (combatData.playerAP <= 0) {
         if (typeof isBoardLocked !== 'undefined') isBoardLocked = true;
         document.getElementById('combat-ap-display').innerText = "Ход Дракона...";
@@ -81,48 +72,33 @@ function usePlayerActionPoint() {
 
 function executeDragonTurnAI() {
     if (combatData.dragonHP <= 0) return;
+    const dModel = document.getElementById('dragon-model');
+    if (dModel) { dModel.classList.remove('dragon-idle'); dModel.classList.add('dragon-attacking'); }
 
-    const dragonModel = document.getElementById('dragon-model');
-    if (dragonModel) {
-        dragonModel.classList.remove('dragon-idle');
-        dragonModel.classList.add('dragon-attacking');
-    }
+    const isAoEPhase = (activeSessionLevel >= 5) && (combatData.currentRound % 4 === 0);
 
-    let baseDamage = 15 + activeSessionLevel * 5;
-    if (combatData.dragonBlinded) {
-        baseDamage = Math.round(baseDamage * 0.5);
-        combatData.dragonBlinded = false; 
-    }
+    let baseDamage = isAoEPhase ? (20 + activeSessionLevel * 6) : (12 + activeSessionLevel * 4);
+    if (combatData.dragonBlinded) { baseDamage = Math.round(baseDamage * 0.5); combatData.dragonBlinded = false; }
 
-    let tankHero = combatData.squad.find(h => h.id === "tank");
-
-    if (combatData.tankTaunting && tankHero && tankHero.hp > 0) {
-        tankHero.hp = Math.max(0, tankHero.hp - baseDamage);
-        combatData.tankTaunting = false; 
+    if (isAoEPhase) {
+        combatData.squad.forEach(h => { if (h.hp > 0) h.hp = Math.max(0, h.hp - baseDamage); });
     } else {
-        let aliveHeroes = combatData.squad.filter(h => h.hp > 0);
-        if (aliveHeroes.length > 0) {
-            let target = aliveHeroes[Math.floor(Math.random() * aliveHeroes.length)];
-            target.hp = Math.max(0, target.hp - baseDamage);
+        let target = combatData.squad.find(h => h.id === "tank");
+        if (!combatData.tankTaunting || !target || target.hp <= 0) {
+            let alive = combatData.squad.filter(h => h.hp > 0);
+            target = alive.length > 0 ? alive[Math.floor(Math.random() * alive.length)] : null;
         }
+        if (target) target.hp = Math.max(0, target.hp - baseDamage);
+        combatData.tankTaunting = false; 
     }
 
     if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
-    
     setTimeout(() => {
-        if (dragonModel) {
-            dragonModel.classList.remove('dragon-attacking');
-            dragonModel.classList.add('dragon-idle');
-        }
-        
-        combatData.currentRound++;
-        combatData.playerAP = combatData.playerMaxAP;
+        if (dModel) { dModel.classList.remove('dragon-attacking'); dModel.classList.add('dragon-idle'); }
+        combatData.currentRound++; combatData.playerAP = combatData.playerMaxAP;
         if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
-        
         document.getElementById('combat-ap-display').innerText = "Сделайте ход на поле!";
         document.getElementById('combat-ap-display').style.color = "#ffd700";
-        
-        if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
         checkBattleResolution();
     }, 1000);
 }
@@ -131,41 +107,26 @@ function activateHeroSuperpower(heroId) {
     let hero = combatData.squad.find(h => h.id === heroId);
     if (!hero || hero.hp <= 0 || hero.sp < hero.maxSP) return;
     
-    hero.sp = 0; 
+    hero.sp = 0;
     if (typeof playMatch3Sound === 'function') playMatch3Sound(hero.icon);
     
-    // Считываем уровни построек лагеря из localStorage
     const damageLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('damage') : 0;
     const archerLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('archer') : 0;
     const mageLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('mage') : 0;
 
-    // Математика масштабирования суперсил по спецификации
-    const tankDamage = 25; // Базовый урон Танка стабилен, постройки дают ему Max HP
-    const dmgClassUnyielding = 120 + damageLvl * 15; // +15 урона за уровень Плаца
-    const archerClassUnyielding = 25 + archerLvl * 10; // +10 урона за уровень Стрельбища
-    const mageClassUnyielding = 25; // Базовый урон мага
-    const mageHealAmount = 25 + mageLvl * 5; // +5 к групповому исцелению за уровень Обители
+    let dmgUnyielding = 120 + damageLvl * 15;
+    let archerUnyielding = 25 + archerLvl * 10;
+    let mageHealAmount = 25 + mageLvl * 5;
     
     switch(heroId) {
-        case "tank":
-            combatData.tankTaunting = true;
-            combatData.dragonHP = Math.max(0, combatData.dragonHP - tankDamage);
-            break;
-        case "damage":
-            combatData.dragonHP = Math.max(0, combatData.dragonHP - dmgClassUnyielding);
-            break;
-        case "archer":
-            combatData.dragonBlinded = true;
-            combatData.dragonHP = Math.max(0, combatData.dragonHP - archerClassUnyielding);
-            break;
+        case "tank": combatData.tankTaunting = true; combatData.dragonHP = Math.max(0, combatData.dragonHP - 25); break;
+        case "damage": combatData.dragonHP = Math.max(0, combatData.dragonHP - dmgUnyielding); break;
+        case "archer": combatData.dragonBlinded = true; combatData.dragonHP = Math.max(0, combatData.dragonHP - archerUnyielding); break;
         case "mage":
-            combatData.squad.forEach(h => {
-                if (h.hp > 0) h.hp = Math.min(h.maxHP, h.hp + mageHealAmount);
-            });
-            combatData.dragonHP = Math.max(0, combatData.dragonHP - mageClassUnyielding);
+            combatData.squad.forEach(h => { if (h.hp > 0) h.hp = Math.min(h.maxHP, h.hp + mageHealAmount); });
+            combatData.dragonHP = Math.max(0, combatData.dragonHP - 25);
             break;
     }
-    
     if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
     checkBattleResolution();
 }
@@ -173,36 +134,28 @@ function activateHeroSuperpower(heroId) {
 function checkBattleResolution() {
     if (combatData.dragonHP <= 0) {
         const earnedGold = Math.floor(activeSessionLevel * 50 + Math.random() * 50);
-        let msg = `ВЕЛИКАЯ ПОБЕДА! Дракон повержен!\nТрофеи: 🪙 ${earnedGold} Золота!\n`;
         
-        if (typeof setBackpackItem === 'function') {
-            const roll = Math.random();
-            let lootItem = 'junk';
-            let lootName = '☠️ Горсть древнего хлама';
-            
-            if (roll < 0.35) {
-                lootItem = 'ore';
-                lootName = '🪨 Горная руда';
-            } else if (roll < 0.70) {
-                lootItem = 'dust';
-                lootName = '🌋 Вулканическая пыль';
-            }
-            
-            setBackpackItem(lootItem);
-            msg += `🎒 В рюкзак добавлен предмет: ${lootName}!`;
+        const lootTypes = ['plasma', 'blood', 'urine', 'tears'];
+        const lootNames = ['🛡️ Плазма', '🔥 Кровь', '⚡ Урина', '💚 Слезы'];
+        const randIndex = Math.floor(Math.random() * lootTypes.length);
+        
+        let lootKey = lootTypes[randIndex];
+        let lootName = lootNames[randIndex];
+
+        // Начисляем ништяк мгновенно на склад цитадели «по воздуху»
+        if (typeof addPlayerResource === 'function') {
+            addPlayerResource(lootKey, 1);
         }
         
-        alert(msg);
+        alert(`ВЕЛИКАЯ ПОБЕДА! Дракон Тира ${activeSessionLevel} повержен!\nТрофеи: 🪙 ${earnedGold} Золота!\n📦 На склад Цитадели доставлено: ${lootName} (1 шт).`);
+        
         if (typeof addPlayerGold === 'function') addPlayerGold(earnedGold);
         if (typeof saveCompletedTier === 'function') saveCompletedTier(activeSessionLevel);
         if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
         showScreen('main-menu');
-    } else {
-        let allDead = combatData.squad.every(hero => hero.hp <= 0);
-        if (allDead) {
-            alert("ОТРЯД ПАЛ!");
-            if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
-            showScreen('main-menu');
-        }
+    } else if (combatData.squad.every(hero => hero.hp <= 0)) {
+        alert("ОТРЯД ПАЛ В БИТВЕ!");
+        if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
+        showScreen('main-menu');
     }
 }
