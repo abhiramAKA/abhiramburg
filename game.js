@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА (УЛЬТРА-СЖАТИЕ - v1.3.0-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА (ОБНОВЛЕН - v2.7.0-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v1.3.0-BETA";
+const GAME_VERSION = "v2.7.0-BETA";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
@@ -31,6 +31,7 @@ let currentOpenedModeKey = null;
 function initDispatcherModule() {
     if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
     if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
+    if (typeof injectSquadInterfaceDOM === 'function') injectSquadInterfaceDOM();
     
     const versionElement = document.getElementById('game-version');
     if (versionElement) versionElement.innerText = GAME_VERSION;
@@ -48,8 +49,8 @@ function showScreen(screenId) {
     if (screenId === 'dragon-select-screen' && typeof renderDragonSelectionGrid === 'function') {
         renderDragonSelectionGrid();
     }
-    if (screenId === 'squad-screen' && typeof updateSquadButtonsDOM === 'function') {
-        updateSquadButtonsDOM();
+    if (screenId === 'squad-screen' && typeof updateSquadVisualStyles === 'function') {
+        updateSquadVisualStyles();
     }
     if (screenId === 'main-menu' || screenId === 'squad-screen' || screenId === 'mode-desc-screen') {
         if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
