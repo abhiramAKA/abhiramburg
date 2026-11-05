@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (НОВЫЙ МОДУЛЬ - v1.3.0-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v2.5.0-BETA)
    ========================================================================== */
 
 function setupAllGameListeners() {
@@ -18,28 +18,14 @@ function setupAllGameListeners() {
     
     document.getElementById('from-info-to-menu-btn').addEventListener('click', () => showScreen('main-menu'));
     
+    // Исправлено: Привязка кликов к главным кнопкам Кузни, Лаборатории и Кланов
     document.getElementById('to-forge-btn').addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('forge'); });
     document.getElementById('to-alchemy-btn').addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('alchemy'); });
+    document.getElementById('to-clans-btn').addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('clans'); });
+    
     document.getElementById('to-squad-btn').addEventListener('click', () => showScreen('squad-screen'));
     document.getElementById('close-mode-desc-btn').addEventListener('click', () => showScreen('main-menu'));
     document.getElementById('close-squad-btn').addEventListener('click', () => showScreen('main-menu'));
-
-    document.getElementById('mode-buy-btn').addEventListener('click', () => {
-        if (currentOpenedModeKey && typeof buyTownBuilding === 'function') {
-            if (buyTownBuilding(currentOpenedModeKey)) {
-                alert("Здание успешно восстановлено древней магией цитадели!");
-                if (typeof openModeDescription === 'function') openModeDescription(currentOpenedModeKey);
-            } else {
-                alert("Недостаточно золота для выкупа! Требуется 🪙 500.");
-            }
-        }
-    });
-
-    document.getElementById('mode-process-btn').addEventListener('click', () => {
-        if (currentOpenedModeKey && typeof openCraftSelectionMenu === 'function') {
-            openCraftSelectionMenu(currentOpenedModeKey);
-        }
-    });
 
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
     if (leaveCombatBtn) {
