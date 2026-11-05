@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.9.4-BETA)
+        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.9.6-BETA)
         (function() {
             const timestamp = Date.now();
             
@@ -28,13 +28,14 @@
                 'match3.js',
                 'match3-progression.js',
                 'town-engine.js',
+                'squad-engine.js',
                 'combat-dom.js',
                 'combat.js'
             ];
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Все модули v0.9.4 успешно загружены в память.");
+                    console.log("КХАМАЧ: Все модули v0.9.6 успешно загружены в память.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -84,7 +85,7 @@
             </div>
             
             <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v0.9.4-BETA</div>
+            <div id="game-version" class="version-footer">v0.9.6-BETA</div>
         </div>
 
         <!-- ================= ОКНО ВЫБОРА ДРАКОНА ================= -->
@@ -191,5 +192,3 @@
         </div>
 
     </div>
-</body>
-</html>
