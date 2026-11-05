@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.18)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ВЕРНУЛИ МАГА! - v0.6.0-beta.19)
    ========================================================================== */
 
-const GAME_VERSION = "v0.6.0-beta.18";
+const GAME_VERSION = "v0.6.0-beta.19";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -22,7 +22,7 @@ let combatData = {
     ]
 };
 
-let match3BoardData = [];
+let match3BoardData =;
 let selectedCell = null;
 
 // Тексты правил и справочника рун
@@ -128,6 +128,8 @@ function setupMenuListeners() {
     if (leaveCombatBtn) {
         leaveCombatBtn.addEventListener('click', () => {
             if (confirm("Вы уверены, что хотите сбежать из рейда?")) {
+                // ВЫКЛЮЧАЕМ музыку при побеге из боя в меню
+                if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
                 showScreen('main-menu');
             }
         });
@@ -145,7 +147,7 @@ function setupCombatHelpListeners() {
             
             const helpScreen = document.getElementById('combat-help-screen');
             if (helpScreen) {
-                helpScreen.style.display = 'flex'; // Показываем оверлей при нажатии на ❓
+                helpScreen.style.display = 'flex';
             }
         });
     }
@@ -154,7 +156,7 @@ function setupCombatHelpListeners() {
         closeCombatHelpBtn.addEventListener('click', () => {
             const helpScreen = document.getElementById('combat-help-screen');
             if (helpScreen) {
-                helpScreen.style.display = 'none'; // Полностью убираем оверлей при закрытии
+                helpScreen.style.display = 'none';
             }
         });
     }
