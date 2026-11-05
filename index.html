@@ -3,16 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Жесткий барьер против кэширования на уровне мета-тегов страниц -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
-    <link rel="stylesheet" href="styles.css?v=v0.7.5">
+    <script>
+        // ДИНАМИЧЕСКИЙ АВТОЗАГРУЗЧИК CACHE BUSTING (v0.7.6-BETA)
+        (function() {
+            const timestamp = Date.now(); // Генерирует уникальный хвост времени в миллисекундах
+            
+            // 1. Принудительно инжектим стили
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'styles.css?t=' + timestamp;
+            document.head.appendChild(link);
+
+            // 2. Строгий порядок асинхронной очереди загрузки JS-модулей
+            const scripts = [
+                'game.js',
+                'background.js',
+                'audio-engine.js',
+                'match3-fx.js',
+                'match3-input.js',
+                'match3.js',
+                'combat.js'
+            ];
+
+            function loadScript(index) {
+                if (index >= scripts.length) return;
+                const script = document.createElement('script');
+                script.src = scripts[index] + '?t=' + timestamp;
+                script.async = false; // Сохраняем строгую готическую иерархию подключения
+                script.onload = function() { loadScript(index + 1); };
+                document.body.appendChild(script);
+            }
+
+            // Запускаем инжекцию после загрузки разметки DOM
+            window.addEventListener('DOMContentLoaded', function() {
+                loadScript(0);
+            });
+        })();
+    </script>
 </head>
 <body>
+    <!-- Холст для искр костра -->
     <canvas id="bg-canvas"></canvas>
 
+    <!-- Общий контейнер интерфейса -->
     <div id="game-interface">
         
         <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
@@ -35,7 +72,8 @@
                 <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
             </div>
             
-            <div id="game-version" class="version-footer">v0.7.5-BETA</div>
+            <!-- Индикатор текущей актуальной версии -->
+            <div id="game-version" class="version-footer">v0.7.6-BETA</div>
         </div>
 
         <!-- ================= ЭКРАН СПРАВКИ МЕНЮ ================= -->
@@ -101,14 +139,5 @@
         </div>
 
     </div>
-
-    <!-- Защита от кэша: все модули подключены с версионными метками v0.7.5 -->
-    <script src="game.js?v=v0.7.5"></script>
-    <script src="background.js?v=v0.7.5"></script>
-    <script src="audio-engine.js?v=v0.7.5"></script>
-    <script src="match3-fx.js?v=v0.7.5"></script>
-    <script src="match3-input.js?v=v0.7.5"></script>
-    <script src="match3.js?v=v0.7.5"></script>
-    <script src="combat.js?v=v0.7.5"></script>
 </body>
 </html>
