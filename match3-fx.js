@@ -1,210 +1,210 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ЖИВЫХ ЭФФЕКТОВ (AUDIO, HAPTIC, PARTICLES) (v0.6.0-beta.19)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК РЕЙДОВ (v0.6.0-beta.19)
    ========================================================================== */
 
-let audioCtx = null;
-let musicInterval = null; // Интервал для фонового музыкального секвенсора
+function buildDragonDOM() {
+    const raidZone = document.getElementById('dragon-raid-zone');
+    if (!raidZone) return;
 
-// Цветовая карта магических искр под каждый элемент камня
-const FX_RUNE_COLORS = {
-    '🔥': { primary: '#ff4500', secondary: '#ffaa00' }, // Огонь (Пламенно-красный)
-    '🛡️': { primary: '#4a90e2', secondary: '#b8d8ff' }, // Защита (Лазурно-голубой)
-    '💚': { primary: '#2ecc71', secondary: '#a3e4d7' }, // Лечение (Изумрудно-зеленый)
-    '⚡️': { primary: '#f1c40f', secondary: '#f9e79f' }, // Молния (Ярко-желтый)
-    '💀': { primary: '#9b59b6', secondary: '#ebdef0' }  // Смерть (Магический фиолетовый)
-};
+    raidZone.innerHTML = '';
 
-function initAudioContext() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const container = document.createElement('div');
+    container.className = 'dragon-container';
+
+    const model = document.createElement('div');
+    model.id = 'dragon-model';
+    model.className = 'dragon-idle';
+    model.innerText = '🐉';
+    model.style.fontSize = '70px';
+    model.style.display = 'flex';
+    model.style.alignItems = 'center';
+    model.style.justifyContent = 'center';
+
+    const fireFx = document.createElement('div');
+    fireFx.id = 'dragon-fire-fx';
+    fireFx.className = 'fire-breath-fx';
+
+    container.appendChild(model);
+    container.appendChild(fireFx);
+    raidZone.appendChild(container);
+}
+
+function startCombatSession() {
+    combatData.dragonHP = 1000;
+    combatData.playerAP = 3;
+    combatData.currentRound = 1;
+    combatData.playerShield = 0;
+    combatData.squad.forEach(hero => hero.hp = hero.maxHP);
+    
+    buildDragonDOM();
+    updateCombatInterfaceDOM();
+    
+    // ВКЛЮЧАЕМ фоновую музыку при старте сессии боя
+    if (typeof startBackgroundMusic === 'function') {
+        startBackgroundMusic();
+    }
+    
+    if (typeof initMatch3Board === 'function') {
+        initMatch3Board();
     }
 }
 
-// Запуск легкой, ненавязчивой фоновой музыки (Процедурный эмбиент)
-function startBackgroundMusic() {
-    try {
-        initAudioContext();
-        if (!audioCtx || musicInterval) return;
+function applyRuneCombination(effects) {
+    let totalDamage = (effects['🔥'] * 15) + (effects['⚡️'] * 10);
+    if (totalDamage > 0) {
+        combatData.dragonHP = Math.max(0, combatData.dragonHP - totalDamage);
+    }
+    
+    let totalHeal = effects['💚'] * 8;
+    if (totalHeal > 0) {
+        combatData.squad.forEach(hero => {
+            if (hero.hp > 0) hero.hp = Math.min(hero.maxHP, hero.hp + totalHeal);
+        });
+    }
 
-        // Базовые минорные ноты для создания атмосферы подземелья (в Гц)
-        const baseNotes = [110.00, 130.81, 146.83, 164.81, 196.00]; // A2, C3, D3, E3, G3
-        
-        musicInterval = setInterval(() => {
-            if (!audioCtx || audioCtx.state === 'suspended') return;
-            
-            const now = audioCtx.currentTime;
-            
-            // Выбираем две случайные гармонирующие ноты
-            const note1 = baseNotes[Math.floor(Math.random() * baseNotes.length)];
-            const note2 = baseNotes[Math.floor(Math.random() * baseNotes.length)] * 1.5; // Пятая ступень для объема
-            
-            // Создаем два мягких синусоидальных осциллятора
-            [note1, note2].forEach((freq, idx) => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, now);
-                
-                // Делаем звук очень тихим и вкрадчивым, чтобы не утомлял
-                const volume = idx === 0 ? 0.02 : 0.01;
-                
-                gain.gain.setValueAtTime(0, now);
-                gain.gain.linearRampToValueAtTime(volume, now + 1.5); // Плавная атака
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 4.5); // Длинное затухание
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                
-                osc.start(now);
-                osc.stop(now + 4.6);
-            });
-            
-        }, 4000); // Новые аккорды звучат каждые 4 секунды
-    } catch (e) {
-        console.warn("Фоновое аудио ожидает клика пользователя.", e);
+    let totalShieldGain = effects['🛡️'] * 12;
+    if (totalShieldGain > 0) {
+        combatData.playerShield += totalShieldGain;
+    }
+    
+    updateCombatInterfaceDOM();
+    checkBattleResolution();
+}
+
+function usePlayerActionPoint() {
+    combatData.playerAP--;
+    updateCombatInterfaceDOM();
+    
+    if (combatData.playerAP <= 0) {
+        setTimeout(executeDragonTurnAI, 800);
     }
 }
 
-// Остановка фоновой музыки
-function stopBackgroundMusic() {
-    if (musicInterval) {
-        clearInterval(musicInterval);
-        musicInterval = null;
-    }
-}
+function damageSquadWithShieldAbsorption(incomingDamage, hitAll = false) {
+    let currentDamage = incomingDamage;
 
-// Воспроизведение звуков перемещения или уникальных взрывов под каждую руну
-function playMatch3Sound(type) {
-    try {
-        initAudioContext();
-        if (!audioCtx || audioCtx.state === 'suspended') return;
-        
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        
-        const now = audioCtx.currentTime;
-        
-        if (type === 'swap') {
-            // Короткий тихий щелчок скольжения рун
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(280, now);
-            osc.frequency.exponentialRampToValueAtTime(550, now + 0.08);
-            gain.gain.setValueAtTime(0.1, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-            osc.start(now);
-            osc.stop(now + 0.08);
-        } else if (type === 'intro') {
-            // Кристальный перезвон поля на старте
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(520, now);
-            osc.frequency.exponentialRampToValueAtTime(850, now + 0.12);
-            gain.gain.setValueAtTime(0.04, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-            osc.start(now);
-            osc.stop(now + 0.12);
+    if (combatData.playerShield > 0) {
+        if (combatData.playerShield >= currentDamage) {
+            combatData.playerShield -= currentDamage;
+            currentDamage = 0;
         } else {
-            // УНИКАЛЬНЫЕ ПРОЦЕДУРНЫЕ ЗВУКИ ПОД КАЖДЫЙ ТИП РУНЫ
-            switch(type) {
-                case '🔥': // Огонь: Низкий плотный взрывной хлопок
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(140, now);
-                    osc.frequency.linearRampToValueAtTime(40, now + 0.25);
-                    gain.gain.setValueAtTime(0.25, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                    break;
-                    
-                case '⚡️': // Молния: Высокочастотный резкий разряд электричества
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(800, now);
-                    osc.frequency.linearRampToValueAtTime(150, now + 0.18);
-                    // Добавляем звуковую модуляцию "треска" через случайность
-                    osc.frequency.setValueAtTime(600, now + 0.05);
-                    gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
-                    break;
-                    
-                case '🛡️': // Защита: Звонкий кристальный металлический отскок брони
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(440, now);
-                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
-                    gain.gain.setValueAtTime(0.18, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-                    break;
-                    
-                case '💚': // Жизнь: Волшебный мягкий восходящий лечащий перелив
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(330, now);
-                    osc.frequency.exponentialRampToValueAtTime(660, now + 0.22);
-                    gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
-                    break;
-                    
-                case '💀': // Смерть: Тягучий, зловещий низкочастотный гул
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(90, now);
-                    osc.frequency.linearRampToValueAtTime(30, now + 0.3);
-                    gain.gain.setValueAtTime(0.22, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                    break;
-                    
-                default:
-                    // Резервный базовый звук взрыва
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(150, now);
-                    osc.frequency.linearRampToValueAtTime(50, now + 0.2);
-                    gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-            }
-            osc.start(now);
-            osc.stop(now + 0.3);
+            currentDamage -= combatData.playerShield;
+            combatData.playerShield = 0;
         }
-    } catch (e) {
-        console.warn("Аудио-эффект заблокирован политикой браузера.", e);
+    }
+
+    if (currentDamage > 0) {
+        if (hitAll) {
+            combatData.squad.forEach(hero => {
+                hero.hp = Math.max(0, hero.hp - currentDamage);
+            });
+        } else {
+            let aliveHeroes = combatData.squad.filter(h => h.hp > 0);
+            if (aliveHeroes.length > 0) {
+                let target = aliveHeroes[Math.floor(Math.random() * aliveHeroes.length)];
+                target.hp = Math.max(0, target.hp - currentDamage);
+            }
+        }
     }
 }
 
-// Вызов мобильной виброотдачи
-function triggerMatch3Haptic(ms) {
-    if (navigator.vibrate) {
-        navigator.vibrate(ms);
+function executeDragonTurnAI() {
+    if (combatData.dragonHP <= 0) return;
+
+    const dragonModel = document.getElementById('dragon-model');
+    const fireFx = document.getElementById('dragon-fire-fx');
+
+    if (dragonModel) {
+        dragonModel.classList.remove('dragon-idle');
+        dragonModel.classList.add('dragon-attacking');
+    }
+
+    if (combatData.currentRound % 3 === 0) {
+        if (fireFx) fireFx.classList.add('active');
+        damageSquadWithShieldAbsorption(35, true);
+    } else {
+        damageSquadWithShieldAbsorption(20, false);
+    }
+
+    updateCombatInterfaceDOM();
+    
+    setTimeout(() => {
+        if (dragonModel) {
+            dragonModel.classList.remove('dragon-attacking');
+            dragonModel.classList.add('dragon-idle');
+        }
+        if (fireFx) {
+            fireFx.classList.remove('active');
+        }
+        
+        combatData.currentRound++;
+        combatData.playerAP = combatData.playerMaxAP;
+        updateCombatInterfaceDOM();
+        checkBattleResolution();
+    }, 1500);
+}
+
+function updateCombatInterfaceDOM() {
+    const hpBar = document.getElementById('boss-hp-bar');
+    const hpText = document.getElementById('boss-hp-text');
+    if (hpBar && hpText) {
+        let pct = (combatData.dragonHP / combatData.dragonMaxHP) * 100;
+        hpBar.style.width = pct + '%';
+        hpText.innerText = `${combatData.dragonHP} / ${combatData.dragonMaxHP}`;
+    }
+    
+    const roundDisp = document.getElementById('combat-round-display');
+    const apDisp = document.getElementById('combat-ap-display');
+    if (roundDisp) roundDisp.innerText = `Раунд: ${combatData.currentRound}`;
+    if (apDisp) apDisp.innerText = `Очки Действия: ${combatData.playerAP} / ${combatData.playerMaxAP}`;
+    
+    const shieldDisp = document.getElementById('combat-shield-display');
+    if (shieldDisp) {
+        if (combatData.playerShield > 0) {
+            shieldDisp.style.display = 'block';
+            shieldDisp.innerText = `🛡️ Защита отряда: +${combatData.playerShield}`;
+        } else {
+            shieldDisp.style.display = 'none';
+        }
+    }
+    
+    const squadMatrix = document.getElementById('squad-matrix');
+    if (squadMatrix) {
+        squadMatrix.innerHTML = '';
+        combatData.squad.forEach(hero => {
+            const badge = document.createElement('div');
+            badge.style.display = 'flex';
+            badge.style.alignItems = 'center';
+            badge.style.gap = '4px';
+            badge.style.background = 'rgba(30, 25, 20, 0.9)';
+            badge.style.border = '1px solid #8a7350';
+            badge.style.padding = '3px 8px';
+            badge.style.borderRadius = '12px';
+            badge.style.fontSize = '12px';
+            badge.style.color = hero.hp <= 0 ? '#555' : '#fff';
+            badge.style.opacity = hero.hp <= 0 ? '0.5' : '1';
+            
+            badge.innerHTML = `
+                <span>${hero.icon}</span>
+                <span style="font-weight:bold;">${hero.hp}</span>
+                <span style="color:#8a7350; font-size:10px;">/${hero.maxHP}</span>
+            `;
+            squadMatrix.appendChild(badge);
+        });
     }
 }
 
-// Генератор умных разноцветных искр (Полностью привязан к цветам рун)
-function spawnRuneExplosionSparks(r, c, runeType) {
-    const boardContainer = document.getElementById('match3-board-container');
-    const cellEl = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
-    if (!boardContainer || !cellEl) return;
-    
-    const startX = cellEl.offsetLeft + cellEl.offsetWidth / 2;
-    const startY = cellEl.offsetTop + cellEl.offsetHeight / 2;
-    
-    // ИСПРАВЛЕНО: Теперь гарантированно вытаскиваются уникальные цвета под каждую руну
-    const colors = FX_RUNE_COLORS[runeType] || { primary: '#ffaa00', secondary: '#ffcc00' };
-    const sparkCount = 8;
-    
-    for (let i = 0; i < sparkCount; i++) {
-        const spark = document.createElement('div');
-        spark.className = 'rune-spark';
-        spark.style.left = `${startX}px`;
-        spark.style.top = `${startY}px`;
-        
-        // Применяем уникальную палитру цветов руны к искрам
-        spark.style.background = colors.secondary;
-        spark.style.boxShadow = `0 0 6px ${colors.primary}, 0 0 12px ${colors.secondary}`;
-        
-        const angle = (i * (360 / sparkCount) + Math.random() * 20) * (Math.PI / 180);
-        const distance = Math.random() * 40 + 25;
-        const dx = Math.cos(angle) * distance;
-        const dy = Math.sin(angle) * distance;
-        
-        spark.style.setProperty('--dx', `${dx}px`);
-        spark.style.setProperty('--dy', `${dy}px`);
-        
-        boardContainer.appendChild(spark);
-        setTimeout(() => spark.remove(), 400);
+function checkBattleResolution() {
+    if (combatData.dragonHP <= 0) {
+        alert("ВЕЛИКАЯ ПОБЕДА! Дракон повержен!");
+        if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
+        showScreen('main-menu');
+    } else {
+        let allDead = combatData.squad.every(hero => hero.hp <= 0);
+        if (allDead) {
+            alert("ОТРЯД ПАЛ!");
+            if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
+            showScreen('main-menu');
+        }
     }
 }
