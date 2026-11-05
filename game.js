@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР И ИНТЕРФЕЙС ПЛОЩАДИ ГОРОДА (v0.8.9-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (РАЗДЕЛЬНЫЙ ГОРОД И СТРОЕНИЯ - v0.9.0-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v0.8.9-BETA";
+const GAME_VERSION = "v0.9.0-BETA";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
@@ -41,6 +41,12 @@ const GAME_TEXTS = {
     `
 };
 
+const MODE_DESCRIPTIONS = {
+    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНИЦА", text: "Священное место, где из костей и чешуи поверженных драконов можно выковывать мифическую экипировку." },
+    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", text: "Здесь вы сможете дистиллировать драконью кровь и варить катализаторы маны." },
+    squad: { title: "👥 КНИГА ЗАКЛИНАНИЙ И ОТРЯД", text: "Военный лагерь. Позволяет повышать уровни героев и открывать новые ультимативные приемы." }
+};
+
 if (document.readyState === 'loading') {
     window.addEventListener('DOMContentLoaded', initDispatcherModule);
 } else {
@@ -60,7 +66,7 @@ function initVersionDisplay() {
 }
 
 function showScreen(screenId) {
-    const screens = ['main-menu', 'dragon-select-screen', 'info-screen', 'mode-desc-screen', 'combat-screen'];
+    const screens = ['main-menu', 'dragon-select-screen', 'info-screen', 'mode-desc-screen', 'town-screen', 'combat-screen'];
     screens.forEach(id => {
         const screenEl = document.getElementById(id);
         if (screenEl) {
@@ -70,12 +76,20 @@ function showScreen(screenId) {
     if (screenId === 'dragon-select-screen' && typeof renderDragonSelectionGrid === 'function') {
         renderDragonSelectionGrid();
     }
-    if (screenId === 'mode-desc-screen') {
+    if (screenId === 'town-screen') {
         renderTownBuildingsList();
     }
-    if (screenId === 'main-menu' || screenId === 'mode-desc-screen') {
+    if (screenId === 'main-menu' || screenId === 'town-screen') {
         if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
     }
+}
+
+function openModeDescription(modeKey) {
+    const modeData = MODE_DESCRIPTIONS[modeKey];
+    if (!modeData) return;
+    document.getElementById('mode-desc-title').innerText = modeData.title;
+    document.getElementById('mode-desc-text').innerHTML = modeData.text;
+    showScreen('mode-desc-screen');
 }
 
 function renderTownBuildingsList() {
@@ -95,7 +109,6 @@ function renderTownBuildingsList() {
 
     buildings.forEach(b => {
         const lvl = typeof getBuildingLevel === 'function' ? getBuildingLevel(b.id) : 0;
-        
         const card = document.createElement('div');
         card.style.background = 'rgba(0,0,0,0.3)';
         card.style.border = '1px solid #4a3e31';
@@ -111,7 +124,7 @@ function renderTownBuildingsList() {
 
         const btn = document.createElement('button');
         btn.className = 'menu-btn';
-        btn.style.padding = '8px';
+        btn.style.padding = '6px';
         btn.style.fontSize = '12px';
 
         if (lvl >= 15) {
@@ -120,14 +133,12 @@ function renderTownBuildingsList() {
         } else {
             btn.innerText = `Улучшить (150 🪙)`;
             if (currentGold < cost) btn.classList.add('disabled');
-            
             btn.addEventListener('click', () => {
                 if (typeof upgradeBuilding === 'function' && upgradeBuilding(b.id)) {
                     renderTownBuildingsList();
                 }
             });
         }
-
         card.appendChild(btn);
         listContainer.appendChild(card);
     });
@@ -143,8 +154,16 @@ function setupMenuListeners() {
     });
     
     document.getElementById('from-info-to-menu-btn').addEventListener('click', () => showScreen('main-menu'));
-    document.getElementById('to-town-btn').addEventListener('click', () => showScreen('mode-desc-screen'));
+    
+    // Возвращаем старые обработчики главного меню
+    document.getElementById('to-forge-btn').addEventListener('click', () => openModeDescription('forge'));
+    document.getElementById('to-alchemy-btn').addEventListener('click', () => openModeDescription('alchemy'));
+    document.getElementById('to-squad-btn').addEventListener('click', () => openModeDescription('squad'));
     document.getElementById('close-mode-desc-btn').addEventListener('click', () => showScreen('main-menu'));
+    
+    // Кнопка города
+    document.getElementById('to-town-btn').addEventListener('click', () => showScreen('town-screen'));
+    document.getElementById('close-town-btn').addEventListener('click', () => showScreen('main-menu'));
 
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
     if (leaveCombatBtn) {
