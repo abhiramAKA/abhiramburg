@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // Автоматический хвостик времени для CSS (обновляется при каждом перезапуске)
         const cacheBusterTime = Date.now();
         const link = document.createElement('link');
         link.rel = 'stylesheet';
@@ -38,7 +37,7 @@
                 <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
             </div>
             
-            <div id="game-version" class="version-footer">v0.6.0-beta.26</div>
+            <div id="game-version" class="version-footer">v0.6.0-beta.27</div>
         </div>
 
         <!-- ================= ЭКРАН КОНТЕКСТНОЙ СПРАВКИ МЕНЮ ================= -->
@@ -101,7 +100,7 @@
 
     </div>
 
-    <!-- Автоматический последовательный загрузчик скриптов с защитой от кэша -->
+    <!-- Последовательный загрузчик с принудительной постобработкой событий -->
     <script>
         (function() {
             const scripts = [
@@ -116,11 +115,16 @@
             const t = Date.now();
             
             function loadScript(index) {
-                if (index >= scripts.length) return;
-                const src = `${scripts[index]}?t=${t}`;
+                if (index >= scripts.length) {
+                    // Все файлы загружены, гарантированно запускаем инициализацию интерфейса
+                    if (typeof runGameCoreInitialization === 'function') {
+                        runGameCoreInitialization();
+                    }
+                    return;
+                }
                 const script = document.createElement('script');
-                script.src = src;
-                script.async = false; // Сохраняем строгий порядок инициализации движка
+                script.src = `${scripts[index]}?t=${t}`;
+                script.async = false;
                 script.onload = () => loadScript(index + 1);
                 document.body.appendChild(script);
             }
