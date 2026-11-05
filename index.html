@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>КХАМАЧ — Восхождение Рейдов</title>
     <script>
-        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.8.5-BETA)
+        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.8.6-BETA)
         (function() {
             const timestamp = Date.now();
             
@@ -27,13 +27,14 @@
                 'match3-input.js',
                 'match3.js',
                 'match3-progression.js',
+                'town-engine.js',
                 'combat-dom.js',
                 'combat.js'
             ];
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Все модули v0.8.5 успешно загружены в память.");
+                    console.log("КХАМАЧ: Все модули v0.8.6 успешно загружены в память.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -62,6 +63,10 @@
         <div id="main-menu" class="game-window" style="display: flex;">
             <h1>КХАМАЧ</h1>
             <span class="subtitle">Рейды в Горнило Рун</span>
+            
+            <!-- Отображение золота игрока в меню города -->
+            <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🪙 0 Золота</div>
+            
             <p>Древний Дракон пробудился в недрах подземелья. Соберите свой отряд, заряжайте шкалы суперсил через камни стихий и сокрушите огнедышащую тварь в пошаговой тактической битве.</p>
             
             <div class="menu-row">
@@ -79,7 +84,7 @@
             </div>
             
             <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v0.8.5-BETA</div>
+            <div id="game-version" class="version-footer">v0.8.6-BETA</div>
         </div>
 
         <!-- ================= ОКНО ВЫБОРА ДРАКОНА ================= -->
@@ -103,174 +108,21 @@
             <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
         </div>
 
-        <!-- ================= ОКНО ОПИСАНИЯ РЕЖИМОВ ================= -->
+        <!-- ================= ОКНО СТРОИТЕЛЬСТВА В ГОРОДЕ ================= -->
         <div id="mode-desc-screen" class="game-window" style="display: none;">
             <h2 id="mode-desc-title">РЕЖИМ ИГРЫ</h2>
-            <span class="subtitle">Грядущие расширения</span>
+            <span class="subtitle">Градостроительство</span>
+            
+            <!-- Счетчик золота внутри режима -->
+            <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 15px;">🪙 0 Золота</div>
+            
             <p id="mode-desc-text">Описание режима загружается...</p>
-            <button id="close-mode-desc-btn" class="menu-btn back-btn">Назад в меню</button>
-        </div>
-
-        <!-- ================= СПРАВОЧНИК В БОЮ ================= -->
-        <div id="combat-help-screen" class="game-window combat-help-popup" style="display: none;">
-            <div class="combat-help-content">
-                <h2>ГОРНИЛО РУН</h2>
-                <span class="subtitle">Справочник Сил</span>
-                <div id="combat-help-text-container"></div>
-                <button id="close-combat-help-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в бой</button>
-            </div>
-        </div>
-
-        <!-- ================= БОЕВОЙ ЭКРАН ================= -->
-        <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 10px 15px;">
-            <div id="dragon-raid-zone" style="position: relative;"></div>
-
-            <!-- ПАНЕЛЬ БОССА -->
-            <div id="boss-panel" style="margin-bottom: 4px; padding: 4px; position: relative;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                    <div id="boss-name" style="font-size: 12px; margin: 0;">ДРАКОН НЕКРОСМУТ</div>
-                    <button id="combat-help-btn" class="info-btn" style="width: 24px; height: 24px; font-size: 12px; box-shadow: none; border-radius: 4px;">❓</button>
-                </div>
-                <div class="hp-bar-container" style="height: 10px;">
-                    <div id="boss-hp-bar" class="hp-bar" style="width: 100%;"></div>
-                    <div id="boss-hp-text" style="font-size: 9px; line-height: 10px;">120 / 120</div>
-                </div>
-            </div>
-
-            <!-- СТАТУС РАУНДА -->
-            <div id="battle-status-panel" style="margin-bottom: 4px; padding: 4px; font-size: 11px; flex-direction: column; align-items: stretch; gap: 2px;">
-                <div style="display: flex; justify-content: space-between; width: 100%;">
-                    <div id="combat-round-display">Раунд: 1</div>
-                    <div id="combat-ap-display" style="color: #ffd700; font-weight: bold;">Сделайте ход на поле!</div>
-                </div>
-                <div id="combat-shield-display" style="display: none; text-align: center; color: #4a90e2; font-weight: bold; font-size: 11px; border-top: 1px dashed #3a3025; padding-top: 2px;">🛡️ Танк спровоцировал дракона!</div>
-            </div>
-
-            <!-- ИНТЕРФЕЙС ОТРЯДА -->
-            <div id="squad-matrix" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 6px;"></div>
-
-            <!-- ИГРОВОЕ ПОЛЕ MATCH-3 -->
-            <div id="match3-board-container" class="match3-board"></div>
-
-            <div style="height: 38px; margin-top: 8px; display: flex; width: 100%;">
-                <button id="leave-combat-btn" class="menu-btn back-btn" style="margin: 0; padding: 0; font-size: 13px; height: 100%;">Сбежать</button>
-            </div>
-        </div>
-
-    </div>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>КХАМАЧ — Восхождение Рейдов</title>
-    <script>
-        // ИСПРАВЛЕННЫЙ АСИНХРОННЫЙ АВТОЗАГРУЗЧИК (v0.8.3-BETA)
-        (function() {
-            const timestamp = Date.now();
             
-            // Загружаем CSS со сбросом кэша
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = 'styles.css?t=' + timestamp;
-            document.head.appendChild(link);
-
-            // Очередь скриптов для строгого последовательного подключения
-            const scripts = [
-                'game.js',
-                'background.js',
-                'audio-engine.js',
-                'match3-fx.js',
-                'match3-input.js',
-                'match3.js',
-                'match3-progression.js',
-                'combat-dom.js',
-                'combat.js'
-            ];
-
-            function injectScript(index) {
-                if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Все модули v0.8.3 успешно загружены в память.");
-                    if (typeof initDispatcherModule === 'function') {
-                        initDispatcherModule();
-                    }
-                    return;
-                }
-                
-                const script = document.createElement('script');
-                script.src = scripts[index] + '?t=' + timestamp;
-                script.async = false; 
-                script.onload = function() { injectScript(index + 1); };
-                document.head.appendChild(script);
-            }
-
-            injectScript(0);
-        })();
-    </script>
-</head>
-<body>
-    <!-- Холст для искр костра -->
-    <canvas id="bg-canvas"></canvas>
-
-    <!-- Общий контейнер интерфейса -->
-    <div id="game-interface">
-        
-        <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
-        <div id="main-menu" class="game-window" style="display: flex;">
-            <h1>КХАМАЧ</h1>
-            <span class="subtitle">Рейды в Горнило Рун</span>
-            <p>Древний Дракон пробудился в недрах подземелья. Соберите свой отряд, заряжайте шкалы суперсил через камни стихий и сокрушите огнедышащую тварь в пошаговой тактической битве.</p>
+            <!-- Кнопка действия "Построить" -->
+            <button id="build-upgrade-btn" class="menu-btn" style="margin-bottom: 10px; background: linear-gradient(to bottom, #1d421e 0%, #102411 100%); border-color: #316e34; color: #aae6ab;">ПОСТРОИТЬ</button>
             
-            <div class="menu-row">
-                <button id="to-combat-btn" class="menu-btn">В БОЙ</button>
-                <button id="info-btn" class="info-btn">❓</button>
-            </div>
-            <div class="menu-row">
-                <button id="to-forge-btn" class="menu-btn">⚒️ Кузница</button>
-            </div>
-            <div class="menu-row">
-                <button id="to-alchemy-btn" class="menu-btn">🧪 Алхимия</button>
-            </div>
-            <div class="menu-row">
-                <button id="to-squad-btn" class="menu-btn">👥 Отряд</button>
-            </div>
-            
-            <!-- Контрольная метка версии сборки -->
-            <div id="game-version" class="version-footer">v0.8.3-BETA</div>
-        </div>
-
-        <!-- ================= ОКНО ВЫБОРА ДРАКОНА ================= -->
-        <div id="dragon-select-screen" class="game-window" style="display: none;">
-            <h2>ДОСКА ОБЪЯВЛЕНИЙ ОХОТЫ</h2>
-            <span class="subtitle">24 Бестиария Горнила</span>
-            <p>Выберите доступного дракона. Следующий уровень угрозы откроется только после полной ликвидации текущей цели.</p>
-            
-            <div id="dragon-levels-grid" style="max-height: 40vh; overflow-y: auto; padding: 4px; margin-bottom: 15px; border: 1px solid #4a3e31; background: rgba(0,0,0,0.4); border-radius: 4px;">
-                <!-- Кнопки полностью генерируются динамически через match3-progression.js -->
-            </div>
-            
-            <button id="from-select-to-menu-btn" class="menu-btn back-btn" style="margin-top: 0; width: 100%;">Назад в меню</button>
-        </div>
-
-        <!-- ================= ЭКРАН СПРАВКИ МЕНЮ ================= -->
-        <div id="info-screen" class="game-window" style="display: none;">
-            <h2>КОНТЕКСТНАЯ СПРАВКА</h2>
-            <span class="subtitle">Базовый Инструктаж</span>
-            <p id="info-screen-text">Загрузка правил...</p>
-            <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
-        </div>
-
-        <!-- ================= ОКНО ОПИСАНИЯ РЕЖИМОВ ================= -->
-        <div id="mode-desc-screen" class="game-window" style="display: none;">
-            h2 id="mode-desc-title">РЕЖИМ ИГРЫ</h2>
-            <span class="subtitle">Грядущие расширения</span>
-            <p id="mode-desc-text">Описание режима загружается...</p>
-            <button id="close-mode-desc-btn" class="menu-btn back-btn">Назад в меню</button>
+            <!-- Кнопка возвращения на площадь города -->
+            <button id="close-mode-desc-btn" class="menu-btn back-btn" style="margin-top: 5px; width: 100%;">В город</button>
         </div>
 
         <!-- ================= СПРАВОЧНИК В БОЮ ================= -->
