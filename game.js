@@ -1,12 +1,12 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР (ОБНОВЛЕНИЕ СПРАВКИ И ГОРОДА - v0.8.6-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР И СТРУКТУРА БОНУСОВ ЗДАНbackgroundИЙ (v0.8.8-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v0.8.6-BETA";
+const GAME_VERSION = "v0.8.8-BETA";
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
-const RUNE_TYPES = ['🔥', '🛡️', '🎯', '💚'];
+const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚']; // Заменено на молнию
 
 let combatData = {
     dragonHP: 120, 
@@ -19,7 +19,7 @@ let combatData = {
     squad: [
         { id: "tank", name: "Танк", hp: 150, maxHP: 150, sp: 0, maxSP: 100, icon: "🛡️", color: "#4a90e2" },
         { id: "damage", name: "Дамагер", hp: 90, maxHP: 90, sp: 0, maxSP: 100, icon: "🔥", color: "#ff4500" },
-        { id: "archer", name: "Лучник", hp: 100, maxHP: 100, sp: 0, maxSP: 100, icon: "🎯", color: "#f1c40f" },
+        { id: "archer", name: "Лучник", hp: 100, maxHP: 100, sp: 0, maxSP: 100, icon: "⚡", color: "#f1c40f" }, // Заменено на молнию
         { id: "mage", name: "Маг", hp: 80, maxHP: 80, sp: 0, maxSP: 100, icon: "💚", color: "#2ecc71" }
     ]
 };
@@ -35,17 +35,17 @@ const GAME_TEXTS = {
         <p>Земля содрогается от поступи древнего змея. Сражайся на поле боя, и каждая собранная триада камней обрушит ярость вашего отряда на врага.</p>
     `,
     combatHelp: `
-        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🛡️ Суперсила Танка:</strong> Провокация. Дракон в следующем раунде гарантированно ударит только Танка. Наносит 25 ед. урона.</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🛡️ Суперсила Танка:</strong> Провокация (Дракон атакует Танка). Наносит базовый урон (+урон Кузницы).</p>
         <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🔥 Суперсила Дамагера:</strong> Наносит Дракону сокрушительный чистый урон (120 ед.).</p>
-        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>🎯 Суперсила Лучника:</strong> Ослепляет Дракона — следующая атака босса нанесет на 50% меньше урона! Наносит 25 ед. урона.</p>
-        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>💚 Суперсила Мага:</strong> Моментально исцеляет здоровье (+25 HP) сразу всему отряду. Наносит 25 ед. урона.</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>⚡ Суперсила Лучника:</strong> Ослепляет Дракона (урон босса -50%). Наносит базовый урон (+урон Кузницы).</p>
+        <p style="text-align: left; font-size: 13px; margin-bottom: 8px;"><strong>💚 Суперсила Мага:</strong> Моментально исцеляет здоровье (+25 HP) всему отряду. Наносит базовый урон (+урон Кузницы).</p>
     `
 };
 
 const MODE_DESCRIPTIONS = {
-    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНИЦА", text: "Священное место, где из костей и чешуи поверженных драконов можно выковывать мифическую экипировку." },
-    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", text: "Здесь вы сможете дистиллировать драконью кровь и варить катализаторы маны." },
-    squad: { title: "👥 КНИГА ЗАКЛИНАНИЙ И ОТРЯД", text: "Военный лагерь. Позволяет повышать уровни героев и открывать новые ультимативные приемы." }
+    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНИЦА (До 15 ур.)", text: "Священное место ковки оружия. Каждый уровень здания увеличивает урон суперсил Танка, Лучника и Мага на <strong>+5 единиц</strong>." },
+    alchemy: { title: "🧪 БАШНЯ АЛХИМИКА (До 15 ур.)", text: "Здесь дистиллируют ману и харизму. Каждые 5 уровней строения навсегда увеличивают лимит ваших очков ходов (Макс. AP) в битвах на +1 ходов." },
+    squad: { title: "👥 ВОЕННЫЙ ЛАГЕРЬ ЦИТАДЕЛИ", text: "Военный штаб планирования. Каждый уровень здания увеличивает максимальный запас здоровья (Max HP) всех героев отряда на <strong>+10 единиц</strong>." }
 };
 
 if (document.readyState === 'loading') {
@@ -74,7 +74,6 @@ function showScreen(screenId) {
             screenEl.style.display = (id === screenId) ? 'flex' : 'none';
         }
     });
-    
     if (screenId === 'dragon-select-screen' && typeof renderDragonSelectionGrid === 'function') {
         renderDragonSelectionGrid();
     }
@@ -103,8 +102,14 @@ function updateBuildButtonDOM() {
     const currentGold = typeof getPlayerGold === 'function' ? getPlayerGold() : 0;
     const cost = 150;
     
+    if (lvl >= 15) {
+        buildBtn.innerText = `МАКСИМАЛЬНЫЙ УРОВЕНЬ (Ур. 15)`;
+        buildBtn.classList.add('disabled');
+        return;
+    }
+
     if (lvl === 0) {
-        buildBtn.innerText = `ПОСТРОИТЬ (Цена: 150 🪙)`;
+        buildBtn.innerText = `ПОСТРОИТЬ УР. 1 (Цена: 150 🪙)`;
     } else {
         buildBtn.innerText = `УЛУЧШИТЬ ДО УР. ${lvl + 1} (Цена: 150 🪙)`;
     }
@@ -126,7 +131,6 @@ function setupMenuListeners() {
     });
     
     document.getElementById('from-info-to-menu-btn').addEventListener('click', () => showScreen('main-menu'));
-    
     document.getElementById('to-forge-btn').addEventListener('click', () => openModeDescription('forge'));
     document.getElementById('to-alchemy-btn').addEventListener('click', () => openModeDescription('alchemy'));
     document.getElementById('to-squad-btn').addEventListener('click', () => openModeDescription('squad'));
@@ -135,9 +139,12 @@ function setupMenuListeners() {
     const buildUpgradeBtn = document.getElementById('build-upgrade-btn');
     if (buildUpgradeBtn) {
         buildUpgradeBtn.addEventListener('click', () => {
+            const currentLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel(activeModeKey) : 0;
+            if (currentLvl >= 15) return;
+
             if (typeof upgradeBuilding === 'function' && upgradeBuilding(activeModeKey)) {
                 updateBuildButtonDOM();
-                alert("Строительство успешно завершено!");
+                alert("Строительство успешно завершено! Бонусы обновлены.");
             } else {
                 alert("Недостаточно золота для постройки! Сражайтесь с драконами.");
             }
@@ -160,7 +167,6 @@ function setupCombatHelpListeners() {
         document.getElementById('combat-help-text-container').innerHTML = GAME_TEXTS.combatHelp;
         document.getElementById('combat-help-screen').style.display = 'flex';
     });
-    
     document.getElementById('close-combat-help-btn').addEventListener('click', () => {
         document.getElementById('combat-help-screen').style.display = 'none';
     });
