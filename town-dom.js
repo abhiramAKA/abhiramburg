@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ГЛОБАЛЬНАЯ ГРАФИЧЕСКАЯ ФАБРИКА ГОРОДСКИХ ИНТЕРФЕЙСОВ (v4.5.1-BETA)
+   КХАМАЧ — ГЛОБАЛЬНАЯ ГРАФИЧЕСКАЯ ФАБРИКА ГОРОДСКИХ ИНТЕРФЕЙСОВ (v4.6.0-BETA)
    ========================================================================== */
 
 function injectTownScreensDOM() {
@@ -19,12 +19,12 @@ function injectTownScreensDOM() {
         <!-- ================= ЭКРАН СПРАВКИ МЕНЮ ================= -->
         <div id="info-screen" class="game-window" style="display: none;">
             <h2>КОНТЕКСТНАЯ СПРАВКА</h2>
-            <span class="subtitle">Базовый Инструктаж</span>
+            <span class="subtitle">Base Инструктаж</span>
             <p id="info-screen-text">Загрузка правил...</p>
             <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
         </div>
 
-        <!-- ================= ОКНО ОПИСАНИЙ ЗДАНnetwork С КРЕСТИКОМ В ШАПКЕ ================= -->
+        <!-- ================= ОКНО ОПИСАНИЙ ЗДАНИЙ И РЕЖИМОВ ================= -->
         <div id="mode-desc-screen" class="game-window" style="display: none; padding: 25px 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; width: 100%;">
                 <h2 id="mode-desc-title" style="margin: 0; font-size: 20px;">РЕЖИМ ИГРЫ</h2>
@@ -52,9 +52,9 @@ function injectTownScreensDOM() {
             <button id="close-settings-btn" class="menu-btn back-btn" style="width: 100%;">Сохранить настройки</button>
         </div>
 
-        <!-- ================= ОКНО СКЛАДА ================= -->
+        <!-- ================= ОКНО СКЛАДА ЦИТАДЕЛИ (ПЕРЕНЕСЕНО СЮДА) ================= -->
         <div id="storage-screen" class="game-window" style="display: none;">
-            <h2>СКЛАД ЦИТАДЕЛИ</h2>
+            <h2>СКЛАД ХРАНИЛИЩА</h2>
             <span class="subtitle">Учет Ресурсов и Трофеев</span>
             <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🪙 0 Золота</div>
             <div id="storage-resources-list" style="background: rgba(0, 0, 0, 0.4); border: 1px double #544432; padding: 15px; margin-bottom: 15px; border-radius: 4px; text-align: left;"></div>
@@ -85,9 +85,19 @@ function injectTownScreensDOM() {
                 <h2>СОСТОЯНИЕ ОТРЯДА</h2>
                 <span class="subtitle">Стихийное Истощение сил</span>
                 <div id="individual-fatigue-list-container" style="display: flex; flex-direction: column; gap: 10px; text-align: left; background: rgba(0,0,0,0.5); padding: 15px; border: 1px solid #544432; border-radius: 4px; font-size: 14px;"></div>
-                <p style="font-size: 11px; margin-top: 12px; color: #8a7350; line-height: 1.4; text-align: center;">Бойцы пассивно сбрасывают усталость во время отдыха, когда не выполняют поручения города.</p>
                 <button id="close-fatigue-screen-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в меню</button>
             </div>
+        </div>
+
+        <!-- ================= НОВОЕ ОКНО МОДЕРНИЗАЦИИ ВОИНОВ ОТРЯДА ================= -->
+        <div id="squad-heroes-spec-screen" class="game-window" style="display: none; padding: 20px 15px;">
+            <h2>ВАШ ОТРЯД</h2>
+            <span class="subtitle" style="margin-bottom: 10px;">Прокачка и тренировка бойцов</span>
+            <!-- Сетка карточек персонажей -->
+            <div id="heroes-upgrade-list-container" style="display: flex; flex-direction: column; gap: 6px; max-height: 52vh; overflow-y: auto; padding-right: 2px;">
+                <!-- Динамический инжект карточек из town-engine.js -->
+            </div>
+            <button id="close-heroes-spec-btn" class="menu-btn back-btn" style="width: 100%; margin-top: 10px; padding: 12px;">Назад в меню</button>
         </div>
 
         <!-- ================= ОКНО ИНСТРУКТАЖА ПЕРВОГО БОЯ ================= -->
