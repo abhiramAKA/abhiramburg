@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНАЯ ЛОГИКА СОВПАДЕНИЙ И КОМБО (ВЫНЕСЕН - v4.9.3-BETA)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНАЯ ЛОГИКА СОВПАДЕНИЙ И КОМБО (РЕДАКЦИЯ - v4.9.8-BETA)
    ========================================================================== */
 
 function checkMatchesAndExecute() {
@@ -76,6 +76,10 @@ function checkMatchesAndExecute() {
             }
         }
         
+        if (detectedAdvancedCombo && !localStorage.getItem('khamach_combo_tut_done')) {
+            combatData.pendingComboTutorial = true;
+        }
+        
         setTimeout(() => {
             for (let c = 0; c < BOARD_COLS; c++) {
                 let emptyRow = BOARD_ROWS - 1;
@@ -100,23 +104,11 @@ function checkMatchesAndExecute() {
             setTimeout(() => {
                 let chainMatched = checkMatchesAndExecute();
                 
-                if (detectedAdvancedCombo && !localStorage.getItem('khamach_combo_tut_done')) {
-                    isBoardLocked = true;
-                    const comboScreen = document.getElementById('combat-combo-tutorial-screen');
-                    const closeComboBtn = document.getElementById('close-combat-combo-tutorial-btn');
-                    if (comboScreen && closeComboBtn) {
-                        comboScreen.style.display = 'flex';
-                        closeComboBtn.onclick = function() {
-                            localStorage.setItem('khamach_combo_tut_done', 'true');
-                            comboScreen.style.display = 'none';
-                            isBoardLocked = false;
-                        };
+                // Поле полностью успокоилось — каскадов больше нет!
+                if (!chainMatched) {
+                    if (typeof usePlayerActionPoint === 'function') {
+                        usePlayerActionPoint(); 
                     }
-                }
-
-                const comboScreenActive = document.getElementById('combat-combo-tutorial-screen')?.style.display === 'flex';
-                if (!chainMatched && combatData.playerAP > 0 && !comboScreenActive) {
-                    isBoardLocked = false;
                 }
             }, 350);
         }, 220);
