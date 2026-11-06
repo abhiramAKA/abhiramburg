@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.9.0-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.9.12-BETA)
    ========================================================================== */
 
 window.closeModeDescriptionUnified = function() {
@@ -77,12 +77,17 @@ function setupAllGameListeners() {
     }
     
     const toClansBtn = document.getElementById('to-clans-btn');
-    if (toClansBtn) toClansBtn.onclick = function() { if (typeof openModeDescription === 'function') openModeDescription('clans'); };
+    if (toClansBtn) {
+        toClansBtn.onclick = function() {
+            if (typeof openModeDescription === 'function') {
+                openModeDescription('clans');
+            }
+        };
+    }
     
     const toSquadBtn = document.getElementById('to-squad-btn');
     if (toSquadBtn) toSquadBtn.onclick = function() { showScreen('squad-screen'); };
 
-    // Кнопка Военного Лагеря вызывает меню взаимодействия с бойцами
     const toStorageBtn = document.getElementById('to-storage-btn');
     if (toStorageBtn) {
         toStorageBtn.onclick = function() {
