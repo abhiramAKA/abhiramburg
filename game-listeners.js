@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v3.9.2-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v3.9.5-BETA)
    ========================================================================== */
 
 function setupAllGameListeners() {
@@ -58,13 +58,8 @@ function setupAllGameListeners() {
         });
     }
     
-    // Глобальное исправление: Клик на "Кланы" на главном экране
     const toClansBtn = document.getElementById('to-clans-btn');
-    if (toClansBtn) {
-        toClansBtn.addEventListener('click', () => { 
-            if (typeof openModeDescription === 'function') openModeDescription('clans'); 
-        });
-    }
+    if (toClansBtn) toClansBtn.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('clans'); });
     
     const toSquadBtn = document.getElementById('to-squad-btn');
     if (toSquadBtn) toSquadBtn.addEventListener('click', () => showScreen('squad-screen'));
@@ -95,24 +90,16 @@ function setupAllGameListeners() {
     const closeModeDesc = document.getElementById('close-mode-desc-btn');
     if (closeModeDesc) closeModeDesc.addEventListener('click', () => showScreen('main-menu'));
 
-    const leaveCombatBtn = document.getElementById('leave-combat-btn');
-    if (leaveCombatBtn) {
-        leaveCombatBtn.addEventListener('click', () => {
-            if (confirm("Вы уверены, что хотите сбежать из рейда?")) showScreen('main-menu');
-        });
-    }
-
     const clearChronicleBtn = document.getElementById('clear-chronicle-btn');
     if (clearChronicleBtn) {
         clearChronicleBtn.addEventListener('click', () => {
             if (confirm("Очистить все записи в Летописи Цитадели?")) {
-                localStorage.setItem('khamach_chronicle_logs', JSON.stringify([]));
+                localStorage.setItem('khamach_chronicle_logs', JSON.stringify());
                 if (typeof renderChronicleDOM === 'function') renderChronicleDOM();
             }
         });
     }
 
-    // Клик на интерактивное золото в шапке
     const goldDisplayLink = document.getElementById('main-gold-display');
     if (goldDisplayLink) {
         goldDisplayLink.addEventListener('click', () => {
@@ -121,7 +108,6 @@ function setupAllGameListeners() {
         });
     }
 
-    // Клик на интерактивный значок 🥱
     const teamFatigueBtn = document.getElementById('team-fatigue-display');
     if (teamFatigueBtn) {
         teamFatigueBtn.addEventListener('click', () => {
@@ -137,5 +123,44 @@ function setupAllGameListeners() {
             const screen = document.getElementById('squad-fatigue-screen');
             if (screen) screen.style.display = 'none';
         });
+    }
+
+    // Слушатель закрытия окна первого приветствия
+    const closeWelcomeBtn = document.getElementById('close-welcome-palace-btn');
+    if (closeWelcomeBtn) {
+        closeWelcomeBtn.addEventListener('click', () => {
+            localStorage.setItem('khamach_welcome_done', 'true');
+            const screen = document.getElementById('welcome-palace-screen');
+            if (screen) screen.style.display = 'none';
+        });
+    }
+
+    // Инициализация принудительных боевых кнопок
+    setupCombatHelpListeners();
+}
+
+function setupCombatHelpListeners() {
+    const combatHelpBtn = document.getElementById('combat-help-btn');
+    if (combatHelpBtn) {
+        combatHelpBtn.onclick = function() {
+            const container = document.getElementById('combat-help-text-container');
+            if (container) container.innerHTML = typeof getTownText === 'function' ? getTownText('combatHelp') : '';
+            const screen = document.getElementById('combat-help-screen');
+            if (screen) screen.style.display = 'flex';
+        };
+    }
+    const closeCombatHelpBtn = document.getElementById('close-combat-help-btn');
+    if (closeCombatHelpBtn) {
+        closeCombatHelpBtn.onclick = function() {
+            const screen = document.getElementById('combat-help-screen');
+            if (screen) screen.style.display = 'none';
+        };
+    }
+    // Обработчик верхнего крестика ❌ побега из рейда
+    const escapeTopBtn = document.getElementById('combat-escape-top-btn');
+    if (escapeTopBtn) {
+        escapeTopBtn.onclick = function() {
+            if (confirm("Вы уверены, что хотите сбежать из рейда?")) showScreen('main-menu');
+        };
     }
 }
