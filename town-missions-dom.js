@@ -1,11 +1,25 @@
 /* ==========================================================================
-   КХАМАЧ — ГРАФИЧЕСКИЙ МОДУЛЬ ИНТЕРФЕЙСА ПОРУЧЕНИЙ (ОБНОВЛЕН - v1.1.0-BETA)
+   КХАМАЧ — ГРАФИЧЕСКИЙ МОДУЛЬ ИНТЕРФЕЙСА ПОРУЧЕНИЙ (ОБНОВЛЕН - v1.2.0-BETA)
    ========================================================================== */
 
 function renderMissionsDOM() {
     const container = document.getElementById('missions-list-container');
     if (!container) return;
     container.innerHTML = '';
+    
+    // Блокировка поручений до первого боя с драконом
+    if (!localStorage.getItem('khamach_combat_tutorial_done')) {
+        container.innerHTML = `
+            <div style="padding: 20px 10px; text-align: center; color: #ff6666; font-family: 'Georgia', serif;">
+                <div style="font-size: 32px; margin-bottom: 10px;">📜</div>
+                <div style="font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; color: #e6c280;">Доска пуста</div>
+                <p style="font-size: 12px; line-height: 1.5; color: #bfae96; margin: 0;">
+                    Горожане Абхирамбурга еще не знают вашего имени. Проявите отвагу и совершите свой <strong>первый боевой рейд против Дракона</strong>, чтобы открыть доступ к городским поручениям!
+                </p>
+            </div>
+        `;
+        return;
+    }
     
     let activeMissionsJSON = localStorage.getItem('khamach_active_triad_ids');
     let currentTriad = [];
@@ -14,7 +28,6 @@ function renderMissionsDOM() {
         try { currentTriad = JSON.parse(activeMissionsJSON); } catch(e) { currentTriad = []; }
     }
     
-    // Формируем пул строго из 2-х случайных поручений взамен 3-х
     if (!currentTriad || currentTriad.length !== 2) {
         currentTriad = [];
         let tempPool = [...CITY_MISSIONS_POOL];
@@ -27,7 +40,6 @@ function renderMissionsDOM() {
         localStorage.setItem('khamach_active_triad_ids', JSON.stringify(currentTriad));
     }
     
-    // Проверяем, есть ли ХОТЬ ОДНО выполняющееся поручение в Цитадели
     let globalMissionActive = currentTriad.some(mId => localStorage.getItem(`khamach_mission_active_${mId}`) === 'true');
     
     const costData = getCurrentResetResourceCost();
@@ -74,12 +86,10 @@ function renderMissionsDOM() {
                 actionHTML = `<div style="color:#ff4500; font-weight:bold; font-size:11px; text-align:center; padding:4px; border:1px dashed #ff4500;">⏱️ В пути: ${min.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}</div>`;
             }
         } else if (globalMissionActive) {
-            // Если в Цитадели уже запущен один контракт, блокируем остальные кнопки
             actionHTML = `<button class="menu-btn disabled" style="padding:4px; font-size:11px;" disabled>Очередь занята</button>`;
         } else if (isHeroBusy) {
             actionHTML = `<button class="menu-btn disabled" style="padding:4px; font-size:11px;" disabled>Боец занят</button>`;
         } else {
-            // На кнопке оставляем строго значок стихии без слов
             actionHTML = `<button class="menu-btn" style="padding:4px; font-size:14px; background:#1d3a1e; height:28px;" onclick="startMission('${mission.id}', '${mission.allowedHero}', ${calculatedReward})">Отправить ${mission.heroIcon}</button>`;
         }
         
