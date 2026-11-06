@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v4.9.9-BETA)
+   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v4.9.13-BETA)
    ========================================================================== */
 
 function setupSquadInterfaceListeners() {
@@ -16,9 +16,12 @@ function setupSquadInterfaceListeners() {
     if (closeBtn) closeBtn.onclick = function() { showScreen('main-menu'); };
 
     const globalBuyBtn = document.getElementById('mode-buy-btn');
-    if (globalBuyBtn) globalBuyBtn.onclick = function() { executeUnifiedBuildingTransaction(); };
+    if (globalBuyBtn) {
+        globalBuyBtn.onclick = function() {
+            executeUnifiedBuildingTransaction();
+        };
+    }
 
-    // Новая кнопка справки цен Цитадели
     const squadHelpBtn = document.getElementById('squad-help-btn');
     if (squadHelpBtn) {
         squadHelpBtn.onclick = function() {
