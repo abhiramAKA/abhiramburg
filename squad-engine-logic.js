@@ -1,43 +1,43 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ МОДУЛЬ ТРЕНИРОВОК И ПОТОЛКА ОТРЯДА (v4.7.4-BETA)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ МОДУЛЬ ТРЕНИРОВОК И ПОТОЛКА ОТРЯДА (v4.9.5-BETA)
    ========================================================================== */
 
 const SQUAD_HERO_LORE = {
     tank: {
         name: "🛡️ Гарнизон",
-        title: "🛡️ ЗАЩИТНИК (РЫЦАРЬ СМЕРТИ)",
+        title: "🛡️ ЗАЩИТНИК",
         resourceKey: "plasma",
         resourceIcon: "🌋",
-        resourceName: "Плазма дракона",
-        statBonus: "+20 Max HP за уровень",
-        lore: "Латные рукавицы намертво сжимают ростовой щит из костей. Он — несокрушимая скала Абхирамбурга, принимающая на себя всю ярость извергаемого драконьего пламени."
+        resourceName: "Плазма",
+        statBonus: "+20 Max HP",
+        lore: "Латные рукавицы намертво сжимают ростовой щит из костей. Он — несокрушимая скала Абхирамбурга."
     },
     damage: {
         name: "🔥 Казармы",
-        title: "🔥 ВОИН (БЕРСЕРК ГОРНИЛА)",
+        title: "🔥 ВОИН",
         resourceKey: "blood",
         resourceIcon: "🩸",
-        resourceName: "Кровь дракона",
-        statBonus: "+15 к урону ультимейта за уровень",
-        lore: "Одержимый первобытным гневом рун Кхамача, этот безумный боец не признает защиты. Его парные топоры жаждут лишь одного — вскрыть хребет древнего змея."
+        resourceName: "Кровь",
+        statBonus: "+15 урон ульты",
+        lore: "Одержимый первобытным гневом рун Кхамача, этот боец его парные топоры жаждут лишь крови."
     },
     archer: {
         name: "⚡ Стрельбище",
-        title: "⚡ СТРЕЛОК (СЛЕДОПЫТ ГРОЗЫ)",
+        title: "⚡ СТРЕЛОК",
         resourceKey: "scale",
         resourceIcon: "🪶",
-        resourceName: "Чешую дракона",
-        statBonus: "+10 к урону молнии за уровень",
-        lore: "Его стрелы оперены чешуей драконов света, а тетива поет песнь молний. Метким выстрелом Следопыт способен ослепить чудовище."
+        resourceName: "Чешуя",
+        statBonus: "+10 урон молнии",
+        lore: "Его стрелы оперены чешуей драконов света, а тетива поет песнь разрушительных молний."
     },
     damage_mage: {
         name: "💚 Обитель",
-        title: "💚 МАГ (ОТРИЦАТЕЛЬ СМЕРТИ)",
+        title: "💚 МАГ",
         resourceKey: "tears",
         resourceIcon: "💧",
-        resourceName: "Слезы дракона",
-        statBonus: "+5 к групповому хилу за уровень",
-        lore: "Тайные эссенции жизни текут по его венам. Хранитель Обители балансирует на грани миров, собирая изумрудные руны, чтобы залечить раны отряда."
+        resourceName: "Слезы",
+        statBonus: "+5 к масс-хилу",
+        lore: "Тайные эссенции жизни текут по его венам. Хранитель Обители балансирует на грани миров."
     }
 };
 
@@ -49,8 +49,8 @@ window.updateStorageScreenDOM = function() {
     if (!listContainer) return;
     
     listContainer.innerHTML = `
-        <div style="color: #e6c280; font-weight: bold; border-bottom: 1px solid #544432; padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase; font-size: 13px;">📜 Материалы Хранилища:</div>
-        <div style="display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 14px; color: #cdb38c;">
+        <div style="color: #e6c280; font-weight: bold; border-bottom: 1px solid #544432; padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase; font-size: 12px;">📜 Материалы Хранилища:</div>
+        <div style="display: grid; grid-template-columns: 1fr; gap: 6px; font-size: 13px; color: #cdb38c;">
             <div>🌋 Плазма древнего змея: <strong style="color:#fff; float: right;">${window.getPlayerResource('plasma')} шт.</strong></div>
             <div>🩸 Первородная кровь дракона: <strong style="color:#fff; float: right;">${window.getPlayerResource('blood')} шт.</strong></div>
             <div>🪶 Плотная чешуя ящера: <strong style="color:#fff; float: right;">${window.getPlayerResource('scale')} шт.</strong></div>
@@ -63,6 +63,11 @@ window.updateSquadHeroesSpecScreenDOM = function() {
     const container = document.getElementById('heroes-upgrade-list-container');
     if (!container) return;
     container.innerHTML = '';
+    
+    // Перевод контейнера на двухколоночную компактную сетку без скролла
+    container.style.display = "grid";
+    container.style.gridTemplateColumns = "1fr 1fr";
+    container.style.gap = "6px";
     
     const heroesData = [
         { id: "tank" },
@@ -81,33 +86,36 @@ window.updateSquadHeroesSpecScreenDOM = function() {
         const currentRes = typeof window.getPlayerResource === 'function' ? window.getPlayerResource(lore.resourceKey) : 0;
         
         const card = document.createElement('div');
-        card.style.background = "rgba(25, 20, 18, 0.9)";
+        card.style.background = "rgba(25, 20, 18, 0.95)";
         card.style.border = "1px solid #544432";
-        card.style.padding = "8px 10px";
+        card.style.padding = "6px 8px";
         card.style.borderRadius = "3px";
         card.style.display = "flex";
         card.style.flexDirection = "column";
+        card.style.justifyContent = "between";
         card.style.gap = "2px";
+        card.style.boxSizing = "border-box";
         
         let actionBtnHTML = '';
         if (!isPurchased) {
-            actionBtnHTML = `<button class="menu-btn disabled" style="padding:4px; font-size:11px;" disabled>Здание не построено</button>`;
+            actionBtnHTML = `<button class="menu-btn disabled" style="padding:2px; font-size:10px;" disabled>Нет здания</button>`;
         } else if (heroLvl >= 15) {
-            actionBtnHTML = `<button class="menu-btn disabled" style="padding:4px; font-size:11px;" disabled>МАКС. УРОВЕНЬ</button>`;
+            actionBtnHTML = `<button class="menu-btn disabled" style="padding:2px; font-size:10px;" disabled>МАКС УР</button>`;
         } else if (heroLvl >= buildLvl) {
-            actionBtnHTML = `<button class="menu-btn disabled" style="padding:4px; font-size:11px; background:#421e1e; border-color:#6e3131;" disabled>Требуется ${lore.name} ${heroLvl + 1} ур.</button>`;
+            actionBtnHTML = `<button class="menu-btn disabled" style="padding:2px; font-size:9px; background:#421e1e; border-color:#6e3131; line-height:1.1;" disabled>Нужен ${buildLvl + 1} ур. здания</button>`;
         } else {
-            actionBtnHTML = `<button class="menu-btn" style="padding:4px; font-size:11px; background:#1d3a1e; height:24px;" onclick="window.triggerHeroLevelUpgrade('${h.id}')">Повысить уровень</button>`;
+            actionBtnHTML = `<button class="menu-btn" style="padding:2px; font-size:10px; background:#1d3a1e; height:22px; line-height:1;" onclick="window.triggerHeroLevelUpgrade('${h.id}')">Прокачать</button>`;
         }
         
         card.innerHTML = `
-            <div style="display:flex; justify-content:space-between; font-weight:bold; color:#e6c280; font-size:12px;">
+            <div style="display:flex; justify-content:space-between; font-weight:bold; color:#e6c280; font-size:11px;">
                 <span>${lore.title}</span>
-                <span style="color:#ffd700;">Ур. ${heroLvl} <span style="font-weight:normal; font-size:10px; color:#8a7350;">(Потолок: ${buildLvl})</span></span>
+                <span style="color:#ffd700;">Ур. ${heroLvl}</span>
             </div>
-            <div style="font-size:11px; color:#cdb38c; line-height:1.2;">Эффект: <span style="color:#2ecc71;">${lore.statBonus}</span></div>
-            <div style="font-size:11px; color:#bfae96;">Цена: 1 шт. ${lore.resourceIcon} ${lore.resourceName} (Есть: ${currentRes})</div>
-            <div style="margin-top:2px;">${actionBtnHTML}</div>
+            <div style="font-size:9px; color:#8a7350; margin-top:-2px; margin-bottom:2px;">Лимит: ${buildLvl}</div>
+            <div style="font-size:10px; color:#2ecc71; line-height:1.1;">Бонус: ${lore.statBonus}</div>
+            <div style="font-size:10px; color:#cdb38c; margin-bottom:3px;">Доступно: ${lore.resourceIcon} ${currentRes}</div>
+            <div style="margin-top:auto;">${actionBtnHTML}</div>
         `;
         container.appendChild(card);
     });
@@ -115,10 +123,10 @@ window.updateSquadHeroesSpecScreenDOM = function() {
 
 window.triggerHeroLevelUpgrade = function(heroId) {
     const heroesData = {
-        tank: { resKey: "plasma", name: "🌋 Плазму" },
-        damage: { resKey: "blood", name: "🩸 Кровь" },
-        archer: { resKey: "scale", name: "🪶 Чешую" },
-        mage: { resKey: "tears", name: "💧 Слезы" }
+        tank: { resKey: "plasma" },
+        damage: { resKey: "blood" },
+        archer: { resKey: "scale" },
+        mage: { resKey: "tears" }
     };
     const target = heroesData[heroId];
     if (!target) return;
@@ -127,7 +135,7 @@ window.triggerHeroLevelUpgrade = function(heroId) {
     const heroLvl = window.getHeroLevel(heroId);
 
     if (currentRes < 1) {
-        alert(`Недостаточно трофеев! Требуется 1 шт. ${target.name}.`);
+        alert(`Недостаточно трофеев! Требуется 1 шт.`);
         return;
     }
 
