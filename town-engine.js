@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.9.1-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.9.3-BETA)
    ========================================================================== */
 
 const INLINE_TOWN_TEXTS = {
@@ -23,6 +23,52 @@ window.addPlayerGold = function(amount) { localStorage.setItem('khamach_gold', w
 window.getPlayerResource = function(key) { return parseInt(localStorage.getItem(`khamach_res_${key}`) || '0'); };
 window.addPlayerResource = function(key, amount) { localStorage.setItem(`khamach_res_${key}`, window.getPlayerResource(key) + amount); if (typeof window.updateTownGoldDisplay === 'function') window.updateTownGoldDisplay(); };
 window.isBuildingPurchased = function(id) { return localStorage.getItem(`khamach_purchased_${id}`) === 'true'; };
+
+window.openModeDescription = function(id) {
+    window.currentOpenedModeKey = id;
+    const config = INLINE_MODE_DESCRIPTIONS[id];
+    if (!config) return;
+
+    const titleEl = document.getElementById('mode-desc-title');
+    const textEl = document.getElementById('mode-desc-text');
+    const buyBtn = document.getElementById('mode-buy-btn');
+
+    if (titleEl) titleEl.innerText = config.title;
+
+    if (textEl) {
+        if (config.isLocked) {
+            textEl.innerHTML = config.reqText;
+            if (buyBtn) buyBtn.style.display = 'none';
+        } else if (config.isHero) {
+            const isPurchased = localStorage.getItem(`khamach_squad_build_${id}`) === 'true';
+            const bldLvl = parseInt(localStorage.getItem(`khamach_build_${id}`) || '0');
+            const data = typeof SQUAD_HERO_LORE !== 'undefined' ? SQUAD_HERO_LORE[id === 'mage' ? 'damage_mage' : id] : null;
+            
+            let loreText = data ? data.lore : "Помещение для тренировки бойцов Цитадели.";
+            let bonusText = data ? data.statBonus : "";
+
+            if (!isPurchased) {
+                textEl.innerHTML = `${loreText}<br><br><span style='color:#cdb38c;'>Эффект: ${bonusText}</span>`;
+                if (buyBtn) { buyBtn.style.display = 'block'; buyBtn.innerText = `⚒️ ПОСТРОИТЬ (🪙 100)`; }
+            } else if (bldLvl >= 15) {
+                textEl.innerHTML = `${loreText}<br><br><span style='color:#2ecc71;'>Максимальный уровень модернизации [15] достигнут!</span>`;
+                if (buyBtn) buyBtn.style.display = 'none';
+            } else {
+                textEl.innerHTML = `${loreText}<br><br><span style='color:#ffd700;'>Текущий уровень строения: ${bldLvl}</span><br>Эффект: ${bonusText}`;
+                if (buyBtn) { buyBtn.style.display = 'block'; buyBtn.innerText = `⚒️ УЛУЧШИТЬ ДО УР. ${bldLvl + 1} (🪙 150)`; }
+            }
+        } else {
+            // Обычные постройки (например, Алхимия)
+            const purchased = window.isBuildingPurchased(id);
+            textEl.innerHTML = purchased ? config.activeText : config.buyText;
+            if (buyBtn) {
+                buyBtn.style.display = purchased ? 'none' : 'block';
+                buyBtn.innerText = `⚒️ ПОСТРОИТЬ (🪙 100)`;
+            }
+        }
+    }
+    showScreen('mode-desc-screen');
+};
 
 window.buyTownBuilding = function(id) {
     const cost = 100; 
