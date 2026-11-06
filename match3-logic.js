@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНАЯ ЛОГИКА СОВПАДЕНИЙ И КОМБО (ВЫНЕСЕН - v4.8.9-BETA)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНАЯ ЛОГИКА СОВПАДЕНИЙ И КОМБО (ВЫНЕСЕН - v4.9.3-BETA)
    ========================================================================== */
 
 function checkMatchesAndExecute() {
@@ -100,7 +100,6 @@ function checkMatchesAndExecute() {
             setTimeout(() => {
                 let chainMatched = checkMatchesAndExecute();
                 
-                // Переносим вызов модалки СТРОГО сюда — когда все анимации падений завершены
                 if (detectedAdvancedCombo && !localStorage.getItem('khamach_combo_tut_done')) {
                     isBoardLocked = true;
                     const comboScreen = document.getElementById('combat-combo-tutorial-screen');
