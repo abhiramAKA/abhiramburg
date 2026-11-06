@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v4.8.8-BETA)
+   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v4.9.1-BETA)
    ========================================================================== */
 
 function setupSquadInterfaceListeners() {
@@ -40,7 +40,7 @@ function executeUnifiedBuildingTransaction() {
             alert("Здание успешно построено!");
             if (typeof openModeDescription === 'function') openModeDescription(currentOpenedModeKey);
         } else {
-            alert("Недостаточно золота в казне Цитадели! Требуется 100 🪙.");
+            alert("Недостаточно средств! Требуется 🪙 100.");
         }
         return;
     }
@@ -61,7 +61,7 @@ function executeUnifiedBuildingTransaction() {
             alert(`Строительство успешно завершено! Открыт лимит прокачки бойца до 1 уровня.`);
             if (typeof openModeDescription === 'function') openModeDescription(id);
         } else {
-            alert(`Недостаточно золота! Требуется 100 🪙.`);
+            alert(`Недостаточно средств! Требуется 🪙 100.`);
         }
         return;
     }
@@ -73,7 +73,7 @@ function executeUnifiedBuildingTransaction() {
     const costUpgradeGold = 150;
 
     if (currentGold < costUpgradeGold) {
-        alert(`Недостаточно золота! Требуется 150 🪙 для апгрейда здания.`);
+        alert(`Недостаточно средств! Требуется 🪙 150.`);
         return;
     }
 
@@ -82,7 +82,7 @@ function executeUnifiedBuildingTransaction() {
 
     if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
     updateSquadVisualStyles();
-    alert(`Здание Цитадели модернизировано! Потолок прокачки воина расширен до ${nextBldLvl} ур.`);
+    alert(`Здание модернизировано! Потолок прокачки воина расширен до ${nextBldLvl} ур.`);
     if (typeof openModeDescription === 'function') openModeDescription(id);
 }
 
@@ -102,7 +102,7 @@ function updateSquadVisualStyles() {
             btn.style.background = "linear-gradient(to bottom, #1d3a1e 0%, #0f2110 100%)";
             btn.style.borderColor = "#316e34";
         } else {
-            btn.innerText = `${data.name} (Построить: 100 🪙)`;
+            btn.innerText = `${data.name} (🪙 100)`;
             btn.style.background = "";
             btn.style.borderColor = "";
         }
