@@ -9,11 +9,11 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            const timestamp = Date.now();
+            const versionMarker = "v3.2.7";
             
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = 'styles.css?t=' + timestamp;
+            link.href = 'styles.css?v=' + versionMarker;
             document.head.appendChild(link);
 
             const scripts = [
@@ -36,7 +36,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Модули v3.2.5 успешно загружены.");
+                    console.log("КХАМАЧ: Модули v3.2.7 успешно загружены.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -49,7 +49,7 @@
                 }
                 
                 const script = document.createElement('script');
-                script.src = scripts[index] + '?t=' + timestamp;
+                script.src = scripts[index] + '?v=' + versionMarker;
                 script.async = false; 
                 script.onload = function() { injectScript(index + 1); };
                 document.head.appendChild(script);
@@ -83,7 +83,7 @@
                 <button id="to-storage-btn" class="menu-btn">📦 Склад Цитадели</button>
             </div>
             <div class="menu-row">
-                <button id="to-missions-btn" class="menu-btn">📜 Городские Поручения</button>
+                <button id="to-missions-btn" class="menu-btn">📜 Городское Поручение</button>
             </div>
             <div class="menu-row">
                 <button id="to-alchemy-btn" class="menu-btn">🧪 Лаборатория</button>
@@ -95,7 +95,7 @@
                 <button id="to-clans-btn" class="menu-btn">🛡️ Кланы</button>
             </div>
             
-            <div id="game-version" class="version-footer">v3.2.5-BETA</div>
+            <div id="game-version" class="version-footer">v3.2.7-BETA</div>
         </div>
 
         <!-- ================= ОКНО АУДИО-МИКШЕРА И НАСТРОЕК ================= -->
@@ -111,19 +111,6 @@
                 <div style="margin-bottom: 10px;">
                     <label>🎇 Громкость Эффектов:</label>
                     <input type="range" id="volume-fx-slider" min="0" max="100" value="70" style="width: 100%; accent-color: #ffd700;">
-                </div>
-                <div style="margin-bottom: 8px; border-top: 1px dashed #4a3f2c; padding-top: 8px; color: #8a7350; font-weight: bold; font-size: 11px; text-transform: uppercase;">🎛️ ЭКВАЛАЙЗЕР ЧАСТОТ ЭМБИЕНТА</div>
-                <div style="margin-bottom: 8px;">
-                    <label>🪵 Низкие частоты (Бас):</label>
-                    <input type="range" id="eq-low-slider" min="-12" max="12" value="0" style="width: 100%; accent-color: #e6c280;">
-                </div>
-                <div style="margin-bottom: 8px;">
-                    <label>🔮 Средние частоты (Тело):</label>
-                    <input type="range" id="eq-mid-slider" min="-12" max="12" value="3" style="width: 100%; accent-color: #e6c280;">
-                </div>
-                <div style="margin-bottom: 8px;">
-                    <label>✨ Высокие частоты (Блеск):</label>
-                    <input type="range" id="eq-high-slider" min="-12" max="12" value="0" style="width: 100%; accent-color: #e6c280;">
                 </div>
             </div>
             
@@ -141,7 +128,7 @@
 
         <!-- ================= ОКНО ГОРОДСКИХ ПОРУЧЕНИЙ ================= -->
         <div id="missions-screen" class="game-window" style="display: none;">
-            <h2>ГОРОДСКИЕ СМЕНЫ</h2>
+            <h2>ГОРОДСКОЕ ПОРУЧЕНИЕ</h2>
             <span class="subtitle">Доска Объявлений Абхирамбурга</span>
             <p style="font-size: 12px; margin-bottom: 10px;">Отправляйте воинов помогать горожанам. Занятые бойцы не смогут принять участие в битве с драконом!</p>
             <div id="missions-list-container" style="max-height: 45vh; overflow-y: auto; padding: 4px; margin-bottom: 15px; border: 1px solid #4a3e31; background: rgba(0,0,0,0.4); border-radius: 4px; display: flex; flex-direction: column; gap: 8px;"></div>
