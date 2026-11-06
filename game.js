@@ -1,8 +1,7 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.9.12-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.9.13-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v4.9.12-BETA";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
@@ -62,7 +61,7 @@ function initDispatcherModule() {
     if (typeof injectSquadInterfaceDOM === 'function') injectSquadInterfaceDOM();
     
     const versionElement = document.getElementById('game-version');
-    if (versionElement) versionElement.innerText = GAME_VERSION;
+    if (versionElement && window.GAME_VERSION) versionElement.innerText = window.GAME_VERSION;
 
     if (typeof setupAllGameListeners === 'function') {
         try { setupAllGameListeners(); } catch (e) { console.error("Ошибка навешивания листенеров:", e); }
