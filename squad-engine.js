@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v4.3.0-BETA)
+   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v4.4.0-BETA)
    ========================================================================== */
 
 function setupSquadInterfaceListeners() {
@@ -7,7 +7,10 @@ function setupSquadInterfaceListeners() {
     ids.forEach(id => {
         const btn = document.getElementById(`upgrade-${id}-btn`);
         if (btn) {
-            btn.addEventListener('click', () => handleSquadHeroClick(id));
+            // Перенаправление на единый готический менеджер описаний
+            btn.addEventListener('click', () => {
+                if (typeof openModeDescription === 'function') openModeDescription(id);
+            });
         }
     });
     
@@ -22,25 +25,34 @@ function setupSquadInterfaceListeners() {
         closeBtn.addEventListener('click', () => showScreen('main-menu'));
     }
 
-    const squadGoldLink = document.getElementById('squad-gold-display');
-    if (squadGoldLink) {
-        squadGoldLink.addEventListener('click', () => {
-            if (typeof updateStorageScreenDOM === 'function') updateStorageScreenDOM();
-            showScreen('storage-screen');
-        });
-    }
-
-    const squadFatigueLink = document.getElementById('squad-fatigue-display');
-    if (squadFatigueLink) {
-        squadFatigueLink.addEventListener('click', () => {
-            if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
-            const screen = document.getElementById('squad-fatigue-screen');
-            if (screen) screen.style.display = 'flex';
-        });
+    // Перехват единой интерактивной кнопки покупки внутри окна описаний
+    const globalBuyBtn = document.getElementById('mode-buy-btn');
+    if (globalBuyBtn) {
+        globalBuyBtn.onclick = function() {
+            executeUnifiedBuildingTransaction();
+        };
     }
 }
 
-function handleSquadHeroClick(id) {
+function executeUnifiedBuildingTransaction() {
+    if (!currentOpenedModeKey) return;
+    
+    // Проверяем, является ли открытый ключ персонажем отряда
+    const isHeroType = ['tank', 'damage', 'archer', 'mage'].includes(currentOpenedModeKey);
+    
+    if (!isHeroType) {
+        // Стандартный выкуп Лаборатории Алхимии
+        if (typeof buyTownBuilding === 'function' && buyTownBuilding(currentOpenedModeKey)) {
+            alert("Здание успешно выкуплено и введено в эксплуатацию!");
+            if (typeof openModeDescription === 'function') openModeDescription(currentOpenedModeKey);
+        } else {
+            alert("Недостаточно золота в казне Цитадели! Требуется 100 🪙.");
+        }
+        return;
+    }
+
+    // Логика покупки/прокачки воинов через окно
+    const id = currentOpenedModeKey;
     const loreKey = id === 'mage' ? 'damage_mage' : id;
     const data = SQUAD_HERO_LORE[loreKey];
     if (!data) return;
@@ -50,72 +62,48 @@ function handleSquadHeroClick(id) {
 
     if (!isPurchased) {
         const costBuild = 100;
-        const textConfirm = `${data.title}\n\n${data.lore}\n\nЖелаете мгновенно возвести постройку «${data.name}» за 100 🪙 золота?`;
-        
-        if (confirm(textConfirm)) {
-            if (currentGold >= costBuild) {
-                localStorage.setItem('khamach_gold', currentGold - costBuild);
-                localStorage.setItem(`khamach_squad_build_${id}`, 'true');
-                localStorage.setItem(`khamach_build_${id}`, 0);
-                
-                if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
-                updateSquadVisualStyles();
-                alert(`Строительство постройки «${data.name}» успешно завершено! Открыты тренировки бойца.`);
-            } else {
-                alert(`Недостаточно золота в казне! Требуется 🪙 ${costBuild}.`);
-            }
+        if (currentGold >= costBuild) {
+            localStorage.setItem('khamach_gold', currentGold - costBuild);
+            localStorage.setItem(`khamach_squad_build_${id}`, 'true');
+            localStorage.setItem(`khamach_build_${id}`, 0);
+            
+            if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
+            updateSquadVisualStyles();
+            alert(`Строительство постройки «${data.name}» завершено! Боец готов к тренировкам.`);
+            if (typeof openModeDescription === 'function') openModeDescription(id);
+        } else {
+            alert(`Недостаточно золота! Требуется 100 🪙.`);
         }
         return;
     }
 
     const currentLvl = parseInt(localStorage.getItem(`khamach_build_${id}`) || '0');
-    if (currentLvl >= 15) {
-        alert(`${data.title}\n\nДостигнут максимальный уровень тренировок (15 ур)!\nТекущий бонус: ${data.statBonus}`);
+    if (currentLvl >= 15) return;
+
+    const nextLvl = currentLvl + 1;
+    const costUpgradeGold = 150;
+    const currentResource = typeof getPlayerResource === 'function' ? getPlayerResource(data.resourceKey) : 0;
+
+    if (currentGold < costUpgradeGold) {
+        alert(`Недостаточно золота! Требуется 150 🪙.`);
+        return;
+    }
+    if (currentResource < 1) {
+        alert(`Недостаточно трофеев дракона! Требуется 1 шт. ${data.resourceIcon} ${data.resourceName}`);
         return;
     }
 
-    const nextLvl = currentLvl + 1;
-    const costUpgradeGold = 150; 
-    const currentResource = typeof getPlayerResource === 'function' ? getPlayerResource(data.resourceKey) : 0;
+    localStorage.setItem('khamach_gold', currentGold - costUpgradeGold);
+    if (typeof addPlayerResource === 'function') addPlayerResource(data.resourceKey, -1);
+    localStorage.setItem(`khamach_build_${id}`, nextLvl);
 
-    const textUpgrade = `${data.title}\nТекущий уровень: ${currentLvl} из 15\nМодификатор: ${data.statBonus}\n\nХотите повысить уровень бойца до ${nextLvl}-го?\n\nСтоимость тренировки:\n🪙 Золото: ${costUpgradeGold}\n${data.resourceIcon} ${data.resourceName}: 1 шт. (У вас: ${currentResource} шт.)`;
-
-    if (confirm(textUpgrade)) {
-        if (currentGold < costUpgradeGold) {
-            alert(`Недостаточно золота! Требуется 🪙 ${costUpgradeGold}.`);
-            return;
-        }
-        if (currentResource < 1) {
-            alert(`Недостаточно трофеев! Требуется 1 шт. ${data.resourceIcon} ${data.resourceName}. Направляйтесь в боевой рейд!`);
-            return;
-        }
-
-        localStorage.setItem('khamach_gold', currentGold - costUpgradeGold);
-        if (typeof addPlayerResource === 'function') {
-            addPlayerResource(data.resourceKey, -1);
-        }
-        localStorage.setItem(`khamach_build_${id}`, nextLvl);
-
-        if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
-        updateSquadVisualStyles();
-        
-        alert(`Боец успешно прошел тренировку! Текущий уровень: ${nextLvl}.`);
-    }
+    if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
+    updateSquadVisualStyles();
+    alert(`Боец успешно прошел тренировку! Текущий уровень: ${nextLvl}.`);
+    if (typeof openModeDescription === 'function') openModeDescription(id);
 }
 
 function updateSquadVisualStyles() {
-    const tFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_tank') || '0'));
-    const dFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_damage') || '0'));
-    const aFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_archer') || '0'));
-    const mFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_mage') || '0'));
-    const averageFatigue = Math.round((tFat + dFat + aFat + mFat) / 4);
-
-    const sFatEl = document.getElementById('squad-fatigue-display');
-    if (sFatEl) sFatEl.innerHTML = `🥱 ${averageFatigue}%`;
-
-    const sGoldEl = document.getElementById('squad-gold-display');
-    if (sGoldEl && typeof getPlayerGold === 'function') sGoldEl.innerHTML = `🪙 ${getPlayerGold()} Золота`;
-
     const ids = ['tank', 'damage', 'archer', 'mage'];
     ids.forEach(id => {
         const btn = document.getElementById(`upgrade-${id}-btn`);
