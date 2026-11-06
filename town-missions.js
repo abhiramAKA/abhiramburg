@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ АВТОМАТИЧЕСКИХ ТАЙМЕРОВ И ЛЕТОПИСИ (ОБНОВЛЕН - v3.3.0-BETA)
+   КХАМАЧ — МОДУЛЬ АВТОМАТИЧЕСКИХ ТАЙМЕРОВ И ЛЕТОПИСИ (ОБНОВЛЕН - v3.3.1-BETA)
    ========================================================================== */
 
 const CITY_MISSIONS_POOL = [
@@ -13,19 +13,17 @@ const CITY_MISSIONS_POOL = [
     { id: "m_m2", allowedHero: "mage", heroName: "Маг", type: "обычное", duration: "5 мин", durationMs: 300000, reward: 133, text: "Алхимик разлил эссенцию нестабильности. Требуется удерживать рунический контур от взрыва.", title: "Стабилизация лаборатории" }
 ];
 
-// Функция добавления записей в Летопись
 function addChronicleLog(message) {
     let logs = [];
     try {
         logs = JSON.parse(localStorage.getItem('khamach_chronicle_logs') || '[]');
     } catch(e) { logs = []; }
     
-    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    logs.unshift(`[${timeStr}] ${message}`); // Добавляем наверх
-    localStorage.setItem('khamach_chronicle_logs', JSON.stringify(logs.slice(0, 50))); // Храним последние 50
+    const timeStr = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    logs.unshift(`[${timeStr}] ${message}`);
+    localStorage.setItem('khamach_chronicle_logs', JSON.stringify(logs.slice(0, 50)));
 }
 
-// Отрисовка летописи
 function renderChronicleDOM() {
     const container = document.getElementById('chronicle-list-container');
     if (!container) return;
@@ -68,6 +66,7 @@ function renderMissionsDOM() {
     }
     
     const isThisMissionActive = localStorage.getItem(`khamach_mission_active_${currentMission.id}`) === 'true';
+    const isHeroBusy = localStorage.getItem(`khamach_hero_busy_${currentMission.allowedHero}`) === 'true';
     
     const card = document.createElement('div');
     card.style.background = "rgba(25, 20, 18, 0.9)";
@@ -77,6 +76,7 @@ function renderMissionsDOM() {
     card.style.textAlign = "left";
     
     let actionHTML = '';
+    // Исправлено: Полностью исключаем ручные кнопки завершения. Доступен только тикающий автотаймер.
     if (isThisMissionActive) {
         const startTimestamp = parseInt(localStorage.getItem(`khamach_mission_start_${currentMission.id}`) || '0');
         const now = Date.now();
@@ -87,8 +87,10 @@ function renderMissionsDOM() {
             const minutes = Math.floor(remaining / 60000);
             const seconds = Math.floor((remaining % 60000) / 1000);
             const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            actionHTML = `<div style="color: #ff4500; font-weight: bold; font-size: 12px; background: rgba(0,0,0,0.3); padding: 4px 8px; border: 1px dashed #ff4500;">⏱️ Воин занят. Вернется через: ${timeStr}</div>`;
+            actionHTML = `<div style="color: #ff4500; font-weight: bold; font-size: 11px; background: rgba(0,0,0,0.4); padding: 4px 6px; border: 1px dashed #ff4500;">⏱️ В пути: ${timeStr}</div>`;
         }
+    } else if (isHeroBusy) {
+        actionHTML = `<button class="menu-btn disabled" style="padding: 6px; font-size: 11px;" disabled>Герой занят</button>`;
     } else {
         actionHTML = `<button class="menu-btn" style="padding: 6px; font-size: 11px; background: #1d3a1e;" onclick="startMission('${currentMission.id}', '${currentMission.allowedHero}')">Отправить (${currentMission.heroName})</button>`;
     }
@@ -100,7 +102,7 @@ function renderMissionsDOM() {
         </div>
         <div style="font-size: 11px; color: #bfae96; margin: 6px 0; line-height: 1.4;">${currentMission.text}</div>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
-            <span style="font-size: 10px; color: #8a7350;">⏱️ Смена: ${currentMission.duration}</span>
+            <span style="font-size: 10px; color: #8a7350;">⏱️ Время: ${currentMission.duration}</span>
             ${actionHTML}
         </div>
     `;
@@ -115,12 +117,11 @@ window.startMission = function(missionId, heroId) {
     localStorage.setItem(`khamach_mission_active_${missionId}`, 'true');
     localStorage.setItem(`khamach_mission_start_${missionId}`, Date.now().toString());
     
-    addChronicleLog(`ОТПРАВЛЕН: ${mission.heroName} ушел на смену «${mission.title}» на ${mission.duration}.`);
-    alert(`Воин ушел на городское поручение. Через ${mission.duration} он автоматически завершит работу.`);
+    addChronicleLog(`ОТПРАВЛЕН: ${mission.heroName} ушел на поручение «${mission.title}» (${mission.duration}).`);
+    alert(`Воин успешно ушел на смену. Он автоматически вернется через ${mission.duration}.`);
     renderMissionsDOM();
 };
 
-// Функция фоновой ежесекундной проверки таймеров (вызывается из game.js)
 window.checkAndProcessMissionsBackground = function() {
     let activeMissionId = localStorage.getItem('khamach_current_mission_id');
     if (!activeMissionId) return;
@@ -134,37 +135,24 @@ window.checkAndProcessMissionsBackground = function() {
     const startTimestamp = parseInt(localStorage.getItem(`khamach_mission_start_${mission.id}`) || '0');
     const now = Date.now();
     
-    // Если реальное время вышло
     if (now - startTimestamp >= mission.durationMs) {
         localStorage.removeItem(`khamach_hero_busy_${mission.allowedHero}`);
         localStorage.removeItem(`khamach_mission_active_${mission.id}`);
         localStorage.removeItem(`khamach_mission_start_${mission.id}`);
-        localStorage.removeItem('khamach_current_mission_id'); // Разблокируем новую случайную смену
+        localStorage.removeItem('khamach_current_mission_id'); 
         
         if (typeof addPlayerGold === 'function') addPlayerGold(mission.reward);
         
-        addChronicleLog(`АВТО-ВЫПОЛНЕНО: ${mission.heroName} успешно завершил смену «${mission.title}». На счет зачислено 🪙 ${mission.reward} золота.`);
+        addChronicleLog(`АВТО-ВЫПОЛНЕНО: ${mission.heroName} завершил поручение «${mission.title}». На счет зачислено 🪙 ${mission.reward} золота.`);
         
-        // Реактивно обновляем интерфейс, если игрок сейчас открыл доску
         const screenMissions = document.getElementById('missions-screen');
         if (screenMissions && screenMissions.style.display !== 'none') {
             renderMissionsDOM();
         }
     } else {
-        // Если экран открыт, обновляем тикающие секунды
         const screenMissions = document.getElementById('missions-screen');
         if (screenMissions && screenMissions.style.display !== 'none') {
             renderMissionsDOM();
         }
     }
-};
-
-// Интеграция Летописи в победу над Драконами (переопределение уведомления)
-const oldCheckBattleResolution = window.checkBattleResolution;
-window.checkBattleResolution = function() {
-    if (combatData && combatData.dragonHP <= 0) {
-        const lootNames = ['🛡️ Плазма', '🔥 Кровь', '🪶 Чешуя', '💚 Слезы'];
-        addChronicleLog(`ВЕЛИКАЯ ПОБЕДА: Успешно ликвидирован древний дракон Тира ${activeSessionLevel}! Получен 1 случайный материал.`);
-    }
-    if (typeof oldCheckBattleResolution === 'function') oldCheckBattleResolution();
 };
