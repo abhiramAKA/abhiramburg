@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 С ЧЕСТНОЙ ГРАВИТАЦИЕЙ (v2.9.0-BETA)
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 С ЧЕСТНОЙ ГРАВИТАЦИЕЙ (v3.2.5-BETA)
    ========================================================================== */
 
 let isBoardLocked = false;
@@ -169,16 +169,16 @@ function checkMatchesAndExecute() {
                     if (typeof spawnRuneExplosionSparks === 'function') {
                         spawnRuneExplosionSparks(r, c, type);
                     }
-                    executionEffects[type]++;
-                    match3BoardData[r][c] = null; // Освобождаем ячейку матрицы для гравитации
+                    // Унификация иконки Лучника (убираем скрытый вариативный символ)
+                    let normalizedType = type === '⚡️' ? '⚡' : type;
+                    executionEffects[normalizedType]++;
+                    match3BoardData[r][c] = null; 
                 }
             }
         }
         
         setTimeout(() => {
-            // ИСПРАВЛЕННЫЙ АЛГОРИТМ ЧЕСТНОЙ ГРАВИТАЦИИ ПО КОЛОНКАМ
             for (let c = 0; c < BOARD_COLS; c++) {
-                // Сдвигаем существующие камни вниз
                 let emptyRow = BOARD_ROWS - 1;
                 for (let r = BOARD_ROWS - 1; r >= 0; r--) {
                     if (match3BoardData[r][c] !== null) {
@@ -189,7 +189,6 @@ function checkMatchesAndExecute() {
                         emptyRow--;
                     }
                 }
-                // Заполняем оставшиеся верхние пустые ряды новыми рунами
                 for (let r = emptyRow; r >= 0; r--) {
                     match3BoardData[r][c] = RUNE_TYPES[Math.floor(Math.random() * RUNE_TYPES.length)];
                     newRunesCoords.push({ row: r, col: c });
