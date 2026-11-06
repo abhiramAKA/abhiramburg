@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.7.9-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.8.9-BETA)
    ========================================================================== */
 
 window.closeModeDescriptionUnified = function() {
@@ -82,7 +82,7 @@ function setupAllGameListeners() {
     const toSquadBtn = document.getElementById('to-squad-btn');
     if (toSquadBtn) toSquadBtn.onclick = function() { showScreen('squad-screen'); };
 
-    // Кнопка Отряд вызывает меню взаимодействия с бойцами
+    // Кнопка Военного Лагеря вызывает меню взаимодействия с бойцами
     const toStorageBtn = document.getElementById('to-storage-btn');
     if (toStorageBtn) {
         toStorageBtn.onclick = function() {
