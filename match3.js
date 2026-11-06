@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 С ЧЕСТНОЙ ГРАВИТАЦИЕЙ (v3.2.5-BETA)
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (РЕДАКЦИЯ - v4.8.3-BETA)
    ========================================================================== */
 
 let isBoardLocked = false;
@@ -112,7 +112,7 @@ function animateAndSwapRunes(r1, c1, r2, c2) {
         match3BoardData[r1][c1] = match3BoardData[r2][c2];
         match3BoardData[r2][c2] = temp;
         
-        let hasMatches = checkMatchesAndExecute();
+        let hasMatches = typeof checkMatchesAndExecute === 'function' ? checkMatchesAndExecute() : false;
         if (hasMatches) {
             if (typeof usePlayerActionPoint === 'function') usePlayerActionPoint();
         } else {
@@ -124,85 +124,4 @@ function animateAndSwapRunes(r1, c1, r2, c2) {
             setTimeout(() => { renderBoardDOM(); isBoardLocked = false; }, 220);
         }
     }, 220);
-}
-
-function checkMatchesAndExecute() {
-    let matchedMatrix = Array(BOARD_ROWS).fill().map(() => Array(BOARD_COLS).fill(false));
-    let found = false;
-    let mainRuneType = null;
-    
-    for (let r = 0; r < BOARD_ROWS; r++) {
-        for (let c = 0; c < BOARD_COLS - 2; c++) {
-            let t = match3BoardData[r][c];
-            if (t && match3BoardData[r][c+1] === t && match3BoardData[r][c+2] === t) {
-                matchedMatrix[r][c] = matchedMatrix[r][c+1] = matchedMatrix[r][c+2] = true;
-                found = true;
-                if (!mainRuneType) mainRuneType = t;
-            }
-        }
-    }
-    for (let r = 0; r < BOARD_ROWS - 2; r++) {
-        for (let c = 0; c < BOARD_COLS; c++) {
-            let t = match3BoardData[r][c];
-            if (t && match3BoardData[r+1][c] === t && match3BoardData[r+2][c] === t) {
-                matchedMatrix[r][c] = matchedMatrix[r+1][c] = matchedMatrix[r+2][c] = true;
-                found = true;
-                if (!mainRuneType) mainRuneType = t;
-            }
-        }
-    }
-    
-    if (found) {
-        isBoardLocked = true;
-        if (typeof playMatch3Sound === 'function') playMatch3Sound(mainRuneType);
-        if (typeof triggerMatch3Haptic === 'function') triggerMatch3Haptic(60);
-        
-        let executionEffects = { '🔥': 0, '🛡️': 0, '⚡': 0, '💚': 0 };
-        let newRunesCoords = [];
-        
-        for (let r = 0; r < BOARD_ROWS; r++) {
-            for (let c = 0; c < BOARD_COLS; c++) {
-                if (matchedMatrix[r][c]) {
-                    const cellEl = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
-                    let type = match3BoardData[r][c];
-                    if (cellEl) cellEl.classList.add('rune-explode');
-                    if (typeof spawnRuneExplosionSparks === 'function') {
-                        spawnRuneExplosionSparks(r, c, type);
-                    }
-                    // Унификация иконки Лучника (убираем скрытый вариативный символ)
-                    let normalizedType = type === '⚡️' ? '⚡' : type;
-                    executionEffects[normalizedType]++;
-                    match3BoardData[r][c] = null; 
-                }
-            }
-        }
-        
-        setTimeout(() => {
-            for (let c = 0; c < BOARD_COLS; c++) {
-                let emptyRow = BOARD_ROWS - 1;
-                for (let r = BOARD_ROWS - 1; r >= 0; r--) {
-                    if (match3BoardData[r][c] !== null) {
-                        if (r !== emptyRow) {
-                            match3BoardData[emptyRow][c] = match3BoardData[r][c];
-                            match3BoardData[r][c] = null;
-                        }
-                        emptyRow--;
-                    }
-                }
-                for (let r = emptyRow; r >= 0; r--) {
-                    match3BoardData[r][c] = RUNE_TYPES[Math.floor(Math.random() * RUNE_TYPES.length)];
-                    newRunesCoords.push({ row: r, col: c });
-                }
-            }
-
-            if (typeof chargeHeroSuperpowers === 'function') chargeHeroSuperpowers(executionEffects);
-            renderBoardDOM(false, newRunesCoords);
-            
-            setTimeout(() => {
-                let chainMatched = checkMatchesAndExecute();
-                if (!chainMatched && combatData.playerAP > 0) isBoardLocked = false;
-            }, 350);
-        }, 220);
-    }
-    return found;
 }
