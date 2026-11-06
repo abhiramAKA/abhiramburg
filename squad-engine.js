@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v3.4.2-BETA)
+   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v3.8.1-BETA)
    ========================================================================== */
 
 function setupSquadInterfaceListeners() {
@@ -11,12 +11,20 @@ function setupSquadInterfaceListeners() {
         }
     });
     
-    // Привязка кликов для перенесенных построек внутри окна Цитадели
+    // Исправлено: привязка кликов для перенесенных построек внутри окна Цитадели
     const forgeBtn = document.getElementById('city-forge-btn');
-    if (forgeBtn) forgeBtn.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('forge'); });
+    if (forgeBtn) {
+        forgeBtn.addEventListener('click', () => { 
+            if (typeof openModeDescription === 'function') openModeDescription('forge'); 
+        });
+    }
     
     const alchemyBtn = document.getElementById('city-alchemy-btn');
-    if (alchemyBtn) alchemyBtn.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('alchemy'); });
+    if (alchemyBtn) {
+        alchemyBtn.addEventListener('click', () => { 
+            if (typeof openModeDescription === 'function') openModeDescription('alchemy'); 
+        });
+    }
 
     const closeBtn = document.getElementById('close-squad-btn');
     if (closeBtn) {
@@ -90,6 +98,15 @@ function updateSquadVisualStyles() {
     const invLookup = document.getElementById('squad-inventory-lookup');
     if (invLookup && typeof getPlayerResource === 'function') {
         invLookup.innerHTML = `🛒 Склады: 🌋 ${getPlayerResource('plasma')} | 🩸 ${getPlayerResource('blood')} | 🪶 ${getPlayerResource('scale')} | 💧 ${getPlayerResource('tears')}`;
+    }
+
+    const fatigueLookup = document.getElementById('squad-fatigue-lookup');
+    if (fatigueLookup) {
+        const tFat = Math.round(parseInt(localStorage.getItem('khamach_fatigue_tank') || '0'));
+        const dFat = Math.round(parseInt(localStorage.getItem('khamach_fatigue_damage') || '0'));
+        const aFat = Math.round(parseInt(localStorage.getItem('khamach_fatigue_archer') || '0'));
+        const mFat = Math.round(parseInt(localStorage.getItem('khamach_fatigue_mage') || '0'));
+        fatigueLookup.innerHTML = `🥱 Усталость: 🛡️ ${tFat}% | 🔥 ${dFat}% | ⚡ ${aFat}% | 💚 ${mFat}%`;
     }
 
     const ids = ['tank', 'damage', 'archer', 'mage'];
