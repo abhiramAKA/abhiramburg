@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v3.9.1-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v3.9.2-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v3.9.1-BETA";
+const GAME_VERSION = "v3.9.2-BETA";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
@@ -29,7 +29,16 @@ let selectedDragonLevel = 1;
 let currentOpenedModeKey = null;
 
 function initDispatcherModule() {
-    // 1. Сначала принудительно генерируем всю UI-архитектуру окон в DOM
+    // Стартовый подрыв нулевого баланса для тестов интерфейса
+    if (!localStorage.getItem('khamach_initial_bonus_v3')) {
+        localStorage.setItem('khamach_gold', '1000');
+        localStorage.setItem('khamach_res_plasma', '5');
+        localStorage.setItem('khamach_res_blood', '5');
+        localStorage.setItem('khamach_res_scale', '5');
+        localStorage.setItem('khamach_res_tears', '5');
+        localStorage.setItem('khamach_initial_bonus_v3', 'true');
+    }
+
     if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
     if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
     if (typeof injectSquadInterfaceDOM === 'function') injectSquadInterfaceDOM();
@@ -37,12 +46,11 @@ function initDispatcherModule() {
     const versionElement = document.getElementById('game-version');
     if (versionElement) versionElement.innerText = GAME_VERSION;
 
-    // 2. Строго после инжекта вешаем все обработчики событий
     if (typeof setupAllGameListeners === 'function') {
         try { 
             setupAllGameListeners(); 
         } catch (e) { 
-            console.error("Критический сбой инициализации листенеров:", e); 
+            console.error("Ошибка навешивания листенеров:", e); 
         }
     }
     
