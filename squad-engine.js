@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v4.7.2-BETA)
+   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v4.7.4-BETA)
    ========================================================================== */
 
 function setupSquadInterfaceListeners() {
@@ -58,7 +58,7 @@ function executeUnifiedBuildingTransaction() {
             
             if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
             updateSquadVisualStyles();
-            alert(`Строительство завершено! Открыт лимит прокачки бойца до 1 уровня.`);
+            alert(`Строительство успешно завершено! Открыт лимит прокачки бойца до 1 уровня.`);
             if (typeof openModeDescription === 'function') openModeDescription(id);
         } else {
             alert(`Недостаточно золота! Требуется 100 🪙.`);
