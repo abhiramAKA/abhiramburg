@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ГЛОБАЛЬНАЯ ГРАФИЧЕСКАЯ ФАБРИКА ГОРОДСКИХ ИНТЕРФЕЙСОВ (v4.4.0-BETA)
+   КХАМАЧ — ГЛОБАЛЬНАЯ ГРАФИЧЕСКАЯ ФАБРИКА ГОРОДСКИХ ИНТЕРФЕЙСОВ (v4.5.0-BETA)
    ========================================================================== */
 
 function injectTownScreensDOM() {
@@ -24,13 +24,15 @@ function injectTownScreensDOM() {
             <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
         </div>
 
-        <!-- ================= ОКНО КУЗНИЦЫ / ЛАБОРАТОРИИ / КЛАНОВ ================= -->
-        <div id="mode-desc-screen" class="game-window" style="display: none;">
-            <h2 id="mode-desc-title">РЕЖИМ ИГРЫ</h2>
-            <span class="subtitle">Управление зданиями</span>
+        <!-- ================= ОКНО ОПИСАНИЙ ЗДАНnetwork С КРЕСТИКОМ В ШАПКЕ ================= -->
+        <div id="mode-desc-screen" class="game-window" style="display: none; padding: 25px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; width: 100%;">
+                <h2 id="mode-desc-title" style="margin: 0; font-size: 20px;">РЕЖИМ ИГРЫ</h2>
+                <button id="close-mode-desc-top-btn" class="info-btn back-btn" style="width: 26px; height: 26px; font-size: 11px; box-shadow: none; border-radius: 4px; margin: 0; padding: 0;">❌</button>
+            </div>
+            <span class="subtitle" style="margin-bottom: 15px; padding-bottom: 6px;">Управление строениями</span>
             <div id="mode-desc-text">Описание режима загружается...</div>
-            <button id="mode-buy-btn" class="menu-btn" style="margin-bottom: 10px; background: linear-gradient(to bottom, #1d421e 0%, #102411 100%); border-color: #316e34; color: #aae6ab;">🛒 ВЫКУПИТЬ ЗДЕНИЕ (100 🪙)</button>
-            <button id="close-mode-desc-btn" class="menu-btn back-btn" style="margin-top: 5px; width: 100%;">Назад в меню</button>
+            <button id="mode-buy-btn" class="menu-btn" style="margin-top: 15px; background: linear-gradient(to bottom, #1d421e 0%, #102411 100%); border-color: #316e34; color: #aae6ab;">⚒️ ПОСТРОИТЬ ЗДЕНИЕ (100 🪙)</button>
         </div>
 
         <!-- ================= ОКНО НАСТРОЕК ЗВУКА ================= -->
@@ -88,7 +90,7 @@ function injectTownScreensDOM() {
             </div>
         </div>
 
-        <!-- ================= ОКНО ПЕРВОГО ЗАПУСКА И ПРИВЕТСТВИЯ ================= -->
+        <!-- ================= ОКНО ИНСТРУКТАЖА ПЕРВОГО БОЯ ================= -->
         <div id="welcome-palace-screen" class="game-window combat-help-popup" style="display: none;">
             <div class="combat-help-content" style="max-width: 420px; padding: 25px;">
                 <h2>ПРИВЕТСТВИЕ</h2>
