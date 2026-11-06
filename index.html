@@ -9,7 +9,7 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            const currentExpectedVersion = "v4.9.0-BETA";
+            const currentExpectedVersion = "v4.9.1-BETA";
             
             if (navigator.serviceWorker) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -69,7 +69,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Модули v4.9.0 успешно загружены.");
+                    console.log("КХАМАЧ: Модули v4.9.1 успешно загружены.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -103,7 +103,7 @@
             <span class="subtitle">Легенды Абхирамбурга</span>
             
             <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; font-size: 16px; font-weight: bold; background: rgba(30, 20, 15, 0.4); padding: 6px 14px; border: 1px double #544432; border-radius: 4px; border-left: none; border-right: none;">
-                <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffd700'">🪙 0 Монет</span>
+                <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffd700'">🪙 0</span>
                 <span style="color: #4a3e31; font-weight: normal;">|</span>
                 <span id="team-fatigue-display" style="color: #ffb3ba; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffb3ba'">🥱 0%</span>
             </div>
@@ -129,7 +129,7 @@
                 <button id="to-clans-btn" class="menu-btn">🛡️ Кланы</button>
             </div>
             
-            <div id="game-version" class="version-footer">v4.9.0-BETA</div>
+            <div id="game-version" class="version-footer">v4.9.1-BETA</div>
         </div>
 
         <div id="dynamic-town-screens"></div>
