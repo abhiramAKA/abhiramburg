@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ОБНОВЛЕН - v3.2.7-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ОБНОВЛЕН - v3.3.0-BETA)
    ========================================================================== */
 
 function setupAllGameListeners() {
@@ -77,6 +77,23 @@ function setupAllGameListeners() {
     
     const closeMissionsBtn = document.getElementById('close-missions-btn');
     if (closeMissionsBtn) closeMissionsBtn.addEventListener('click', () => showScreen('main-menu'));
+
+    // Слушатели для нового окна летописи событий
+    const toChronicleBtn = document.getElementById('to-chronicle-btn');
+    if (toChronicleBtn) toChronicleBtn.addEventListener('click', () => showScreen('chronicle-screen'));
+
+    const closeChronicleBtn = document.getElementById('close-chronicle-btn');
+    if (closeChronicleBtn) closeChronicleBtn.addEventListener('click', () => showScreen('main-menu'));
+
+    const clearChronicleBtn = document.getElementById('clear-chronicle-btn');
+    if (clearChronicleBtn) {
+        clearChronicleBtn.addEventListener('click', () => {
+            if (confirm("Очистить все записи в Летописи Цитадели?")) {
+                localStorage.setItem('khamach_chronicle_logs', JSON.stringify([]));
+                if (typeof renderChronicleDOM === 'function') renderChronicleDOM();
+            }
+        });
+    }
 }
 
 function setupCombatHelpListeners() {
