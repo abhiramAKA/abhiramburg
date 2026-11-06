@@ -9,7 +9,22 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 100000);
+            const currentExpectedVersion = "v4.7.4-BETA";
+            
+            if (localStorage.getItem('khamach_sys_version') !== currentExpectedVersion) {
+                const savedGold = localStorage.getItem('khamach_gold') || '0';
+                const savedTier = localStorage.getItem('khamach_max_tier') || '1';
+                
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                localStorage.setItem('khamach_gold', savedGold);
+                localStorage.setItem('khamach_max_tier', savedTier);
+                localStorage.setItem('khamach_sys_version', currentExpectedVersion);
+                console.log("КХАМАЧ: Системная очистка старой памяти завершена.");
+            }
+
+            const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
             
             const link = document.createElement('link');
             link.rel = 'stylesheet';
@@ -28,19 +43,19 @@
                 'town-chronicle.js',
                 'town-missions-pool.js',
                 'town-missions-engine.js',
+                'town-dom.js',
+                'squad-dom.js',
+                'combat-dom.js',
                 'town-missions-dom.js',
                 'squad-engine-logic.js',
                 'squad-engine.js',
-                'squad-dom.js',
-                'town-dom.js',
-                'combat-dom.js',
                 'combat.js',
                 'game-listeners.js'
             ];
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Модули v4.7.3 успешно загружены.");
+                    console.log("КХАМАЧ: Сборка v4.7.4-BETA запущена успешно.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -100,7 +115,7 @@
                 <button id="to-clans-btn" class="menu-btn">🛡️ Кланы</button>
             </div>
             
-            <div id="game-version" class="version-footer">v4.7.3-BETA</div>
+            <div id="game-version" class="version-footer">v4.7.4-BETA</div>
         </div>
 
         <div id="dynamic-town-screens"></div>
