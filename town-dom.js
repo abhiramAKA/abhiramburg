@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ ГЕНЕРАТОР ИНТЕРФЕЙСОВ ГОРОДА (ИСПРАВЛЕН - v2.7.0-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ ГЕНЕРАТОР ИНТЕРФЕЙСОВ ГОРОДА (ИСПРАВЛЕН - v3.8.0-BETA)
    ========================================================================== */
 
 function injectTownScreensDOM() {
@@ -32,6 +32,19 @@ function injectTownScreensDOM() {
             <div id="mode-desc-text">Описание режима загружается...</div>
             <button id="mode-buy-btn" class="menu-btn" style="margin-bottom: 10px; background: linear-gradient(to bottom, #1d421e 0%, #102411 100%); border-color: #316e34; color: #aae6ab;">🛒 ВЫКУПИТЬ ЗДЕНИЕ (100 🪙)</button>
             <button id="close-mode-desc-btn" class="menu-btn back-btn" style="margin-top: 5px; width: 100%;">Назад в меню</button>
+        </div>
+
+        <!-- ================= НОВОЕ ОКНО ДЕТАЛЬНОЙ УСТАЛОСТИ ОТРЯДА ================= -->
+        <div id="squad-fatigue-screen" class="game-window combat-help-popup" style="display: none;">
+            <div class="combat-help-content" style="max-width: 400px; padding: 20px 25px;">
+                <h2>СОСТОЯНИЕ ОТРЯДА</h2>
+                <span class="subtitle">Стихийное Истощение сил</span>
+                <div id="individual-fatigue-list-container" style="display: flex; flex-direction: column; gap: 10px; text-align: left; background: rgba(0,0,0,0.5); padding: 15px; border: 1px solid #544432; border-radius: 4px; font-size: 14px;">
+                    <!-- Рендерится динамически из town-engine.js -->
+                </div>
+                <p style="font-size: 11px; margin-top: 12px; color: #8a7350; line-height: 1.4; text-align: center;">Бойцы пассивно сбрасывают усталость во время отдыха, когда не выполняют поручения города.</p>
+                <button id="close-fatigue-screen-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в меню</button>
+            </div>
         </div>
     `;
 }
