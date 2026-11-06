@@ -1,17 +1,23 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.2.1-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.4.0-BETA)
    ========================================================================== */
 
 const INLINE_TOWN_TEXTS = {
     mainInfo: `<p><strong>«КХАМАЧ: Восхождение Рейдов»</strong></p><p>В недрах древних подземелий Абхирамбурга пробудился великий закон змея. Соберите свой верный отряд, заряжайте шкалы суперсил через камни стихий и сокрушите огнедышащих тварей в пошаговых тактических битвах Горнила!</p>`,
-    squadInfo: `<p><strong>«Военная Цитадель Казарм»:</strong></p><p>Здесь сосредоточены тренировочные лагеря, полигоны и алтари ваших героев. Развивайте инфраструктуру отряда, чтобы открыть скрытые вехи развития и многократно приумножить характеристики воинов перед вылазкой в рейд.</p>`,
+    squadInfo: `<p><strong>«Военная Цитадель Казарм»:</strong></p><p>Здесь сосредоточены тренировочные лагеря, полигоны и алтари ваших героев.</p>`,
     combatHelp: `<p>🛡️-Танк: Провокация. 🔥-Дамагер: Чистый урон. ⚡-Лучник: Слепота босса. 💚-Маг: Масс-хил.</p>`
 };
 
 const INLINE_MODE_DESCRIPTIONS = {
     forge: { title: "⚒️ ДРЕВНЯЯ КУЗНЯ", reqText: "В полумраке кузницы тяжело вздыхают мехи. Здесь из костей и чешуи великих ящеров куется мифический доспех, не знающий износа.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Кузня открывается только на 12-м уровне развития отряда!</strong>", isLocked: true },
-    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", buyText: "Полки уставлены древними фолиантами и склянками со светящимися эссенциями. Лаборатории требуется закупка редких алхимических реагентов за 100 🪙.", activeText: "Реагенты закуплены. Лаборатория Абхирамбурга полностью готова дистиллировать эссенции драконов.", isLocked: false },
-    clans: { title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", reqText: "Знамена великих гильдий замерли под сводами залов безмолвия. Здесь куется коллективное Величие фракций, координируются рейды и возводятся Врата Разломов в Мир 2.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Клановый шлюз открывается на 12-м уровне развития отряда!</strong>", isLocked: true }
+    clans: { title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", reqText: "Знамена великих гильдий замерли под сводами залов безмолвия. Здесь куется коллективное Величие фракций, координируются рейды и возводятся Врата Разломов в другие измерения.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Клановый шлюз открывается на 12-м уровне развития отряда!</strong>", isLocked: true },
+    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", buyText: "Полки уставлены древними фолиантами и склянками со светящимися эссенциями. Лаборатории требуется закупка редких реагентов за 100 🪙.", activeText: "Реагенты закуплены. Лаборатория полностью готова дистиллировать эссенции драконов.", isLocked: false, isHero: false },
+    
+    // Перенос персонажей на рельсы фабрики описаний
+    tank: { title: "🛡️ ГАРНИЗОН", isLocked: false, isHero: true, heroId: "tank" },
+    damage: { title: "🔥 КАЗАРМЫ", isLocked: false, isHero: true, heroId: "damage" },
+    archer: { title: "⚡ СТРЕЛЬБИЩЕ", isLocked: false, isHero: true, heroId: "archer" },
+    mage: { title: "💚 ОБИТЕЛЬ", isLocked: false, isHero: true, heroId: "mage" }
 };
 
 window.getTownText = function(key) { return INLINE_TOWN_TEXTS[key] || ''; };
@@ -45,14 +51,47 @@ window.openModeDescription = function(modeKey) {
     if (modeData.isLocked) {
         textEl.innerHTML = `<p>${modeData.reqText}</p>`;
         buyBtn.style.display = 'none';
+    } else if (modeData.isHero) {
+        // Логика отрисовки для персонажей отряда
+        const hId = modeData.heroId;
+        const isPurchased = localStorage.getItem(`khamach_squad_build_${hId}`) === 'true';
+        const currentLvl = parseInt(localStorage.getItem(`khamach_build_${hId}`) || '0');
+        const loreData = typeof SQUAD_HERO_LORE !== 'undefined' ? SQUAD_HERO_LORE[hId === 'mage' ? 'damage_mage' : hId] : null;
+        
+        if (!loreData) return;
+
+        if (!isPurchased) {
+            textEl.innerHTML = `<p>${loreData.lore}</p><p style='color:#cdb38c;'>Постройка не возведена. Требуется мгновенный выкуп.</p>`;
+            buyBtn.style.display = 'block';
+            buyBtn.innerText = `⚒️ ВОЗВЕСТИ СТРОЕНИЕ (100 🪙)`;
+        } else if (currentLvl >= 15) {
+            textEl.innerHTML = `<p>${loreData.title}</p><p style='color:#ffd700;'>Достигнут максимальный уровень тренировок (15 ур)!<br>Текущий бонус: ${loreData.statBonus}</p>`;
+            buyBtn.style.display = 'none';
+        } else {
+            const nextLvl = currentLvl + 1;
+            const resCount = window.getPlayerResource(loreData.resourceKey);
+            textEl.innerHTML = `
+                <p>${loreData.lore}</p>
+                <div style='background:rgba(0,0,0,0.3); padding:8px; border:1px dashed #544432; font-size:12px; text-align:left;'>
+                    <div>• Текущий уровень: <strong>${currentLvl} из 15</strong></div>
+                    <div>• Эффект: <span style='color:#2ecc71;'>${loreData.statBonus}</span></div>
+                    <div style='margin-top:4px; color:#e6c280;'>Стоимость улучшения до ${nextLvl} ур:</div>
+                    <div>🪙 Золото: 150 (У вас: ${window.getPlayerGold()})</div>
+                    <div>${loreData.resourceIcon} ${loreData.resourceName}: 1 шт. (У вас: ${resCount} шт.)</div>
+                </div>
+            `;
+            buyBtn.style.display = 'block';
+            buyBtn.innerText = `🏋️ НАЧАТЬ ТРЕНИРОВКУ (150 🪙)`;
+        }
     } else {
+        // Обычные постройки (Лаборатория)
         const purchased = window.isBuildingPurchased(modeKey);
         if (!purchased) {
             textEl.innerHTML = `<p>${modeData.buyText}</p>`;
             buyBtn.style.display = 'block';
-            buyBtn.innerText = `🛒 ВЫКУПИТЬ ЛАБОРАТОРИЮ (100 🪙)`;
+            buyBtn.innerText = `🛒 ВЫКУПИТЬ ЗДЕНИЕ (100 🪙)`;
         } else {
-            textEl.innerHTML = `<p>${modeData.activeText}</p><p style='color:#2ecc71;'>Лаборатория успешно функционирует в вашей citadel!</p>`;
+            textEl.innerHTML = `<p>${modeData.activeText}</p><p style='color:#2ecc71;'>Здание успешно функционирует в вашей цитадели!</p>`;
             buyBtn.style.display = 'none';
         }
     }
@@ -78,7 +117,6 @@ window.updateTownGoldDisplay = function() {
         fatigueContainer.innerHTML = `🥱 ${averageFatigue}%`;
     }
 
-    // Из списка индивидуальной усталости вырезаны все упоминания стихий в скобках
     const listContainer = document.getElementById('individual-fatigue-list-container');
     if (listContainer) {
         listContainer.innerHTML = `
