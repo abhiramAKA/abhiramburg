@@ -1,10 +1,48 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ МОДУЛЬ ТРЕНИРОВОК И ПОТОЛКА ОТРЯДА (v1.0.0-BETA)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ МОДУЛЬ ТРЕНИРОВОК И ПОТОЛКА ОТРЯДА (v4.7.4-BETA)
    ========================================================================== */
+
+const SQUAD_HERO_LORE = {
+    tank: {
+        name: "🛡️ Гарнизон",
+        title: "🛡️ ЗАЩИТНИК (РЫЦАРЬ СМЕРТИ)",
+        resourceKey: "plasma",
+        resourceIcon: "🌋",
+        resourceName: "Плазма дракона",
+        statBonus: "+20 Max HP за уровень",
+        lore: "Латные рукавицы намертво сжимают ростовой щит из костей. Он — несокрушимая скала Абхирамбурга, принимающая на себя всю ярость извергаемого драконьего пламени."
+    },
+    damage: {
+        name: "🔥 Казармы",
+        title: "🔥 ВОИН (БЕРСЕРК ГОРНИЛА)",
+        resourceKey: "blood",
+        resourceIcon: "🩸",
+        resourceName: "Кровь дракона",
+        statBonus: "+15 к урону ультимейта за уровень",
+        lore: "Одержимый первобытным гневом рун Кхамача, этот безумный боец не признает защиты. Его парные топоры жаждут лишь одного — вскрыть хребет древнего змея."
+    },
+    archer: {
+        name: "⚡ Стрельбище",
+        title: "⚡ СТРЕЛОК (СЛЕДОПЫТ ГРОЗЫ)",
+        resourceKey: "scale",
+        resourceIcon: "🪶",
+        resourceName: "Чешую дракона",
+        statBonus: "+10 к урону молнии за уровень",
+        lore: "Его стрелы оперены чешуей драконов света, а тетива поет песнь молний. Метким выстрелом Следопыт способен ослепить чудовище."
+    },
+    damage_mage: {
+        name: "💚 Обитель",
+        title: "💚 МАГ (ОТРИЦАТЕЛЬ СМЕРТИ)",
+        resourceKey: "tears",
+        resourceIcon: "💧",
+        resourceName: "Слезы дракона",
+        statBonus: "+5 к групповому хилу за уровень",
+        lore: "Тайные эссенции жизни текут по его венам. Хранитель Обители балансирует на грани миров, собирая изумрудные руны, чтобы залечить раны отряда."
+    }
+};
 
 window.getHeroLevel = function(id) { return parseInt(localStorage.getItem(`khamach_hero_lvl_${id}`) || '1'); };
 window.getBuildingLevel = function(id) { return parseInt(localStorage.getItem(`khamach_build_${id}`) || '0'); };
-window.getMetaPerkValue = function(key) { return parseInt(localStorage.getItem(key) || '0'); };
 
 window.updateStorageScreenDOM = function() {
     const listContainer = document.getElementById('storage-resources-list');
@@ -27,30 +65,29 @@ window.updateSquadHeroesSpecScreenDOM = function() {
     container.innerHTML = '';
     
     const heroesData = [
-        { id: "tank", key: "tank" },
-        { id: "damage", key: "damage" },
-        { id: "archer", key: "archer" },
-        { id: "mage", key: "damage_mage" }
+        { id: "tank" },
+        { id: "damage" },
+        { id: "archer" },
+        { id: "mage" }
     ];
     
     heroesData.forEach(h => {
-        const lore = typeof SQUAD_HERO_LORE !== 'undefined' ? SQUAD_HERO_LORE[h.id === 'mage' ? 'damage_mage' : h.id] : null;
+        const lore = SQUAD_HERO_LORE[h.id === 'mage' ? 'damage_mage' : h.id];
         if (!lore) return;
         
         const heroLvl = window.getHeroLevel(h.id);
         const buildLvl = window.getBuildingLevel(h.id);
         const isPurchased = localStorage.getItem(`khamach_squad_build_${h.id}`) === 'true';
-        const currentRes = window.getPlayerResource(lore.resourceKey);
+        const currentRes = typeof window.getPlayerResource === 'function' ? window.getPlayerResource(lore.resourceKey) : 0;
         
         const card = document.createElement('div');
-        card.style.background = "rgba(20, 16, 14, 0.95)";
+        card.style.background = "rgba(25, 20, 18, 0.9)";
         card.style.border = "1px solid #544432";
         card.style.padding = "8px 10px";
         card.style.borderRadius = "3px";
         card.style.display = "flex";
         card.style.flexDirection = "column";
         card.style.gap = "2px";
-        card.style.textAlign = "left";
         
         let actionBtnHTML = '';
         if (!isPurchased) {
@@ -64,11 +101,11 @@ window.updateSquadHeroesSpecScreenDOM = function() {
         }
         
         card.innerHTML = `
-            <div style="display:flex; justify-content:space-between; font-weight:bold; color:#e6c280; font-size:13px;">
+            <div style="display:flex; justify-content:space-between; font-weight:bold; color:#e6c280; font-size:12px;">
                 <span>${lore.title}</span>
                 <span style="color:#ffd700;">Ур. ${heroLvl} <span style="font-weight:normal; font-size:10px; color:#8a7350;">(Потолок: ${buildLvl})</span></span>
             </div>
-            <div style="font-size:11px; color:#cdb38c; line-height:1.2;">Модификатор: <span style="color:#2ecc71;">${lore.statBonus}</span></div>
+            <div style="font-size:11px; color:#cdb38c; line-height:1.2;">Эффект: <span style="color:#2ecc71;">${lore.statBonus}</span></div>
             <div style="font-size:11px; color:#bfae96;">Цена: 1 шт. ${lore.resourceIcon} ${lore.resourceName} (Есть: ${currentRes})</div>
             <div style="margin-top:2px;">${actionBtnHTML}</div>
         `;
@@ -86,7 +123,7 @@ window.triggerHeroLevelUpgrade = function(heroId) {
     const target = heroesData[heroId];
     if (!target) return;
 
-    const currentRes = window.getPlayerResource(target.resKey);
+    const currentRes = typeof window.getPlayerResource === 'function' ? window.getPlayerResource(target.resKey) : 0;
     const heroLvl = window.getHeroLevel(heroId);
 
     if (currentRes < 1) {
@@ -95,7 +132,7 @@ window.triggerHeroLevelUpgrade = function(heroId) {
     }
 
     if (typeof addPlayerResource === 'function') addPlayerResource(target.resKey, -1);
-    localStorage.setItem(`khamach_hero_lvl_${heroId}`, heroId === 'tank' || heroId === 'damage' || heroId === 'archer' || heroId === 'mage' ? heroLvl + 1 : heroLvl);
+    localStorage.setItem(`khamach_hero_lvl_${heroId}`, heroLvl + 1);
 
     if (typeof addChronicleLog === 'function') {
         addChronicleLog(`ТРЕНИРОВКА: Боец повысил уровень до ${heroLvl + 1}-го.`);
