@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v3.9.2-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.2.1-BETA)
    ========================================================================== */
 
 const INLINE_TOWN_TEXTS = {
@@ -52,7 +52,7 @@ window.openModeDescription = function(modeKey) {
             buyBtn.style.display = 'block';
             buyBtn.innerText = `🛒 ВЫКУПИТЬ ЛАБОРАТОРИЮ (100 🪙)`;
         } else {
-            textEl.innerHTML = `<p>${modeData.activeText}</p><p style='color:#2ecc71;'>Лаборатория успешно функционирует в вашей цитадели!</p>`;
+            textEl.innerHTML = `<p>${modeData.activeText}</p><p style='color:#2ecc71;'>Лаборатория успешно функционирует в вашей citadel!</p>`;
             buyBtn.style.display = 'none';
         }
     }
@@ -78,17 +78,17 @@ window.updateTownGoldDisplay = function() {
         fatigueContainer.innerHTML = `🥱 ${averageFatigue}%`;
     }
 
+    // Из списка индивидуальной усталости вырезаны все упоминания стихий в скобках
     const listContainer = document.getElementById('individual-fatigue-list-container');
     if (listContainer) {
         listContainer.innerHTML = `
-            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #3a3025; padding-bottom:4px;"><span>🛡️ Защитник (Земля):</span><strong>${tFat}%</strong></div>
-            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #3a3025; padding-bottom:4px;"><span>🔥 Воин (Огонь):</span><strong>${dFat}%</strong></div>
-            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #3a3025; padding-bottom:4px;"><span>⚡ Стрелок (Молния):</span><strong>${aFat}%</strong></div>
-            <div style="display:flex; justify-content:space-between;"><span>💚 Маг (Жизнь):</span><strong>${mFat}%</strong></div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #3a3025; padding-bottom:4px;"><span>🛡️ Защитник:</span><strong>${tFat}%</strong></div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #3a3025; padding-bottom:4px;"><span>🔥 Воин:</span><strong>${dFat}%</strong></div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #3a3025; padding-bottom:4px;"><span>⚡ Стрелок:</span><strong>${aFat}%</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span>💚 Маг:</span><strong>${mFat}%</strong></div>
         `;
     }
     
-    // Реактивное принудительное обновление Склада при изменении кошелька
     if (typeof window.updateStorageScreenDOM === 'function') window.updateStorageScreenDOM();
 };
 
