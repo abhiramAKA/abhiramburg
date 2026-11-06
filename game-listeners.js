@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ОБНОВЛЕН - v3.3.0-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ОБНОВЛЕН - v3.3.1-BETA)
    ========================================================================== */
 
 function setupAllGameListeners() {
@@ -78,7 +78,7 @@ function setupAllGameListeners() {
     const closeMissionsBtn = document.getElementById('close-missions-btn');
     if (closeMissionsBtn) closeMissionsBtn.addEventListener('click', () => showScreen('main-menu'));
 
-    // Слушатели для нового окна летописи событий
+    // Исправлено: добавлены слушатели для кнопки Летописи на главном экране
     const toChronicleBtn = document.getElementById('to-chronicle-btn');
     if (toChronicleBtn) toChronicleBtn.addEventListener('click', () => showScreen('chronicle-screen'));
 
