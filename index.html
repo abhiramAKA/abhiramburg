@@ -9,9 +9,8 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            const currentExpectedVersion = "v4.7.5-BETA";
+            const currentExpectedVersion = "v4.7.6-BETA";
             
-            // ЖЕСТКОЕ ИСТРЕБЛЕНИЕ СКРЫТЫХ СЕРВИС-ВОРКЕРОВ И КЭШ-ХРАНИЛИЩ
             if (navigator.serviceWorker) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
                     for (let registration of registrations) {
@@ -21,20 +20,17 @@
                 });
             }
 
-            // Полная зачистка изолированных файловых буферов диска
             if (window.caches) {
                 caches.keys().then(function(names) {
                     for (let name of names) caches.delete(name);
                 });
             }
             
-            // Санация памяти переменных при смене ревизии (золото НЕ стирается)
             if (localStorage.getItem('khamach_sys_version') !== currentExpectedVersion) {
                 const savedGold = localStorage.getItem('khamach_gold') || '0';
                 const savedTier = localStorage.getItem('khamach_max_tier') || '1';
                 
-                // Выжигаем застрявшие куски старой разметки, которые воркер мог записать в память
-                const legacyKeys = ['GAME_TEXTS', 'town_dom_backup', 'main_menu_html_v2', 'khamach_menu_backup', 'town_dom_html'];
+                const legacyKeys = ['GAME_TEXTS', 'town_dom_backup', 'main_menu_html_v2', 'khamach_menu_backup', 'town_dom_html', 'town_dom_backup_html', 'khamach_html_backup', 'cached_menu_dom'];
                 legacyKeys.forEach(k => localStorage.removeItem(k));
                 
                 localStorage.setItem('khamach_gold', savedGold);
@@ -42,7 +38,6 @@
                 localStorage.setItem('khamach_sys_version', currentExpectedVersion);
             }
 
-            // Абсолютный рандомизатор хэша для обхода любых дисковых блокировок
             const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 999999);
             
             const link = document.createElement('link');
@@ -74,7 +69,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Сборка v4.7.5-BETA успешно развернута в обход воркеров.");
+                    console.log("КХАМАЧ: Сборка v4.7.6-BETA успешно развернута.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -134,7 +129,7 @@
                 <button id="to-clans-btn" class="menu-btn">🛡️ Кланы</button>
             </div>
             
-            <div id="game-version" class="version-footer">v4.7.5-BETA</div>
+            <div id="game-version" class="version-footer">v4.7.6-BETA</div>
         </div>
 
         <div id="dynamic-town-screens"></div>
