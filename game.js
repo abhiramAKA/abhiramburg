@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v3.9.2-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.3.1-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v3.9.2-BETA";
+const GAME_VERSION = "v4.3.1-BETA";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
@@ -28,16 +28,33 @@ let selectedCell = null;
 let selectedDragonLevel = 1;
 let currentOpenedModeKey = null;
 
+function sanitizeAndMigrateStorage() {
+    // Каскадная очистка застрявших старых версий UI в памяти без потери золота
+    const currentGold = localStorage.getItem('khamach_gold') || '0';
+    const currentMaxTier = localStorage.getItem('khamach_max_tier') || '1';
+    
+    // Переносим только чистые ресурсы
+    const plasma = localStorage.getItem('khamach_res_plasma') || '0';
+    const blood = localStorage.getItem('khamach_res_blood') || '0';
+    const scale = localStorage.getItem('khamach_res_scale') || '0';
+    const tears = localStorage.getItem('khamach_res_tears') || '0';
+
+    // Удаляем старые системные конфликты, если они форсируют загрузку старого меню
+    const legacyKeys = ['GAME_TEXTS', 'town_dom_backup', 'main_menu_html_v2', 'khamach_menu_backup'];
+    legacyKeys.forEach(k => localStorage.removeItem(k));
+
+    // Возвращаем на место чистый прогресс игрока
+    localStorage.setItem('khamach_gold', currentGold);
+    localStorage.setItem('khamach_max_tier', currentMaxTier);
+    localStorage.setItem('khamach_res_plasma', plasma);
+    localStorage.setItem('khamach_res_blood', blood);
+    localStorage.setItem('khamach_res_scale', scale);
+    localStorage.setItem('khamach_res_tears', tears);
+}
+
 function initDispatcherModule() {
-    // Стартовый подрыв нулевого баланса для тестов интерфейса
-    if (!localStorage.getItem('khamach_initial_bonus_v3')) {
-        localStorage.setItem('khamach_gold', '1000');
-        localStorage.setItem('khamach_res_plasma', '5');
-        localStorage.setItem('khamach_res_blood', '5');
-        localStorage.setItem('khamach_res_scale', '5');
-        localStorage.setItem('khamach_res_tears', '5');
-        localStorage.setItem('khamach_initial_bonus_v3', 'true');
-    }
+    // Принудительная изоляция данных от старого кэша
+    sanitizeAndMigrateStorage();
 
     if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
     if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
@@ -47,11 +64,7 @@ function initDispatcherModule() {
     if (versionElement) versionElement.innerText = GAME_VERSION;
 
     if (typeof setupAllGameListeners === 'function') {
-        try { 
-            setupAllGameListeners(); 
-        } catch (e) { 
-            console.error("Ошибка навешивания листенеров:", e); 
-        }
+        try { setupAllGameListeners(); } catch (e) { console.error("Ошибка навешивания листенеров:", e); }
     }
     
     if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
