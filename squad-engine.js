@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v4.9.1-BETA)
+   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v4.9.4-BETA)
    ========================================================================== */
 
 function setupSquadInterfaceListeners() {
@@ -73,7 +73,7 @@ function executeUnifiedBuildingTransaction() {
     const costUpgradeGold = 150;
 
     if (currentGold < costUpgradeGold) {
-        alert(`Недостаточно средств! Требуется 🪙 150.`);
+        alert("Недостаточно средств! Требуется 🪙 150.");
         return;
     }
 
@@ -93,16 +93,11 @@ function updateSquadVisualStyles() {
         if (!btn) return;
 
         const isPurchased = localStorage.getItem(`khamach_squad_build_${id}`) === 'true';
-        const loreKey = id === 'mage' ? 'damage_mage' : id;
-        const data = typeof SQUAD_HERO_LORE !== 'undefined' ? SQUAD_HERO_LORE[loreKey] : { name: id };
         
         if (isPurchased) {
-            const currentLvl = localStorage.getItem(`khamach_build_${id}`) || '1';
-            btn.innerText = `${data.name} [Ур. ${currentLvl}]`;
             btn.style.background = "linear-gradient(to bottom, #1d3a1e 0%, #0f2110 100%)";
             btn.style.borderColor = "#316e34";
         } else {
-            btn.innerText = `${data.name} (🪙 100)`;
             btn.style.background = "";
             btn.style.borderColor = "";
         }
