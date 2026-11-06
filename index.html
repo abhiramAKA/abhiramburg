@@ -9,7 +9,6 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            // Динамический хвостовик времени генерируется при каждом старте страницы
             const cacheBuster = Date.now();
             
             const link = document.createElement('link');
@@ -73,7 +72,11 @@
             <h1>КХАМАЧ</h1>
             <span class="subtitle">Легенды Абхирамбурга</span>
             
-            <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 12px; font-size: 16px;">🪙 0 Золота</div>
+            <!-- Информационный блок: Золото и Средняя Усталость всей команды -->
+            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 12px; gap: 4px;">
+                <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; font-size: 16px;">🪙 0 Золота</div>
+                <div id="team-fatigue-display" style="color: #ffb3ba; font-size: 12px; font-weight: bold; letter-spacing: 0.5px; background: rgba(40, 15, 15, 0.4); padding: 4px 10px; border: 1px solid #5c2323; border-radius: 4px;">🥱 Усталость команды: 0%</div>
+            </div>
             
             <div class="menu-row">
                 <button id="to-combat-btn" class="menu-btn">В БОЙ</button>
@@ -84,19 +87,19 @@
                 <button id="to-squad-btn" class="menu-btn">🏙️ Цитадель</button>
             </div>
             <div class="menu-row">
-                <button id="to-storage-btn" class="menu-btn">📦 Склад Цитадели</button>
+                <button id="to-storage-btn" class="menu-btn">📦 Склад</button>
             </div>
             <div class="menu-row">
-                <button id="to-missions-btn" class="menu-btn">📜 Городское Поручение</button>
+                <button id="to-missions-btn" class="menu-btn">📜 Поручения</button>
             </div>
             <div class="menu-row">
-                <button id="to-chronicle-btn" class="menu-btn">📜 Летопись Событий</button>
+                <button id="to-chronicle-btn" class="menu-btn">📖 Летопись</button>
             </div>
             <div class="menu-row">
                 <button id="to-clans-btn" class="menu-btn">🛡️ Кланы</button>
             </div>
             
-            <div id="game-version" class="version-footer">v3.7.2-BETA</div>
+            <div id="game-version" class="version-footer">v3.7.4-BETA</div>
         </div>
 
         <!-- ================= ОКНО НАСТРОЕК ================= -->
@@ -150,4 +153,3 @@
     </div>
 </body>
 </html>
-
