@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.9.10-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.9.11-BETA)
    ========================================================================== */
 
 const TOWN_BUILDING_PRICES = {
@@ -33,7 +33,11 @@ const INLINE_TOWN_TEXTS = {
 };
 
 const INLINE_MODE_DESCRIPTIONS = {
-    clans: { title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", reqText: "Знамена великих гильдий замерли под сводами залов безмолвия. Здесь куется коллективное Величие фракций, координируются рейды, возводятся Врата Разломов, а также открывается Древняя Кузня!<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Клановый шлюз открывается на 12-м уровне развития отряда!</strong>", isLocked: true },
+    clans: { 
+        title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", 
+        reqText: "Знамена великих гильдий замерли под сводами залов безмолвия. Нас ждут Хроники Разломов и великие клановые приключения!<br><br>🛡️ <strong>Что дадут Кланы:</strong><br>• 🌌 <strong>Врата Разломов:</strong> Строительство порталов для совместных рейдов в другие измерения.<br>• ⚔️ <strong>Битвы с Боссами:</strong> Глобальные сражения с великими змеями и тиранами ради мифических наград.<br>• 🔨 <strong>Древний Кузнец:</strong> Перенесенный мастер кузни выкует неразрушимые доспехи и разящее оружие из костей чудовищ.<br>• ⚖️ <strong>Торговый Шлюз и Купцы:</strong> Появление бродячих торговцев и возможность обмениваться редкими товарами и ресурсами с соклановцами.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Клановый шлюз открывается на 12-м уровне развития отряда!</strong>", 
+        isLocked: true 
+    },
     alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", isLocked: false, isHero: false, heroId: "alchemy", lore: "Полки уставлены древними фолиантами и склянками со светящимися эссенциями. Необходима для будущей дистилляции и переплавки драконьих ресурсов." },
     tank: { title: "🛡️ ГАРНИЗОН", isLocked: false, isHero: true, heroId: "tank" },
     damage: { title: "🔥 КАЗАРМЫ", isLocked: false, isHero: true, heroId: "damage" },
@@ -76,7 +80,7 @@ window.openModeDescription = function(id) {
         if (bldLvl === 0) {
             let price = TOWN_BUILDING_PRICES[1];
             textEl.innerHTML = `${loreText}${instructionText}${bonusText}`;
-            if (buyBtn) { buyBtn.style.display = 'block'; buyBtn.innerText = `⚒️ ПОСТРОИТЬ (🪙 ${price.toLocaleString('ru-RU')})`; }
+            if (buyBtn) { buyBtn.style.display = 'block'; buyBtn.innerText = `⚒️ ПОСТРОИТЬ (🪙 ${price})`; }
         } else if (bldLvl >= 15) {
             textEl.innerHTML = `${loreText}<br><br><span style='color:#2ecc71;'>Максимальный 15 уровень модернизации здания достигнут! Лимиты расширены до предела.</span>`;
             if (buyBtn) buyBtn.style.display = 'none';
