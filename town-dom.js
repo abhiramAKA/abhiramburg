@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ГЛОБАЛЬНАЯ ГРАФИЧЕСКАЯ ФАБРИКА ГОРОДСКИХ ИНТЕРФЕЙСОВ (v4.6.0-BETA)
+   КХАМАЧ — ГЛОБАЛЬНАЯ ГРАФИЧЕСКАЯ ФАБРИКА ГОРОДСКИХ ИНТЕРФЕЙСОВ (v4.7.0-BETA)
    ========================================================================== */
 
 function injectTownScreensDOM() {
@@ -7,7 +7,6 @@ function injectTownScreensDOM() {
     if (!container) return;
 
     container.innerHTML = `
-        <!-- ================= ОКНО ВЫБОРА ДРАКОНА ================= -->
         <div id="dragon-select-screen" class="game-window" style="display: none;">
             <h2>ДОСКА ОБЪЯВЛЕНИЙ ОХОТЫ</h2>
             <span class="subtitle">24 Бестиария Горнила</span>
@@ -16,15 +15,13 @@ function injectTownScreensDOM() {
             <button id="from-select-to-menu-btn" class="menu-btn back-btn" style="margin-top: 0; width: 100%;">Назад в меню</button>
         </div>
 
-        <!-- ================= ЭКРАН СПРАВКИ МЕНЮ ================= -->
         <div id="info-screen" class="game-window" style="display: none;">
             <h2>КОНТЕКСТНАЯ СПРАВКА</h2>
-            <span class="subtitle">Base Инструктаж</span>
+            <span class="subtitle">Базовый Инструктаж</span>
             <p id="info-screen-text">Загрузка правил...</p>
             <button id="from-info-to-menu-btn" class="menu-btn back-btn">Назад в меню</button>
         </div>
 
-        <!-- ================= ОКНО ОПИСАНИЙ ЗДАНИЙ И РЕЖИМОВ ================= -->
         <div id="mode-desc-screen" class="game-window" style="display: none; padding: 25px 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; width: 100%;">
                 <h2 id="mode-desc-title" style="margin: 0; font-size: 20px;">РЕЖИМ ИГРЫ</h2>
@@ -35,7 +32,6 @@ function injectTownScreensDOM() {
             <button id="mode-buy-btn" class="menu-btn" style="margin-top: 15px; background: linear-gradient(to bottom, #1d421e 0%, #102411 100%); border-color: #316e34; color: #aae6ab;">⚒️ ПОСТРОИТЬ ЗДЕНИЕ (100 🪙)</button>
         </div>
 
-        <!-- ================= ОКНО НАСТРОЕК ЗВУКА ================= -->
         <div id="settings-screen" class="game-window" style="display: none; padding: 20px;">
             <h2>ЗВУКОВОЙ ПУЛЬТ</h2>
             <span class="subtitle">Микшер Абхирамбурга</span>
@@ -52,16 +48,14 @@ function injectTownScreensDOM() {
             <button id="close-settings-btn" class="menu-btn back-btn" style="width: 100%;">Сохранить настройки</button>
         </div>
 
-        <!-- ================= ОКНО СКЛАДА ЦИТАДЕЛИ (ПЕРЕНЕСЕНО СЮДА) ================= -->
         <div id="storage-screen" class="game-window" style="display: none;">
-            <h2>СКЛАД ХРАНИЛИЩА</h2>
+            <h2>СКЛАД ЦИТАДЕЛИ</h2>
             <span class="subtitle">Учет Ресурсов и Трофеев</span>
             <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🪙 0 Золота</div>
             <div id="storage-resources-list" style="background: rgba(0, 0, 0, 0.4); border: 1px double #544432; padding: 15px; margin-bottom: 15px; border-radius: 4px; text-align: left;"></div>
             <button id="close-storage-btn" class="menu-btn back-btn" style="width: 100%;">Назад в меню</button>
         </div>
 
-        <!-- ================= ОКНО ПОРУЧЕНИЙ ================= -->
         <div id="missions-screen" class="game-window" style="display: none;">
             <h2>ГОРОДСКОЕ ПОРУЧЕНИЕ</h2>
             <span class="subtitle">Доска Объявлений Абхирамбурга</span>
@@ -70,7 +64,6 @@ function injectTownScreensDOM() {
             <button id="close-missions-btn" class="menu-btn back-btn" style="width: 100%; margin-top: 0;">Назад в меню</button>
         </div>
 
-        <!-- ================= ОКНО ЛЕТОПИСИ ================= -->
         <div id="chronicle-screen" class="game-window" style="display: none;">
             <h2>ЛЕТОПИСЬ ЦИТАДЕЛИ</h2>
             <span class="subtitle">Архив Истории Абхирамбурга</span>
@@ -79,7 +72,6 @@ function injectTownScreensDOM() {
             <button id="close-chronicle-btn" class="menu-btn back-btn" style="width: 100%; margin-top: 0;">Назад в меню</button>
         </div>
 
-        <!-- ================= ОКНО ИНДИВИДУАЛЬНОЙ УСТАЛОСТИ ================= -->
         <div id="squad-fatigue-screen" class="game-window combat-help-popup" style="display: none;">
             <div class="combat-help-content" style="max-width: 400px; padding: 20px 25px;">
                 <h2>СОСТОЯНИЕ ОТРЯДА</h2>
@@ -89,30 +81,18 @@ function injectTownScreensDOM() {
             </div>
         </div>
 
-        <!-- ================= НОВОЕ ОКНО МОДЕРНИЗАЦИИ ВОИНОВ ОТРЯДА ================= -->
         <div id="squad-heroes-spec-screen" class="game-window" style="display: none; padding: 20px 15px;">
             <h2>ВАШ ОТРЯД</h2>
             <span class="subtitle" style="margin-bottom: 10px;">Прокачка и тренировка бойцов</span>
-            <!-- Сетка карточек персонажей -->
-            <div id="heroes-upgrade-list-container" style="display: flex; flex-direction: column; gap: 6px; max-height: 52vh; overflow-y: auto; padding-right: 2px;">
-                <!-- Динамический инжект карточек из town-engine.js -->
-            </div>
+            <div id="heroes-upgrade-list-container" style="display: flex; flex-direction: column; gap: 6px; max-height: 52vh; overflow-y: auto; padding-right: 2px;"></div>
             <button id="close-heroes-spec-btn" class="menu-btn back-btn" style="width: 100%; margin-top: 10px; padding: 12px;">Назад в меню</button>
         </div>
 
-        <!-- ================= ОКНО ИНСТРУКТАЖА ПЕРВОГО БОЯ ================= -->
         <div id="welcome-palace-screen" class="game-window combat-help-popup" style="display: none;">
             <div class="combat-help-content" style="max-width: 420px; padding: 25px;">
                 <h2>ПРИВЕТСТВИЕ</h2>
                 <span class="subtitle">Хроники Абхирамбурга</span>
-                <p style="font-size: 14px; color: #e6c280; text-align: left; line-height: 1.6; margin-bottom: 15px;">
-                    Добро пожаловать в мрачные чертоги тактической ролевой стратегии <strong>«КХАМАЧ»</strong>! 
-                </p>
-                <div style="font-size: 12px; color: #cdb38c; text-align: left; line-height: 1.5; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.4); padding: 12px; border: 1px dashed #8a7350; border-radius: 4px;">
-                    <div>• ⚔️ <strong>Боевые Рейды:</strong> Собирайте руны стихий три в ряд, чтобы заряжать суперсилы героев и сокрушать великих драконов.</div>
-                    <div>• ⛺ <strong>Развитие Цитадели:</strong> Повышайте уровни лагерей за золото и добытые в бою стихийные трофеи ящеров.</div>
-                    <div>• 📜 <strong>Поручения:</strong> Отправляйте свободных бойцов на городские задания ради добычи монет, но следите за их общей 🥱 усталостью!</div>
-                </div>
+                <p style="font-size: 14px; color: #e6c280; text-align: left; line-height: 1.6; margin-bottom: 15px;">Добро пожаловать в мрачные чертоги тактической ролевой стратегии <strong>«КХАМАЧ»</strong>!</p>
                 <button id="close-welcome-palace-btn" class="menu-btn" style="margin-top: 20px; width: 100%; background: linear-gradient(to bottom, #1d3a1e, #0f2110); border-color: #316e34;">Принять командование</button>
             </div>
         </div>
