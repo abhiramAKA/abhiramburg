@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.7.6-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.7.9-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v4.7.6-BETA";
+const GAME_VERSION = "v4.7.9-BETA";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
@@ -26,10 +26,11 @@ let combatData = {
 let match3BoardData =;
 let selectedCell = null;
 let selectedDragonLevel = 1;
-let currentOpenedModeKey = null;
+
+// Жесткая глобальная привязка ключа окна для избежания ReferenceError в других модулях
+window.currentOpenedModeKey = null;
 
 function sanitizeAndMigrateStorage() {
-    // Сохраняем ТОЛЬКО чистый игровой прогресс
     const currentGold = localStorage.getItem('khamach_gold') || '0';
     const currentMaxTier = localStorage.getItem('khamach_max_tier') || '1';
     
@@ -38,7 +39,6 @@ function sanitizeAndMigrateStorage() {
     const scale = localStorage.getItem('khamach_res_scale') || '0';
     const tears = localStorage.getItem('khamach_res_tears') || '0';
 
-    // Тотально уничтожаем текстовые HTML-бэкапы старых интерфейсов
     const toxicKeys = [
         'GAME_TEXTS', 'town_dom_backup', 'main_menu_html_v2', 
         'khamach_menu_backup', 'town_dom_html', 'town_dom_backup_html',
@@ -46,7 +46,6 @@ function sanitizeAndMigrateStorage() {
     ];
     toxicKeys.forEach(k => localStorage.removeItem(k));
 
-    // Возвращаем на место чистый прогресс игрока
     localStorage.setItem('khamach_gold', currentGold);
     localStorage.setItem('khamach_max_tier', currentMaxTier);
     localStorage.setItem('khamach_res_plasma', plasma);
@@ -56,7 +55,6 @@ function sanitizeAndMigrateStorage() {
 }
 
 function initDispatcherModule() {
-    // Принудительное выжигание старого кэша разметки
     sanitizeAndMigrateStorage();
 
     if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
