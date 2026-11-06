@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.8.4-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.8.5-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v4.8.4-BETA";
+const GAME_VERSION = "v4.8.5-BETA";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
@@ -23,7 +23,7 @@ let combatData = {
     ]
 };
 
-let match3BoardData =;
+let match3BoardData = [];
 let selectedCell = null;
 let selectedDragonLevel = 1;
 
