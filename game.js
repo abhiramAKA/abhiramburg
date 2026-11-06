@@ -45,6 +45,10 @@ function sanitizeAndMigrateStorage() {
     ];
     toxicKeys.forEach(k => localStorage.removeItem(k));
 
+    // Сброс триггеров для принудительного вызова лаконичных окон обучения
+    localStorage.removeItem('khamach_combat_tutorial_done');
+    localStorage.removeItem('khamach_combo_tut_done');
+
     localStorage.setItem('khamach_gold', currentGold);
     localStorage.setItem('khamach_max_tier', currentMaxTier);
     localStorage.setItem('khamach_res_plasma', plasma);
