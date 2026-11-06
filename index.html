@@ -9,7 +9,7 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            const versionMarker = "v3.4.1";
+            const versionMarker = "v3.4.2";
             
             const link = document.createElement('link');
             link.rel = 'stylesheet';
@@ -36,7 +36,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Модули v3.4.1 успешно загружены.");
+                    console.log("КХАМАЧ: Модули v3.4.2 успешно загружены.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -77,7 +77,7 @@
                 <button id="info-btn" class="info-btn">❓</button>
             </div>
             <div class="menu-row">
-                <button id="to-squad-btn" class="menu-btn">🏙️ ГОРОД</button>
+                <button id="to-squad-btn" class="menu-btn">🏙️ Цитадель</button>
             </div>
             <div class="menu-row">
                 <button id="to-storage-btn" class="menu-btn">📦 Склад Цитадели</button>
@@ -89,16 +89,10 @@
                 <button id="to-chronicle-btn" class="menu-btn">📜 Летопись Событий</button>
             </div>
             <div class="menu-row">
-                <button id="to-alchemy-btn" class="menu-btn">🧪 Лаборатория</button>
-            </div>
-            <div class="menu-row">
-                <button id="to-forge-btn" class="menu-btn">⚒️ Кузня</button>
-            </div>
-            <div class="menu-row">
                 <button id="to-clans-btn" class="menu-btn">🛡️ Кланы</button>
             </div>
             
-            <div id="game-version" class="version-footer">v3.4.1-BETA</div>
+            <div id="game-version" class="version-footer">v3.4.2-BETA</div>
         </div>
 
         <!-- ================= ОКНО НАСТРОЕК ================= -->
