@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.9.13-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.9.14-BETA)
    ========================================================================== */
 
 window.closeModeDescriptionUnified = function() {
@@ -20,6 +20,20 @@ window.closeModeDescriptionUnified = function() {
 function setupAllGameListeners() {
     document.onclick = null;
     document.body.onclick = null;
+
+    // ПАТТЕРН ДЕЛЕГИРОВАНИЯ: Намертво привязываем клик Клана к контейнеру Главного меню
+    const mainMenuEl = document.getElementById('main-menu');
+    if (mainMenuEl) {
+        mainMenuEl.onclick = function(e) {
+            if (e.target && e.target.id === 'to-clans-btn') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof openModeDescription === 'function') {
+                    openModeDescription('clans');
+                }
+            }
+        };
+    }
 
     const toCombatBtn = document.getElementById('to-combat-btn');
     if (toCombatBtn) toCombatBtn.onclick = function() { showScreen('dragon-select-screen'); };
@@ -73,15 +87,6 @@ function setupAllGameListeners() {
             document.getElementById('settings-screen').style.display = 'none';
             document.getElementById('main-menu').style.display = 'flex';
             if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
-        };
-    }
-    
-    const toClansBtn = document.getElementById('to-clans-btn');
-    if (toClansBtn) {
-        toClansBtn.onclick = function() {
-            if (typeof openModeDescription === 'function') {
-                openModeDescription('clans');
-            }
         };
     }
     
