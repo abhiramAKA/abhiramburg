@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ОБНОВЛЕН - v3.3.1-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v3.6.1-BETA)
    ========================================================================== */
 
 function setupAllGameListeners() {
@@ -26,43 +26,57 @@ function setupAllGameListeners() {
         toSettingsBtn.addEventListener('click', () => {
             document.getElementById('volume-music-slider').value = (parseFloat(localStorage.getItem('khamach_vol_music') || '0.5') * 100);
             document.getElementById('volume-fx-slider').value = (parseFloat(localStorage.getItem('khamach_vol_fx') || '0.7') * 100);
-            
             if (typeof initAudioContext === 'function') initAudioContext();
-            
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('settings-screen').style.display = 'flex';
         });
     }
 
-    document.getElementById('volume-music-slider').addEventListener('input', (e) => {
-        if (typeof updateEngineVolumeValues === 'function') updateEngineVolumeValues('music', e.target.value);
-    });
-    document.getElementById('volume-fx-slider').addEventListener('input', (e) => {
-        if (typeof updateEngineVolumeValues === 'function') updateEngineVolumeValues('fx', e.target.value);
-    });
+    const musicSlider = document.getElementById('volume-music-slider');
+    if (musicSlider) {
+        musicSlider.addEventListener('input', (e) => {
+            if (typeof updateEngineVolumeValues === 'function') updateEngineVolumeValues('music', e.target.value);
+        });
+    }
     
-    document.getElementById('volume-fx-slider').addEventListener('change', () => {
-        if (typeof playMatch3Sound === 'function') playMatch3Sound('swap');
-    });
+    const fxSlider = document.getElementById('volume-fx-slider');
+    if (fxSlider) {
+        fxSlider.addEventListener('input', (e) => {
+            if (typeof updateEngineVolumeValues === 'function') updateEngineVolumeValues('fx', e.target.value);
+        });
+        fxSlider.addEventListener('change', () => {
+            if (typeof playMatch3Sound === 'function') playMatch3Sound('swap');
+        });
+    }
 
-    document.getElementById('close-settings-btn').addEventListener('click', () => {
-        document.getElementById('settings-screen').style.display = 'none';
-        document.getElementById('main-menu').style.display = 'flex';
-        if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
-    });
+    const closeSettingsBtn = document.getElementById('close-settings-btn');
+    if (closeSettingsBtn) {
+        closeSettingsBtn.addEventListener('click', () => {
+            document.getElementById('settings-screen').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'flex';
+            if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
+        });
+    }
     
-    document.getElementById('to-forge-btn').addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('forge'); });
-    document.getElementById('to-alchemy-btn').addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('alchemy'); });
-    document.getElementById('to-clans-btn').addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('clans'); });
-    document.getElementById('to-squad-btn').addEventListener('click', () => showScreen('squad-screen'));
-    document.getElementById('close-mode-desc-btn').addEventListener('click', () => showScreen('main-menu'));
+    const toForge = document.getElementById('to-forge-btn');
+    if (toForge) toForge.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('forge'); });
+    
+    const toAlchemy = document.getElementById('to-alchemy-btn');
+    if (toAlchemy) toAlchemy.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('alchemy'); });
+    
+    const toClans = document.getElementById('to-clans-btn');
+    if (toClans) toClans.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('clans'); });
+    
+    const toSquadBtn = document.getElementById('to-squad-btn');
+    if (toSquadBtn) toSquadBtn.addEventListener('click', () => showScreen('squad-screen'));
+    
+    const closeModeDesc = document.getElementById('close-mode-desc-btn');
+    if (closeModeDesc) closeModeDesc.addEventListener('click', () => showScreen('main-menu'));
 
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
     if (leaveCombatBtn) {
         leaveCombatBtn.addEventListener('click', () => {
-            if (confirm("Вы уверены, что хотите сбежать из рейда?")) {
-                showScreen('main-menu');
-            }
+            if (confirm("Вы уверены, что хотите сбежать из рейда?")) showScreen('main-menu');
         });
     }
 
@@ -78,7 +92,6 @@ function setupAllGameListeners() {
     const closeMissionsBtn = document.getElementById('close-missions-btn');
     if (closeMissionsBtn) closeMissionsBtn.addEventListener('click', () => showScreen('main-menu'));
 
-    // Исправлено: добавлены слушатели для кнопки Летописи на главном экране
     const toChronicleBtn = document.getElementById('to-chronicle-btn');
     if (toChronicleBtn) toChronicleBtn.addEventListener('click', () => showScreen('chronicle-screen'));
 
