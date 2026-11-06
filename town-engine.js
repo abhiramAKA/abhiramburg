@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.4.0-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.5.0-BETA)
    ========================================================================== */
 
 const INLINE_TOWN_TEXTS = {
@@ -11,9 +11,8 @@ const INLINE_TOWN_TEXTS = {
 const INLINE_MODE_DESCRIPTIONS = {
     forge: { title: "⚒️ ДРЕВНЯЯ КУЗНЯ", reqText: "В полумраке кузницы тяжело вздыхают мехи. Здесь из костей и чешуи великих ящеров куется мифический доспех, не знающий износа.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Кузня открывается только на 12-м уровне развития отряда!</strong>", isLocked: true },
     clans: { title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", reqText: "Знамена великих гильдий замерли под сводами залов безмолвия. Здесь куется коллективное Величие фракций, координируются рейды и возводятся Врата Разломов в другие измерения.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Клановый шлюз открывается на 12-м уровне развития отряда!</strong>", isLocked: true },
-    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", buyText: "Полки уставлены древними фолиантами и склянками со светящимися эссенциями. Лаборатории требуется закупка редких реагентов за 100 🪙.", activeText: "Реагенты закуплены. Лаборатория полностью готова дистиллировать эссенции драконов.", isLocked: false, isHero: false },
+    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", buyText: "Полки уставлены древними фолиантами и склянками со светящимися эссенциями. Лаборатории требуется постройка рунического очага реагентов за 100 🪙.", activeText: "Реагенты закуплены. Лаборатория полностью готова дистиллировать эссенции драконов.", isLocked: false, isHero: false },
     
-    // Перенос персонажей на рельсы фабрики описаний
     tank: { title: "🛡️ ГАРНИЗОН", isLocked: false, isHero: true, heroId: "tank" },
     damage: { title: "🔥 КАЗАРМЫ", isLocked: false, isHero: true, heroId: "damage" },
     archer: { title: "⚡ СТРЕЛЬБИЩЕ", isLocked: false, isHero: true, heroId: "archer" },
@@ -52,7 +51,6 @@ window.openModeDescription = function(modeKey) {
         textEl.innerHTML = `<p>${modeData.reqText}</p>`;
         buyBtn.style.display = 'none';
     } else if (modeData.isHero) {
-        // Логика отрисовки для персонажей отряда
         const hId = modeData.heroId;
         const isPurchased = localStorage.getItem(`khamach_squad_build_${hId}`) === 'true';
         const currentLvl = parseInt(localStorage.getItem(`khamach_build_${hId}`) || '0');
@@ -61,9 +59,9 @@ window.openModeDescription = function(modeKey) {
         if (!loreData) return;
 
         if (!isPurchased) {
-            textEl.innerHTML = `<p>${loreData.lore}</p><p style='color:#cdb38c;'>Постройка не возведена. Требуется мгновенный выкуп.</p>`;
+            textEl.innerHTML = `<p>${loreData.lore}</p><p style='color:#cdb38c;'>Постройка не возведена. Требуется мгновенное возведение.</p>`;
             buyBtn.style.display = 'block';
-            buyBtn.innerText = `⚒️ ВОЗВЕСТИ СТРОЕНИЕ (100 🪙)`;
+            buyBtn.innerText = `⚒️ ПОСТРОИТЬ ЗДЕНИЕ (100 🪙)`;
         } else if (currentLvl >= 15) {
             textEl.innerHTML = `<p>${loreData.title}</p><p style='color:#ffd700;'>Достигнут максимальный уровень тренировок (15 ур)!<br>Текущий бонус: ${loreData.statBonus}</p>`;
             buyBtn.style.display = 'none';
@@ -84,12 +82,11 @@ window.openModeDescription = function(modeKey) {
             buyBtn.innerText = `🏋️ НАЧАТЬ ТРЕНИРОВКУ (150 🪙)`;
         }
     } else {
-        // Обычные постройки (Лаборатория)
         const purchased = window.isBuildingPurchased(modeKey);
         if (!purchased) {
             textEl.innerHTML = `<p>${modeData.buyText}</p>`;
             buyBtn.style.display = 'block';
-            buyBtn.innerText = `🛒 ВЫКУПИТЬ ЗДЕНИЕ (100 🪙)`;
+            buyBtn.innerText = `⚒️ ПОСТРОИТЬ ЗДЕНИЕ (100 🪙)`;
         } else {
             textEl.innerHTML = `<p>${modeData.activeText}</p><p style='color:#2ecc71;'>Здание успешно функционирует в вашей цитадели!</p>`;
             buyBtn.style.display = 'none';
