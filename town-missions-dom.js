@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ГРАФИЧЕСКИЙ МОДУЛЬ ИНТЕРФЕЙСА ПОРУЧЕНИЙ (v1.0.0-BETA)
+   КХАМАЧ — ГРАФИЧЕСКИЙ МОДУЛЬ ИНТЕРФЕЙСА ПОРУЧЕНИЙ (ОБНОВЛЕН - v1.1.0-BETA)
    ========================================================================== */
 
 function renderMissionsDOM() {
@@ -14,10 +14,11 @@ function renderMissionsDOM() {
         try { currentTriad = JSON.parse(activeMissionsJSON); } catch(e) { currentTriad = []; }
     }
     
-    if (!currentTriad || currentTriad.length !== 3) {
+    // Формируем пул строго из 2-х случайных поручений взамен 3-х
+    if (!currentTriad || currentTriad.length !== 2) {
         currentTriad = [];
         let tempPool = [...CITY_MISSIONS_POOL];
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 2; i++) {
             if (tempPool.length === 0) tempPool = [...CITY_MISSIONS_POOL];
             const randIdx = Math.floor(Math.random() * tempPool.length);
             currentTriad.push(tempPool[randIdx].id);
@@ -25,6 +26,9 @@ function renderMissionsDOM() {
         }
         localStorage.setItem('khamach_active_triad_ids', JSON.stringify(currentTriad));
     }
+    
+    // Проверяем, есть ли ХОТЬ ОДНО выполняющееся поручение в Цитадели
+    let globalMissionActive = currentTriad.some(mId => localStorage.getItem(`khamach_mission_active_${mId}`) === 'true');
     
     const costData = getCurrentResetResourceCost();
     const currentResCount = typeof getPlayerResource === 'function' ? getPlayerResource(costData.key) : 0;
@@ -69,10 +73,14 @@ function renderMissionsDOM() {
                 const sec = Math.floor((remaining % 60000) / 1000);
                 actionHTML = `<div style="color:#ff4500; font-weight:bold; font-size:11px; text-align:center; padding:4px; border:1px dashed #ff4500;">⏱️ В пути: ${min.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}</div>`;
             }
+        } else if (globalMissionActive) {
+            // Если в Цитадели уже запущен один контракт, блокируем остальные кнопки
+            actionHTML = `<button class="menu-btn disabled" style="padding:4px; font-size:11px;" disabled>Очередь занята</button>`;
         } else if (isHeroBusy) {
             actionHTML = `<button class="menu-btn disabled" style="padding:4px; font-size:11px;" disabled>Боец занят</button>`;
         } else {
-            actionHTML = `<button class="menu-btn" style="padding:4px; font-size:11px; background:#1d3a1e; height:28px;" onclick="startMission('${mission.id}', '${mission.allowedHero}', ${calculatedReward})">Отправить ${mission.heroName}</button>`;
+            // На кнопке оставляем строго значок стихии без слов
+            actionHTML = `<button class="menu-btn" style="padding:4px; font-size:14px; background:#1d3a1e; height:28px;" onclick="startMission('${mission.id}', '${mission.allowedHero}', ${calculatedReward})">Отправить ${mission.heroIcon}</button>`;
         }
         
         card.innerHTML = `
@@ -81,7 +89,7 @@ function renderMissionsDOM() {
                 <span style="color: #ffd700;">🪙 ${calculatedReward} <span style="font-size:9px; color:#8a7350; font-weight:normal;">(база: ${mission.reward})</span></span>
             </div>
             <div style="font-size: 11px; color: #bfae96; line-height: 1.2;">${mission.text}</div>
-            <div style="font-size: 10px; color: #ffb3ba;">🥱 Свежесть ${mission.heroName}: Усталость ${currentFatigue}% (Доход: ${Math.round(reductionMultiplier * 100)}%)</div>
+            <div style="font-size: 10px; color: #ffb3ba;">Усталость: ${currentFatigue}% (Доход: ${Math.round(reductionMultiplier * 100)}%)</div>
             <div style="margin-top: 2px;">${actionHTML}</div>
         `;
         container.appendChild(card);
