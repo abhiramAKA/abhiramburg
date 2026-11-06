@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.9.16-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.9.17-BETA)
    ========================================================================== */
 
 window.closeModeDescriptionUnified = function() {
@@ -36,7 +36,11 @@ function setupAllGameListeners() {
 
             if (clansBtn) {
                 e.preventDefault(); e.stopPropagation();
-                if (typeof openModeDescription === 'function') openModeDescription('clans');
+                if (typeof window.openModeDescription === 'function') {
+                    window.openModeDescription('clans');
+                } else if (typeof openModeDescription === 'function') {
+                    openModeDescription('clans');
+                }
             } else if (combatBtn) {
                 showScreen('dragon-select-screen');
             } else if (settingsBtn) {
