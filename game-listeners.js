@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.8.9-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.9.0-BETA)
    ========================================================================== */
 
 window.closeModeDescriptionUnified = function() {
@@ -98,7 +98,11 @@ function setupAllGameListeners() {
     if (closeStorageBtn) closeStorageBtn.onclick = function() { showScreen('main-menu'); };
 
     const toMissionsBtn = document.getElementById('to-missions-btn');
-    if (toMissionsBtn) toMissionsBtn.onclick = function() { showScreen('missions-screen'); };
+    if (toMissionsBtn) {
+        toMissionsBtn.onclick = function() {
+            showScreen('missions-screen');
+        };
+    }
     
     const closeMissionsBtn = document.getElementById('close-missions-btn');
     if (closeMissionsBtn) closeMissionsBtn.onclick = function() { showScreen('main-menu'); };
@@ -120,7 +124,7 @@ function setupAllGameListeners() {
     if (clearChronicleBtn) {
         clearChronicleBtn.onclick = function() {
             if (confirm("Очистить все записи в Летописи Цитадели?")) {
-                localStorage.setItem('khamach_chronicle_logs', JSON.stringify());
+                localStorage.setItem('khamach_chronicle_logs', JSON.stringify(new Array()));
                 if (typeof renderChronicleDOM === 'function') renderChronicleDOM();
             }
         };
@@ -151,7 +155,6 @@ function setupAllGameListeners() {
         };
     }
 
-    if (typeof setupSquadInterfaceListeners === 'function') setupSquadInterfaceListeners();
     setupCombatHelpListeners();
 }
 
