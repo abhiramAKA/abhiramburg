@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ГЕНЕРАТОР ИНТЕРФЕЙСА ВНУТРИ ЦИТАДЕЛИ (ОБНОВЛЕН - v3.4.2-BETA)
+   КХАМАЧ — ГЕНЕРАТОР ИНТЕРФЕЙСА ВНУТРИ ЦИТАДЕЛИ (ОБНОВЛЕН - v4.0.0-BETA)
    ========================================================================== */
 
 const SQUAD_HERO_LORE = {
@@ -30,7 +30,7 @@ const SQUAD_HERO_LORE = {
         statBonus: "+10 к урону молнии за уровень",
         lore: "Его стрелы оперены чешуей драконов света, а тетива поет песнь молний. Метким выстрелом Следопыт способен ослепить чудовище."
     },
-    mage: {
+    damage_mage: { // ключ изменен во избежание конфликта со старыми сохранениями
         name: "💚 Обитель магов",
         title: "💚 ОТРИЦАТЕЛЬ СМЕРТИ (МАГ)",
         resourceKey: "tears",
@@ -47,17 +47,19 @@ function injectSquadInterfaceDOM() {
 
     screen.innerHTML = `
         <h1>Цитадель</h1>
-        <span class="subtitle">Инфраструктура и Кварталы Построек</span>
-        <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🪙 0 Золота</div>
+        <span class="subtitle">Инфраструктура строений</span>
         
-        <div id="squad-inventory-lookup" style="background: rgba(0, 0, 0, 0.4); border: 1px dashed #544432; padding: 6px; margin-bottom: 12px; font-size: 11px; border-radius: 4px;"></div>
+        <!-- Интерактивный дашборд ресурсов в шапке Цитадели, зеркальный Главному Меню -->
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; font-size: 16px; font-weight: bold; background: rgba(30, 20, 15, 0.4); padding: 6px 14px; border: 1px double #544432; border-radius: 4px; border-left: none; border-right: none;">
+            <span id="squad-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffd700'">🪙 0 Золота</span>
+            <span style="color: #4a3e31; font-weight: normal;">|</span>
+            <span id="squad-fatigue-display" style="color: #ffb3ba; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffb3ba'">🥱 0%</span>
+        </div>
         
+        <!-- Единый строгий готический вертикальный ряд кнопок без лишнего текста -->
         <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-height: 48vh; overflow-y: auto; padding-right: 4px;">
-            <div style="color: #e6c280; font-size: 12px; font-weight: bold; text-align: left; border-bottom: 1px solid #3a3025; padding-bottom: 2px;">⚒️ ГОРОДСКИЕ КВАРТАЛЫ</div>
-            <div class="menu-row"><button id="city-forge-btn" class="menu-btn" style="background: linear-gradient(to bottom, #2a1f1a, #15100e);">⚒️ Древняя кузня</button></div>
-            <div class="menu-row"><button id="city-alchemy-btn" class="menu-btn" style="background: linear-gradient(to bottom, #1a252a, #0e151a);">🧪 Лаборатория алхимии</button></div>
-            
-            <div style="color: #e6c280; font-size: 12px; font-weight: bold; text-align: left; border-bottom: 1px solid #3a3025; padding-bottom: 2px; margin-top: 6px;">⛺ ПОЛИГОНЫ ТРЕНИРОВОК</div>
+            <div class="menu-row"><button id="city-forge-btn" class="menu-btn">⚒️ Древняя кузня</button></div>
+            <div class="menu-row"><button id="city-alchemy-btn" class="menu-btn">🧪 Лаборатория алхимии</button></div>
             <div class="menu-row"><button id="upgrade-tank-btn" class="menu-btn">⛺ Лагерь защитников</button></div>
             <div class="menu-row"><button id="upgrade-damage-btn" class="menu-btn">🛡️ Казармы воинов</button></div>
             <div class="menu-row"><button id="upgrade-archer-btn" class="menu-btn">⚡ Стрельбище стрелков</button></div>
