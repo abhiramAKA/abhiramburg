@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ОБНОВЛЕН - v3.0.0-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ОБНОВЛЕН - v3.2.0-BETA)
    ========================================================================== */
 
 function setupAllGameListeners() {
@@ -21,7 +21,6 @@ function setupAllGameListeners() {
     const fromInfoBtn = document.getElementById('from-info-to-menu-btn');
     if (fromInfoBtn) fromInfoBtn.addEventListener('click', () => showScreen('main-menu'));
     
-    // Инициализация ползунков настроек из памяти при открытии панели
     const toSettingsBtn = document.getElementById('to-settings-btn');
     if (toSettingsBtn) {
         toSettingsBtn.addEventListener('click', () => {
@@ -31,16 +30,13 @@ function setupAllGameListeners() {
             document.getElementById('eq-mid-slider').value = parseInt(localStorage.getItem('khamach_eq_mid') || '3');
             document.getElementById('eq-high-slider').value = parseInt(localStorage.getItem('khamach_eq_high') || '0');
             
-            // Принудительно запускаем и возобновляем контекст звука
             if (typeof initAudioContext === 'function') initAudioContext();
             
-            // Метод ручного переключения экрана оверлея
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('settings-screen').style.display = 'flex';
         });
     }
 
-    // Реактивное отслеживание изменений на ползунках микшера частот и громкости
     document.getElementById('volume-music-slider').addEventListener('input', (e) => {
         if (typeof updateEngineVolumeValues === 'function') updateEngineVolumeValues('music', e.target.value);
     });
@@ -78,6 +74,20 @@ function setupAllGameListeners() {
             }
         });
     }
+
+    // Обработчики окна склада цитадели
+    const toStorageBtn = document.getElementById('to-storage-btn');
+    if (toStorageBtn) toStorageBtn.addEventListener('click', () => showScreen('storage-screen'));
+    
+    const closeStorageBtn = document.getElementById('close-storage-btn');
+    if (closeStorageBtn) closeStorageBtn.addEventListener('click', () => showScreen('main-menu'));
+
+    // Обработчики доски городских поручений
+    const toMissionsBtn = document.getElementById('to-missions-btn');
+    if (toMissionsBtn) toMissionsBtn.addEventListener('click', () => showScreen('missions-screen'));
+    
+    const closeMissionsBtn = document.getElementById('close-missions-btn');
+    if (closeMissionsBtn) closeMissionsBtn.addEventListener('click', () => showScreen('main-menu'));
 }
 
 function setupCombatHelpListeners() {
