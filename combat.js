@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БАЛАНСА БОССА (v3.2.5-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БАЛАНСА БОССА (v3.2.7-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -32,7 +32,6 @@ function startCombatSession(level) {
     const tankLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel('tank') : 0;
     const tankHpBonus = tankLvl * 20;
     
-    // Фильтруем боевой состав отряда, исключая воинов, ушедших на городские смены
     combatData.squad = [
         { id: "tank", name: "Танк", hp: 150, maxHP: 150, sp: 0, maxSP: 100, icon: "🛡️", color: "#4a90e2" },
         { id: "damage", name: "Дамагер", hp: 90, maxHP: 90, sp: 0, maxSP: 100, icon: "🔥", color: "#ff4500" },
@@ -65,7 +64,6 @@ function chargeHeroSuperpowers(effects) {
     if (!combatData || !combatData.squad) return;
     combatData.squad.forEach(hero => {
         if (!hero || hero.hp <= 0) return;
-        // Исправлена жесткая привязка иконки лучника к спецсимволу
         let iconKey = hero.icon;
         if (effects && effects[iconKey]) {
             let charge = effects[iconKey] * 6;
@@ -149,7 +147,6 @@ function activateHeroSuperpower(heroId) {
 
 function checkBattleResolution() {
     if (combatData.dragonHP <= 0) {
-        const earnedGold = Math.floor(activeSessionLevel * 50 + Math.random() * 50);
         const lootTypes = ['plasma', 'blood', 'scale', 'tears']; 
         const lootNames = ['🛡️ Плазма', '🔥 Кровь', '🪶 Чешуя', '💚 Слезы'];
         const randIndex = Math.floor(Math.random() * lootTypes.length);
@@ -158,9 +155,8 @@ function checkBattleResolution() {
         let lootName = lootNames[randIndex];
 
         if (typeof addPlayerResource === 'function') addPlayerResource(lootKey, 1);
-        alert(`ВЕЛИКАЯ ПОБЕДА! Дракон Тира ${activeSessionLevel} повержен!\nТрофеи: 🪙 ${earnedGold} Золота!\n📦 На склад Цитадели доставлено: ${lootName} (1 шт).`);
+        alert(`ВЕЛИКАЯ ПОБЕДА! Дракон Тира ${activeSessionLevel} повержен!\n📦 На склад Цитадели доставлено: ${lootName} (1 шт). Золотые монеты за боссов более не выплачиваются!`);
         
-        if (typeof addPlayerGold === 'function') addPlayerGold(earnedGold);
         if (typeof saveCompletedTier === 'function') saveCompletedTier(activeSessionLevel);
         if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
         showScreen('main-menu');
