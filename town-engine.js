@@ -1,10 +1,24 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.9.9-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.9.10-BETA)
    ========================================================================== */
 
-const TOWN_BUILDING_PRICES = [
-    0, 100, 300, 900, 2700, 11000, 30000, 75000, 125000, 200000, 310000, 540000, 850000, 1385000, 2300000, 3590500
-];
+const TOWN_BUILDING_PRICES = {
+    1: 100,
+    2: 300,
+    3: 900,
+    4: 2700,
+    5: 11000,
+    6: 30000,
+    7: 75000,
+    8: 125000,
+    9: 200000,
+    10: 310000,
+    11: 540000,
+    12: 850000,
+    13: 1385000,
+    14: 2300000,
+    15: 3590500
+};
 
 const INLINE_TOWN_TEXTS = {
     mainInfo: `<p><strong>«КХАМАЧ: Восхождение Рейдов»</strong></p><p>В недрах древних подземелий Абхирамбурга пробудился великий закон змея. Соберите свой верный отряд, заряжайте шкалы суперсил через камни стихий и сокрушите огнедышащих тварей в пошаговых тактических битвах Горнила!</p>`,
@@ -62,14 +76,14 @@ window.openModeDescription = function(id) {
         if (bldLvl === 0) {
             let price = TOWN_BUILDING_PRICES[1];
             textEl.innerHTML = `${loreText}${instructionText}${bonusText}`;
-            if (buyBtn) { buyBtn.style.display = 'block'; buyBtn.innerText = `⚒️ ПОСТРОИТЬ (🪙 ${price})`; }
+            if (buyBtn) { buyBtn.style.display = 'block'; buyBtn.innerText = `⚒️ ПОСТРОИТЬ (🪙 ${price.toLocaleString('ru-RU')})`; }
         } else if (bldLvl >= 15) {
             textEl.innerHTML = `${loreText}<br><br><span style='color:#2ecc71;'>Максимальный 15 уровень модернизации здания достигнут! Лимиты расширены до предела.</span>`;
             if (buyBtn) buyBtn.style.display = 'none';
         } else {
             let nextPrice = TOWN_BUILDING_PRICES[bldLvl + 1];
             textEl.innerHTML = `${loreText}${instructionText}<br><br><span style='color:#ffd700;'>Текущий уровень строения: ${bldLvl}</span>${bonusText}`;
-            if (buyBtn) { buyBtn.style.display = 'block'; buyBtn.innerText = `⚒️ УЛУЧШИТЬ ДО УР. ${bldLvl + 1} (🪙 ${nextPrice})`; }
+            if (buyBtn) { buyBtn.style.display = 'block'; buyBtn.innerText = `⚒️ УЛУЧШИТЬ ДО УР. ${bldLvl + 1} (🪙 ${nextPrice.toLocaleString('ru-RU')})`; }
         }
     }
     showScreen('mode-desc-screen');
@@ -77,7 +91,7 @@ window.openModeDescription = function(id) {
 
 window.updateTownGoldDisplay = function() {
     document.querySelectorAll('.gold-counter-display').forEach(el => { 
-        el.innerText = `🪙 ${window.getPlayerGold()}`; 
+        el.innerText = `🪙 ${window.getPlayerGold().toLocaleString('ru-RU')}`; 
     });
     
     const tFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_tank') || '0'));
