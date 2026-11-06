@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ПОЛНОГО РЕНДЕРИНГА БОЕВОГО ИНТЕРФЕЙСА (ОБНОВЛЕН - v2.2.0-BETA)
+   КХАМАЧ — МОДУЛЬ ПОЛНОГО РЕНДЕРИНГА БОЕВОГО ИНТЕРФЕЙСА (ОБНОВЛЕН - v2.6.0-BETA)
    ========================================================================== */
 
 function injectCombatInterfaceBaseDOM() {
@@ -8,14 +8,17 @@ function injectCombatInterfaceBaseDOM() {
 
     container.innerHTML = `
         <!-- ================= БОЕВОЙ ЭКРАН ================= -->
-        <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 10px 15px;">
+        <div id="combat-screen" class="game-window" style="display: none; max-width: 460px; padding: 8px 12px;">
             <div id="dragon-raid-zone" style="position: relative;"></div>
 
-            <!-- ПАНЕЛЬ БОССА -->
+            <!-- ПАНЕЛЬ БОССА С ВЕРХНИМ УПРАВЛЕНИЕМ -->
             <div id="boss-panel" style="margin-bottom: 4px; padding: 4px; position: relative;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
                     <div id="boss-name" style="font-size: 12px; margin: 0;">ДРАКОН НЕКРОСМУТ</div>
-                    <button id="combat-help-btn" class="info-btn" style="width: 24px; height: 24px; font-size: 12px; box-shadow: none; border-radius: 4px;">❓</button>
+                    <div style="display: flex; gap: 4px;">
+                        <button id="combat-help-btn" class="info-btn" style="width: 26px; height: 26px; font-size: 12px; box-shadow: none; border-radius: 4px; padding: 0;">❓</button>
+                        <button id="combat-escape-top-btn" class="info-btn back-btn" style="width: 26px; height: 26px; font-size: 11px; box-shadow: none; border-radius: 4px; margin-top: 0; padding: 0;">❌</button>
+                    </div>
                 </div>
                 <div class="hp-bar-container" style="height: 10px;">
                     <div id="boss-hp-bar" class="hp-bar" style="width: 100%;"></div>
@@ -33,14 +36,10 @@ function injectCombatInterfaceBaseDOM() {
             </div>
 
             <!-- ИНТЕРФЕЙС ОТРЯДА -->
-            <div id="squad-matrix" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 6px;"></div>
+            <div id="squad-matrix" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 4px;"></div>
 
             <!-- ИГРОВОЕ ПОЛЕ MATCH-3 -->
             <div id="match3-board-container" class="match3-board"></div>
-
-            <div style="height: 38px; margin-top: 8px; display: flex; width: 100%;">
-                <button id="leave-combat-btn" class="menu-btn back-btn" style="margin: 0; padding: 0; font-size: 13px; height: 100%;">Сбежать</button>
-            </div>
         </div>
 
         <!-- ================= СПРАВОЧНИК В БОЮ ================= -->
@@ -50,6 +49,23 @@ function injectCombatInterfaceBaseDOM() {
                 <span class="subtitle">Справочник Сил</span>
                 <div id="combat-help-text-container"></div>
                 <button id="close-combat-help-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в бой</button>
+            </div>
+        </div>
+
+        <!-- ================= ОКНО ОБУЧЕНИЯ ПЕРВОГО БОЯ ================= -->
+        <div id="combat-welcome-tutorial-screen" class="game-window combat-help-popup" style="display: none;">
+            <div class="combat-help-content" style="max-width: 420px; padding: 22px; text-align: left;">
+                <h2>ГОРНИЛО РУН</h2>
+                <span class="subtitle" style="margin-bottom: 15px;">Инструктаж предводителя</span>
+                <p style="font-size: 13px; color: #e6c280; line-height: 1.5; margin-bottom: 12px;">
+                    Перед вами боевое поле древнего змея. Обычное перемещение камней не наносит дракону прямого урона! Ваша цель — подчинить себе стихийную энергию рун.
+                </p>
+                <div style="font-size: 12px; color: #cdb38c; line-height: 1.5; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.5); padding: 12px; border: 1px solid #544432; border-radius: 4px; margin-bottom: 15px;">
+                    <div>✨ <strong>Накопление энергии (SP):</strong> Собирайте комбинации из трех и более рун. Каждая сожженная триада питает шкалу ярости конкретного воина: 🔥-Воина, 🛡️-Танка, ⚡-Стрелка или 💚-Мага.</div>
+                    <div>⚡ <strong>Смертоносный ультимейт:</strong> Когда золотая шкала SP на карточке героя заполнится до 100%, она вспыхнет мистическим сиянием. В этот момент <strong>ТАПНИТЕ ПО КАРТОЧКЕ БОЙЦА</strong>, чтобы обрушить на ящера его сокрушительную суперсилу!</div>
+                    <div>🐉 <strong>Внимание:</strong> У вас есть всего 1 Очко Действия на раунд. Тратьте ходы с умом, комбинируйте атаки и следите за здоровьем отряда.</div>
+                </div>
+                <button id="close-combat-tutorial-btn" class="menu-btn" style="width:100%; background: linear-gradient(to bottom, #1d3a1e, #0f2110); border-color: #316e34;">Вступить в бой</button>
             </div>
         </div>
     `;
@@ -116,19 +132,21 @@ function updateCombatInterfaceDOM() {
         let hpPct = (hero.hp / hero.maxHP) * 100;
         let spPct = (hero.sp / hero.maxSP) * 100;
         
-        // Извлекаем уровень воина из localStorage
         const heroLvl = typeof getBuildingLevel === 'function' ? getBuildingLevel(hero.id) : 0;
+        const currentFatigue = Math.min(100, Math.max(0, parseInt(localStorage.getItem(`khamach_fatigue_${hero.id}`) || '0')));
         
         card.innerHTML = `
             <div class="hero-card-avatar" style="color: ${hero.color};">${hero.icon}</div>
             <div class="hero-card-name" style="font-size: 8px; line-height: 1.1;">
-                ${hero.name}<br><span style="color: #ffd700;">Ур. ${heroLvl}</span>
+                ${hero.name}<br>
+                <span style="color: #ffd700;">Ур. ${heroLvl}</span><br>
+                <span style="color: #ffb3ba; font-weight: normal;">🥱 ${currentFatigue}%</span>
             </div>
-            <div class="hero-bar-container">
+            <div class="hero-bar-container" style="height: 11px;">
                 <div class="hero-bar-fill hp-fill" style="width: ${hpPct}%;"></div>
                 <div class="hero-bar-text">${hero.hp}/${hero.maxHP}</div>
             </div>
-            <div class="hero-bar-container" style="border-color: #5c4314; background: #0f0a02;">
+            <div class="hero-bar-container" style="border-color: #5c4314; background: #0f0a02; height: 11px;">
                 <div class="hero-bar-fill sp-fill" style="width: ${spPct}%;"></div>
                 <div class="hero-bar-text" style="color: #ffd700;">SP ${Math.round(spPct)}%</div>
             </div>
@@ -141,4 +159,6 @@ function updateCombatInterfaceDOM() {
         });
         squadMatrix.appendChild(card);
     });
+    
+    if (typeof setupCombatHelpListeners === 'function') setupCombatHelpListeners();
 }
