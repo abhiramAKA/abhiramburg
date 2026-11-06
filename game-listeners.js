@@ -1,6 +1,22 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.5.0-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.5.1-BETA)
    ========================================================================== */
+
+// Глобальный неуязвимый метод контекстного закрытия окон Цитадели по крестику
+window.closeModeDescriptionUnified = function() {
+    const squadScreen = document.getElementById('squad-screen');
+    const isInsideSquad = (squadScreen && squadScreen.style.display !== 'none') || 
+                          ['tank', 'damage', 'archer', 'mage', 'forge', 'alchemy'].includes(currentOpenedModeKey);
+    
+    // Исключение для Кланов — они вызываются только из Главного Меню
+    if (currentOpenedModeKey === 'clans') {
+        showScreen('main-menu');
+    } else if (isInsideSquad) {
+        showScreen('squad-screen');
+    } else {
+        showScreen('main-menu');
+    }
+};
 
 function setupAllGameListeners() {
     const toCombatBtn = document.getElementById('to-combat-btn');
@@ -76,7 +92,9 @@ function setupAllGameListeners() {
     if (closeStorageBtn) closeStorageBtn.addEventListener('click', () => showScreen('main-menu'));
 
     const toMissionsBtn = document.getElementById('to-missions-btn');
-    if (toMissionsBtn) toMissionsBtn.addEventListener('click', () => showScreen('missions-screen'));
+    if (toMissionsBtn) {
+        toMissionsBtn.addEventListener('click', () => showScreen('missions-screen'));
+    }
     
     const closeMissionsBtn = document.getElementById('close-missions-btn');
     if (closeMissionsBtn) closeMissionsBtn.addEventListener('click', () => showScreen('main-menu'));
@@ -86,6 +104,9 @@ function setupAllGameListeners() {
 
     const closeChronicleBtn = document.getElementById('close-chronicle-btn');
     if (closeChronicleBtn) closeChronicleBtn.addEventListener('click', () => showScreen('main-menu'));
+
+    const closeModeDesc = document.getElementById('close-mode-desc-btn');
+    if (closeModeDesc) closeModeDesc.addEventListener('click', () => showScreen('main-menu'));
 
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
     if (leaveCombatBtn) {
@@ -127,20 +148,6 @@ function setupAllGameListeners() {
             const screen = document.getElementById('squad-fatigue-screen');
             if (screen) screen.style.display = 'none';
         });
-    }
-
-    // Умный контекстный крестик ❌ закрытия окна описаний
-    const closeModeDescTopBtn = document.getElementById('close-mode-desc-top-btn');
-    if (closeModeDescTopBtn) {
-        closeModeDescTopBtn.onclick = function() {
-            const squadScreen = document.getElementById('squad-screen');
-            // Если Цитадель была активна (открыта на заднем плане), возвращаем в неё
-            if (squadScreen && squadScreen.style.display !== 'none' || ['tank', 'damage', 'archer', 'mage'].includes(currentOpenedModeKey)) {
-                showScreen('squad-screen');
-            } else {
-                showScreen('main-menu');
-            }
-        };
     }
 
     setupCombatHelpListeners();
