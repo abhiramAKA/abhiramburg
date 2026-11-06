@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v3.2.0-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v3.2.2-BETA)
    ========================================================================== */
 
 const INLINE_TOWN_TEXTS = {
@@ -14,26 +14,26 @@ const INLINE_MODE_DESCRIPTIONS = {
     clans: { title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", reqText: "Знамена великих гильдий замерли под сводами залов безмолвия. Здесь куется коллективное Величие фракций, координируются рейды и возводятся Врата Разломов в Мир 2.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Клановый шлюз открывается на 12-м уровне развития отряда!</strong>", isLocked: true }
 };
 
-function getTownText(key) { return INLINE_TOWN_TEXTS[key] || ''; }
+window.getTownText = function(key) { return INLINE_TOWN_TEXTS[key] || ''; };
 
-function getPlayerGold() { return parseInt(localStorage.getItem('khamach_gold') || '0'); }
-function addPlayerGold(amount) { localStorage.setItem('khamach_gold', getPlayerGold() + amount); updateTownGoldDisplay(); }
-function getPlayerResource(key) { return parseInt(localStorage.getItem(`khamach_res_${key}`) || '0'); }
-function addPlayerResource(key, amount) { localStorage.setItem(`khamach_res_${key}`, getPlayerResource(key) + amount); if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay(); }
-function isBuildingPurchased(id) { return localStorage.getItem(`khamach_purchased_${id}`) === 'true'; }
+window.getPlayerGold = function() { return parseInt(localStorage.getItem('khamach_gold') || '0'); };
+window.addPlayerGold = function(amount) { localStorage.setItem('khamach_gold', window.getPlayerGold() + amount); window.updateTownGoldDisplay(); };
+window.getPlayerResource = function(key) { return parseInt(localStorage.getItem(`khamach_res_${key}`) || '0'); };
+window.addPlayerResource = function(key, amount) { localStorage.setItem(`khamach_res_${key}`, window.getPlayerResource(key) + amount); if (typeof window.updateTownGoldDisplay === 'function') window.updateTownGoldDisplay(); };
+window.isBuildingPurchased = function(id) { return localStorage.getItem(`khamach_purchased_${id}`) === 'true'; };
 
-function buyTownBuilding(id) {
+window.buyTownBuilding = function(id) {
     const cost = 100; 
-    if (getPlayerGold() >= cost && !isBuildingPurchased(id)) {
-        localStorage.setItem('khamach_gold', getPlayerGold() - cost);
+    if (window.getPlayerGold() >= cost && !window.isBuildingPurchased(id)) {
+        localStorage.setItem('khamach_gold', window.getPlayerGold() - cost);
         localStorage.setItem(`khamach_purchased_${id}`, 'true');
-        updateTownGoldDisplay();
+        window.updateTownGoldDisplay();
         return true;
     }
     return false;
-}
+};
 
-function openModeDescription(modeKey) {
+window.openModeDescription = function(modeKey) {
     currentOpenedModeKey = modeKey;
     const modeData = INLINE_MODE_DESCRIPTIONS[modeKey];
     if (!modeData) return;
@@ -46,7 +46,7 @@ function openModeDescription(modeKey) {
         textEl.innerHTML = `<p>${modeData.reqText}</p>`;
         buyBtn.style.display = 'none';
     } else {
-        const purchased = isBuildingPurchased(modeKey);
+        const purchased = window.isBuildingPurchased(modeKey);
         if (!purchased) {
             textEl.innerHTML = `<p>${modeData.buyText}</p>`;
             buyBtn.style.display = 'block';
@@ -57,28 +57,28 @@ function openModeDescription(modeKey) {
         }
     }
     showScreen('mode-desc-screen');
-}
+};
 
-function getBuildingLevel(id) { return parseInt(localStorage.getItem(`khamach_build_${id}`) || '0'); }
-function getMetaPerkValue(key) { return parseInt(localStorage.getItem(key) || '0'); }
+window.getBuildingLevel = function(id) { return parseInt(localStorage.getItem(`khamach_build_${id}`) || '0'); };
+window.getMetaPerkValue = function(key) { return parseInt(localStorage.getItem(key) || '0'); };
 
-function updateTownGoldDisplay() {
+window.updateTownGoldDisplay = function() {
     document.querySelectorAll('.gold-counter-display').forEach(el => { 
-        el.innerText = `🪙 ${getPlayerGold()} Золота`; 
+        el.innerText = `🪙 ${window.getPlayerGold()} Золота`; 
     });
-}
+};
 
-function updateStorageScreenDOM() {
+window.updateStorageScreenDOM = function() {
     const listContainer = document.getElementById('storage-resources-list');
     if (!listContainer) return;
     
     listContainer.innerHTML = `
         <div style="color: #e6c280; font-weight: bold; border-bottom: 1px solid #544432; padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase; font-size: 13px;">📜 Материалы Хранилища:</div>
         <div style="display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 14px; color: #cdb38c;">
-            <div>🌋 Плазма древнего змея: <strong style="color:#fff; float: right;">${getPlayerResource('plasma')} шт.</strong></div>
-            <div>🩸 Первородная кровь дракона: <strong style="color:#fff; float: right;">${getPlayerResource('blood')} шт.</strong></div>
-            <div>🪶 Плотная чешуя ящера: <strong style="color:#fff; float: right;">${getPlayerResource('scale')} шт.</strong></div>
-            <div>💧 Чистые слезы природы: <strong style="color:#fff; float: right;">${getPlayerResource('tears')} шт.</strong></div>
+            <div>🌋 Плазма древнего змея: <strong style="color:#fff; float: right;">${window.getPlayerResource('plasma')} шт.</strong></div>
+            <div>🩸 Первородная кровь дракона: <strong style="color:#fff; float: right;">${window.getPlayerResource('blood')} шт.</strong></div>
+            <div>🪶 Плотная чешуя ящера: <strong style="color:#fff; float: right;">${window.getPlayerResource('scale')} шт.</strong></div>
+            <div>💧 Чистые слезы природы: <strong style="color:#fff; float: right;">${window.getPlayerResource('tears')} шт.</strong></div>
         </div>
     `;
-}
+};
