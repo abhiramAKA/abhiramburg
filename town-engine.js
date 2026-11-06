@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.8.0-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.9.0-BETA)
    ========================================================================== */
 
 const INLINE_TOWN_TEXTS = {
@@ -37,7 +37,7 @@ window.buyTownBuilding = function(id) {
 
 window.updateTownGoldDisplay = function() {
     document.querySelectorAll('.gold-counter-display').forEach(el => { 
-        el.innerText = `🪙 ${window.getPlayerGold()} Золота`; 
+        el.innerText = `🪙 ${window.getPlayerGold()} Монет`; 
     });
     
     const tFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_tank') || '0'));
