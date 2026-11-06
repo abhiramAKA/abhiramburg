@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ОБНОВЛЕН - v3.2.6-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ОБНОВЛЕН - v3.2.7-BETA)
    ========================================================================== */
 
 function setupAllGameListeners() {
@@ -26,9 +26,6 @@ function setupAllGameListeners() {
         toSettingsBtn.addEventListener('click', () => {
             document.getElementById('volume-music-slider').value = (parseFloat(localStorage.getItem('khamach_vol_music') || '0.5') * 100);
             document.getElementById('volume-fx-slider').value = (parseFloat(localStorage.getItem('khamach_vol_fx') || '0.7') * 100);
-            document.getElementById('eq-low-slider').value = parseInt(localStorage.getItem('khamach_eq_low') || '0');
-            document.getElementById('eq-mid-slider').value = parseInt(localStorage.getItem('khamach_eq_mid') || '3');
-            document.getElementById('eq-high-slider').value = parseInt(localStorage.getItem('khamach_eq_high') || '0');
             
             if (typeof initAudioContext === 'function') initAudioContext();
             
@@ -44,19 +41,8 @@ function setupAllGameListeners() {
         if (typeof updateEngineVolumeValues === 'function') updateEngineVolumeValues('fx', e.target.value);
     });
     
-    // Новое событие: при отпускании ползунка эффектов проигрывается тестовый щелчок звука
     document.getElementById('volume-fx-slider').addEventListener('change', () => {
         if (typeof playMatch3Sound === 'function') playMatch3Sound('swap');
-    });
-
-    document.getElementById('eq-low-slider').addEventListener('input', (e) => {
-        if (typeof changeEqualizerGain === 'function') changeEqualizerGain('low', parseInt(e.target.value));
-    });
-    document.getElementById('eq-mid-slider').addEventListener('input', (e) => {
-        if (typeof changeEqualizerGain === 'function') changeEqualizerGain('mid', parseInt(e.target.value));
-    });
-    document.getElementById('eq-high-slider').addEventListener('input', (e) => {
-        if (typeof changeEqualizerGain === 'function') changeEqualizerGain('high', parseInt(e.target.value));
     });
 
     document.getElementById('close-settings-btn').addEventListener('click', () => {
