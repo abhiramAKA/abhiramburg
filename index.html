@@ -9,11 +9,12 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            const cacheBuster = Date.now();
+            // Ультимативное каскадное принуждение сброса кэша через случайный токен времени
+            const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 100000);
             
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = 'styles.css?t=' + cacheBuster;
+            link.href = 'styles.css?t=' + enforceBuster;
             document.head.appendChild(link);
 
             const scripts = [
@@ -39,7 +40,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Все модули успешно загружены со сбросом кэша.");
+                    console.log("КХАМАЧ: Все модули успешно принудительно загружены.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -52,7 +53,7 @@
                 }
                 
                 const script = document.createElement('script');
-                script.src = scripts[index] + '?t=' + cacheBuster;
+                script.src = scripts[index] + '?t=' + enforceBuster;
                 script.async = false; 
                 script.onload = function() { injectScript(index + 1); };
                 document.head.appendChild(script);
@@ -72,9 +73,9 @@
             <h1>КХАМАЧ</h1>
             <span class="subtitle">Легенды Абхирамбурга</span>
             
-            <!-- Ультракомпактный дашборд ресурсов в один ряд с кликабельной усталостью -->
+            <!-- Интерактивный дашборд ресурсов с кликабельным золотом и усталостью -->
             <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; font-size: 16px; font-weight: bold; background: rgba(30, 20, 15, 0.4); padding: 6px 14px; border: 1px double #544432; border-radius: 4px; border-left: none; border-right: none;">
-                <span class="gold-counter-display" style="color: #ffd700;">🪙 0 Золота</span>
+                <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffd700'">🪙 0 Золота</span>
                 <span style="color: #4a3e31; font-weight: normal;">|</span>
                 <span id="team-fatigue-display" style="color: #ffb3ba; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffb3ba'">🥱 0%</span>
             </div>
@@ -100,7 +101,7 @@
                 <button id="to-clans-btn" class="menu-btn">🛡️ Кланы</button>
             </div>
             
-            <div id="game-version" class="version-footer">v3.8.0-BETA</div>
+            <div id="game-version" class="version-footer">v3.8.2-BETA</div>
         </div>
 
         <!-- ================= ОКНО НАСТРОЕК ================= -->
