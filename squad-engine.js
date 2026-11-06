@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v4.6.0-BETA)
+   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v4.7.2-BETA)
    ========================================================================== */
 
 function setupSquadInterfaceListeners() {
@@ -7,22 +7,20 @@ function setupSquadInterfaceListeners() {
     ids.forEach(id => {
         const btn = document.getElementById(`upgrade-${id}-btn`);
         if (btn) {
-            btn.addEventListener('click', () => {
+            btn.onclick = function() {
                 if (typeof openModeDescription === 'function') openModeDescription(id);
-            });
+            };
         }
     });
     
     const forgeBtn = document.getElementById('city-forge-btn');
-    if (forgeBtn) forgeBtn.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('forge'); });
+    if (forgeBtn) forgeBtn.onclick = function() { if (typeof openModeDescription === 'function') openModeDescription('forge'); };
     
     const alchemyBtn = document.getElementById('city-alchemy-btn');
-    if (alchemyBtn) alchemyBtn.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('alchemy'); });
+    if (alchemyBtn) alchemyBtn.onclick = function() { if (typeof openModeDescription === 'function') openModeDescription('alchemy'); };
 
     const closeBtn = document.getElementById('close-squad-btn');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => showScreen('main-menu'));
-    }
+    if (closeBtn) closeBtn.onclick = function() { showScreen('main-menu'); };
 
     const globalBuyBtn = document.getElementById('mode-buy-btn');
     if (globalBuyBtn) {
@@ -47,7 +45,6 @@ function executeUnifiedBuildingTransaction() {
         return;
     }
 
-    // Покупка и модернизация ЗДАНИЙ в Цитадели за ЗОЛОТО
     const id = currentOpenedModeKey;
     const isPurchased = localStorage.getItem(`khamach_squad_build_${id}`) === 'true';
     const currentGold = typeof getPlayerGold === 'function' ? getPlayerGold() : 0;
@@ -57,11 +54,11 @@ function executeUnifiedBuildingTransaction() {
         if (currentGold >= costBuild) {
             localStorage.setItem('khamach_gold', currentGold - costBuild);
             localStorage.setItem(`khamach_squad_build_${id}`, 'true');
-            localStorage.setItem(`khamach_build_${id}`, '1'); // Старт с 1-го уровня постройки
+            localStorage.setItem(`khamach_build_${id}`, '1');
             
             if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
             updateSquadVisualStyles();
-            alert(`Строительство успешно завершено! Открыт лимит прокачки бойца до 1 уровня.`);
+            alert(`Строительство завершено! Открыт лимит прокачки бойца до 1 уровня.`);
             if (typeof openModeDescription === 'function') openModeDescription(id);
         } else {
             alert(`Недостаточно золота! Требуется 100 🪙.`);
@@ -97,15 +94,15 @@ function updateSquadVisualStyles() {
 
         const isPurchased = localStorage.getItem(`khamach_squad_build_${id}`) === 'true';
         const loreKey = id === 'mage' ? 'damage_mage' : id;
-        const data = SQUAD_HERO_LORE[loreKey];
+        const data = typeof SQUAD_HERO_LORE !== 'undefined' ? SQUAD_HERO_LORE[loreKey] : { name: id };
         
         if (isPurchased) {
-            const currentLvl = localStorage.getItem(`khamach_build_${id}`) || '0';
+            const currentLvl = localStorage.getItem(`khamach_build_${id}`) || '1';
             btn.innerText = `${data.name} [Ур. ${currentLvl}]`;
             btn.style.background = "linear-gradient(to bottom, #1d3a1e 0%, #0f2110 100%)";
             btn.style.borderColor = "#316e34";
         } else {
-            btn.innerText = `${data.name} (Выкуп: 100 🪙)`;
+            btn.innerText = `${data.name} (Построить: 100 🪙)`;
             btn.style.background = "";
             btn.style.borderColor = "";
         }
