@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БАЛАНСА БОССА (v3.4.1-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БАЛАНСА БОССА (v3.5.0-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -58,6 +58,13 @@ function startCombatSession(level) {
     if (typeof buildDragonDOM === 'function') buildDragonDOM();
     if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
     if (typeof initMatch3Board === 'function') initMatch3Board();
+
+    // Перехват управления для первого в истории запуска боевой сцены
+    if (!localStorage.getItem('khamach_combat_tutorial_done')) {
+        if (typeof isBoardLocked !== 'undefined') isBoardLocked = true; // Замораживаем камни
+        const tutorialScreen = document.getElementById('combat-welcome-tutorial-screen');
+        if (tutorialScreen) tutorialScreen.style.display = 'flex';
+    }
 }
 
 function chargeHeroSuperpowers(effects) {
@@ -156,7 +163,6 @@ function checkBattleResolution() {
 
         if (typeof addPlayerResource === 'function') addPlayerResource(lootKey, 1);
         
-        // Исправлено: жестко отправляем запись в Летопись до вызова алертов
         if (typeof window.addChronicleLog === 'function') {
             window.addChronicleLog(`ПОБЕДА: Ликвидирован дракон Тира ${activeSessionLevel}. На склад зачислена 1 шт. материала: ${lootName}`);
         } else if (typeof addChronicleLog === 'function') {
