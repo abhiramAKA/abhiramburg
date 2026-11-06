@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНАЯ ЛОГИКА СОВПАДЕНИЙ И КОМБО (ВЫНЕСЕН - v4.8.4-BETA)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНАЯ ЛОГИКА СОВПАДЕНИЙ И КОМБО (ВЫНЕСЕН - v4.8.6-BETA)
    ========================================================================== */
 
 function checkMatchesAndExecute() {
@@ -58,7 +58,7 @@ function checkMatchesAndExecute() {
         if (typeof triggerMatch3Haptic === 'function') triggerMatch3Haptic(60);
         
         let executionEffects = { '🔥': 0, '🛡️': 0, '⚡': 0, '💚': 0 };
-        let newRunesCoords =;
+        let newRunesCoords = new Array();
         
         for (let r = 0; r < BOARD_ROWS; r++) {
             for (let c = 0; c < BOARD_COLS; c++) {
