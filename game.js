@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.8.9-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.9.0-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v4.8.9-BETA";
+const GAME_VERSION = "v4.9.0-BETA";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
@@ -86,8 +86,6 @@ function showScreen(screenId) {
         renderDragonSelectionGrid();
     }
     if (screenId === 'squad-screen') {
-        if (typeof injectSquadInterfaceDOM === 'function') injectSquadInterfaceDOM();
-        if (typeof setupSquadInterfaceListeners === 'function') setupSquadInterfaceListeners();
         if (typeof updateSquadVisualStyles === 'function') updateSquadVisualStyles();
     }
     if (screenId === 'storage-screen' && typeof updateStorageScreenDOM === 'function') {
