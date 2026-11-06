@@ -9,7 +9,7 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            const currentExpectedVersion = "v4.8.4-BETA";
+            const currentExpectedVersion = "v4.8.9-BETA";
             
             if (navigator.serviceWorker) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -69,7 +69,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Модули v4.8.4 успешно загружены.");
+                    console.log("КХАМАЧ: Модули v4.8.9 успешно загружены.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -117,7 +117,7 @@
                 <button id="to-squad-btn" class="menu-btn">🏙️ Цитадель</button>
             </div>
             <div class="menu-row">
-                <button id="to-storage-btn" class="menu-btn">👥 Отряд</button>
+                <button id="to-storage-btn" class="menu-btn">👥 Военный Лагерь</button>
             </div>
             <div class="menu-row">
                 <button id="to-missions-btn" class="menu-btn">📜 Поручения</button>
@@ -129,7 +129,7 @@
                 <button id="to-clans-btn" class="menu-btn">🛡️ Кланы</button>
             </div>
             
-            <div id="game-version" class="version-footer">v4.8.4-BETA</div>
+            <div id="game-version" class="version-footer">v4.8.9-BETA</div>
         </div>
 
         <div id="dynamic-town-screens"></div>
