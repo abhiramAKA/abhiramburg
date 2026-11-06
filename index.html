@@ -9,7 +9,7 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            const versionMarker = "v3.4.2";
+            const versionMarker = "v3.6.0";
             
             const link = document.createElement('link');
             link.rel = 'stylesheet';
@@ -25,6 +25,7 @@
                 'match3.js',
                 'match3-progression.js',
                 'town-engine.js',
+                'town-chronicle.js',
                 'town-missions.js',
                 'squad-engine.js',
                 'squad-dom.js',
@@ -36,7 +37,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Модули v3.4.2 успешно загружены.");
+                    console.log("КХАМАЧ: Модули v3.6.0 успешно загружены.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -92,7 +93,7 @@
                 <button id="to-clans-btn" class="menu-btn">🛡️ Кланы</button>
             </div>
             
-            <div id="game-version" class="version-footer">v3.4.2-BETA</div>
+            <div id="game-version" class="version-footer">v3.6.0-BETA</div>
         </div>
 
         <!-- ================= ОКНО НАСТРОЕК ================= -->
