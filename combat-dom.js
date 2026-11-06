@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ПОЛНОГО РЕНДЕРИНГА БОЕВОГО ИНТЕРФЕЙСА (ОБНОВЛЕН - v4.8.8-BETA)
+   КХАМАЧ — МОДУЛЬ ПОЛНОГО РЕНДЕРИНГА БОЕВОГО ИНТЕРФЕЙСА (ОБНОВЛЕН - v4.9.2-BETA)
    ========================================================================== */
 
 function injectCombatInterfaceBaseDOM() {
@@ -55,9 +55,7 @@ function injectCombatInterfaceBaseDOM() {
         <!-- ================= ОКНО ОБУЧЕНИЯ ПЕРВОГО БОЯ ================= -->
         <div id="combat-welcome-tutorial-screen" class="game-window combat-help-popup" style="display: none;">
             <div class="combat-help-content" style="max-width: 380px; padding: 20px; text-align: center;">
-                <h2>ИНСТРУКТАЖ</h2>
-                <span class="subtitle" style="margin-bottom: 12px; padding-bottom: 8px;">Суть боя в 2 строки</span>
-                <div style="font-size: 13px; color: #cdb38c; line-height: 1.5; display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.5); padding: 12px; border: 1px solid #544432; border-radius: 4px; margin-bottom: 15px; text-align: left;">
+                <div style="font-size: 13px; color: #cdb38c; line-height: 1.5; display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.5); padding: 14px; border: 1px solid #544432; border-radius: 4px; margin-bottom: 15px; text-align: left;">
                     <div>⚡ <strong>1. Собирайте руны:</strong> Триады камней копят энергию SP для героев своего цвета (🔥 🛡️ ⚡ 💚). Ходы тратить на свайпы.</div>
                     <div>👑 <strong>2. Бейте ультой:</strong> Когда шкала SP героя дойдет до 100%, <strong>НАЖМИТЕ НА КАРТОЧКУ БОЙЦА</strong> для сокрушительного удара!</div>
                 </div>
@@ -68,13 +66,8 @@ function injectCombatInterfaceBaseDOM() {
         <!-- ================= ОКНО ОСОБЫХ КОМБИНАЦИЙ ================= -->
         <div id="combat-combo-tutorial-screen" class="game-window combat-help-popup" style="display: none;">
             <div class="combat-help-content" style="max-width: 380px; padding: 20px; text-align: center;">
-                <h2 style="color: #ffd700;">ОСОБАЯ КОМБИНАЦИЯ!</h2>
-                <span class="subtitle" style="margin-bottom: 12px; padding-bottom: 8px;">Уведомление Цитадели</span>
-                <p style="font-size: 13px; color: #e6c280; line-height: 1.5; margin-bottom: 12px; text-align: left;">
-                    Вы собрали усиленный ряд из 4 или 5 рун! 
-                </p>
-                <div style="font-size: 12px; color: #ffb3ba; line-height: 1.4; background: rgba(40,10,10,0.5); padding: 10px; border: 1px solid #6e3131; border-radius: 4px; margin-bottom: 15px; text-align: left;">
-                    ⚠️ В данный момент эти продвинутые комбинации <strong>неактивны</strong>. Чтобы разблокировать их истинную разрушительную силу, улучшайте и прокачивайте своих бойцов в Военном Лагере!
+                <div style="font-size: 13px; color: #ffb3ba; line-height: 1.4; background: rgba(40,10,10,0.5); padding: 14px; border: 1px solid #6e3131; border-radius: 4px; margin-bottom: 15px; text-align: left;">
+                    Вы собрали усиленный ряд из 4 или 5 рун! В данный момент эти продвинутые комбинации <strong>неактивны</strong>. Чтобы разблокировать их истинную разрушительную силу, улучшайте и прокачивайте своих бойцов в Военном Лагере!
                 </div>
                 <button id="close-combat-combo-tutorial-btn" class="menu-btn" style="width:100%; background: linear-gradient(to bottom, #2d2621, #171311); padding: 10px;">Понятно</button>
             </div>
