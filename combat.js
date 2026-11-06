@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БАЛАНСА БОССА (v3.2.7-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БАЛАНСА БОССА (v3.3.2-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -33,14 +33,14 @@ function startCombatSession(level) {
     const tankHpBonus = tankLvl * 20;
     
     combatData.squad = [
-        { id: "tank", name: "Танк", hp: 150, maxHP: 150, sp: 0, maxSP: 100, icon: "🛡️", color: "#4a90e2" },
-        { id: "damage", name: "Дамагер", hp: 90, maxHP: 90, sp: 0, maxSP: 100, icon: "🔥", color: "#ff4500" },
-        { id: "archer", name: "Лучник", hp: 100, maxHP: 100, sp: 0, maxSP: 100, icon: "⚡", color: "#f1c40f" },
+        { id: "tank", name: "Защитник", hp: 150, maxHP: 150, sp: 0, maxSP: 100, icon: "🛡️", color: "#4a90e2" },
+        { id: "damage", name: "Воин", hp: 90, maxHP: 90, sp: 0, maxSP: 100, icon: "🔥", color: "#ff4500" },
+        { id: "archer", name: "Стрелок", hp: 100, maxHP: 100, sp: 0, maxSP: 100, icon: "⚡", color: "#f1c40f" },
         { id: "mage", name: "Маг", hp: 80, maxHP: 80, sp: 0, maxSP: 100, icon: "💚", color: "#2ecc71" }
     ].filter(hero => localStorage.getItem(`khamach_hero_busy_${hero.id}`) !== 'true');
 
     if (combatData.squad.length === 0) {
-        alert("Ошибка: Все ваши воины на сменах! Некому идти в бой.");
+        alert("Ошибка: Все ваши бойцы на сменах! Некому идти в бой.");
         showScreen('main-menu');
         return;
     }
