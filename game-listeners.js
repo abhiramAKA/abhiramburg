@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v3.9.6-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.5.0-BETA)
    ========================================================================== */
 
 function setupAllGameListeners() {
@@ -87,9 +87,6 @@ function setupAllGameListeners() {
     const closeChronicleBtn = document.getElementById('close-chronicle-btn');
     if (closeChronicleBtn) closeChronicleBtn.addEventListener('click', () => showScreen('main-menu'));
 
-    const closeModeDesc = document.getElementById('close-mode-desc-btn');
-    if (closeModeDesc) closeModeDesc.addEventListener('click', () => showScreen('main-menu'));
-
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
     if (leaveCombatBtn) {
         leaveCombatBtn.addEventListener('click', () => {
@@ -132,7 +129,20 @@ function setupAllGameListeners() {
         });
     }
 
-    // Удален старый листенер главного приветствия
+    // Умный контекстный крестик ❌ закрытия окна описаний
+    const closeModeDescTopBtn = document.getElementById('close-mode-desc-top-btn');
+    if (closeModeDescTopBtn) {
+        closeModeDescTopBtn.onclick = function() {
+            const squadScreen = document.getElementById('squad-screen');
+            // Если Цитадель была активна (открыта на заднем плане), возвращаем в неё
+            if (squadScreen && squadScreen.style.display !== 'none' || ['tank', 'damage', 'archer', 'mage'].includes(currentOpenedModeKey)) {
+                showScreen('squad-screen');
+            } else {
+                showScreen('main-menu');
+            }
+        };
+    }
+
     setupCombatHelpListeners();
 }
 
@@ -159,12 +169,11 @@ function setupCombatHelpListeners() {
             if (confirm("Вы уверены, что хотите сбежать из рейда?")) showScreen('main-menu');
         };
     }
-    // Листенер закрытия первого боевого мануала
     const closeTutorialBtn = document.getElementById('close-combat-tutorial-btn');
     if (closeTutorialBtn) {
         closeTutorialBtn.onclick = function() {
             localStorage.setItem('khamach_combat_tutorial_done', 'true');
-            if (typeof isBoardLocked !== 'undefined') isBoardLocked = false; // Размораживаем сетку рун
+            if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
             const screen = document.getElementById('combat-welcome-tutorial-screen');
             if (screen) screen.style.display = 'none';
         };
