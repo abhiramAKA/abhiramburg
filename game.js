@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v3.3.3-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v3.9.1-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v3.3.3-BETA";
+const GAME_VERSION = "v3.9.1-BETA";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
@@ -29,6 +29,7 @@ let selectedDragonLevel = 1;
 let currentOpenedModeKey = null;
 
 function initDispatcherModule() {
+    // 1. Сначала принудительно генерируем всю UI-архитектуру окон в DOM
     if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
     if (typeof injectCombatInterfaceBaseDOM === 'function') injectCombatInterfaceBaseDOM();
     if (typeof injectSquadInterfaceDOM === 'function') injectSquadInterfaceDOM();
@@ -36,7 +37,15 @@ function initDispatcherModule() {
     const versionElement = document.getElementById('game-version');
     if (versionElement) versionElement.innerText = GAME_VERSION;
 
-    if (typeof setupAllGameListeners === 'function') setupAllGameListeners();
+    // 2. Строго после инжекта вешаем все обработчики событий
+    if (typeof setupAllGameListeners === 'function') {
+        try { 
+            setupAllGameListeners(); 
+        } catch (e) { 
+            console.error("Критический сбой инициализации листенеров:", e); 
+        }
+    }
+    
     if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
 
     setInterval(() => {
