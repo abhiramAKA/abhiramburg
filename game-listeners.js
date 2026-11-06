@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.9.15-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.9.16-BETA)
    ========================================================================== */
 
 window.closeModeDescriptionUnified = function() {
@@ -21,47 +21,52 @@ function setupAllGameListeners() {
     document.onclick = null;
     document.body.onclick = null;
 
+    // ПАТТЕРН НАДЁЖНОГО ПЕРЕХВАТА КЛИКОВ ЧЕРЕЗ CLOSEST
     const mainMenuEl = document.getElementById('main-menu');
     if (mainMenuEl) {
         mainMenuEl.onclick = function(e) {
-            if (e.target && e.target.id === 'to-clans-btn') {
-                e.preventDefault();
-                e.stopPropagation();
-                if (typeof openModeDescription === 'function') {
-                    openModeDescription('clans');
-                }
+            const clansBtn = e.target.closest('#to-clans-btn');
+            const combatBtn = e.target.closest('#to-combat-btn');
+            const settingsBtn = e.target.closest('#to-settings-btn');
+            const infoBtn = e.target.closest('#info-btn');
+            const squadBtn = e.target.closest('#to-squad-btn');
+            const storageBtn = e.target.closest('#to-storage-btn');
+            const missionsBtn = e.target.closest('#to-missions-btn');
+            const chronicleBtn = e.target.closest('#to-chronicle-btn');
+
+            if (clansBtn) {
+                e.preventDefault(); e.stopPropagation();
+                if (typeof openModeDescription === 'function') openModeDescription('clans');
+            } else if (combatBtn) {
+                showScreen('dragon-select-screen');
+            } else if (settingsBtn) {
+                document.getElementById('volume-music-slider').value = (parseFloat(localStorage.getItem('khamach_vol_music') || '0.5') * 100);
+                document.getElementById('volume-fx-slider').value = (parseFloat(localStorage.getItem('khamach_vol_fx') || '0.7') * 100);
+                if (typeof initAudioContext === 'function') initAudioContext();
+                document.getElementById('main-menu').style.display = 'none';
+                document.getElementById('settings-screen').style.display = 'flex';
+            } else if (infoBtn) {
+                const textContainer = document.getElementById('info-screen-text');
+                if (textContainer) textContainer.innerHTML = typeof getTownText === 'function' ? getTownText('mainInfo') : '';
+                showScreen('info-screen');
+            } else if (squadBtn) {
+                showScreen('squad-screen');
+            } else if (storageBtn) {
+                if (typeof updateSquadHeroesSpecScreenDOM === 'function') updateSquadHeroesSpecScreenDOM();
+                showScreen('squad-heroes-spec-screen');
+            } else if (missionsBtn) {
+                showScreen('missions-screen');
+            } else if (chronicleBtn) {
+                showScreen('chronicle-screen');
             }
         };
     }
 
-    const toCombatBtn = document.getElementById('to-combat-btn');
-    if (toCombatBtn) toCombatBtn.onclick = function() { showScreen('dragon-select-screen'); };
-
     const fromSelectBtn = document.getElementById('from-select-to-menu-btn');
     if (fromSelectBtn) fromSelectBtn.onclick = function() { showScreen('main-menu'); };
     
-    const infoBtn = document.getElementById('info-btn');
-    if (infoBtn) {
-        infoBtn.onclick = function() {
-            const textContainer = document.getElementById('info-screen-text');
-            if (textContainer) textContainer.innerHTML = typeof getTownText === 'function' ? getTownText('mainInfo') : '';
-            showScreen('info-screen');
-        };
-    }
-    
     const fromInfoBtn = document.getElementById('from-info-to-menu-btn');
     if (fromInfoBtn) fromInfoBtn.onclick = function() { showScreen('main-menu'); };
-    
-    const toSettingsBtn = document.getElementById('to-settings-btn');
-    if (toSettingsBtn) {
-        toSettingsBtn.onclick = function() {
-            document.getElementById('volume-music-slider').value = (parseFloat(localStorage.getItem('khamach_vol_music') || '0.5') * 100);
-            document.getElementById('volume-fx-slider').value = (parseFloat(localStorage.getItem('khamach_vol_fx') || '0.7') * 100);
-            if (typeof initAudioContext === 'function') initAudioContext();
-            document.getElementById('main-menu').style.display = 'none';
-            document.getElementById('settings-screen').style.display = 'flex';
-        };
-    }
 
     const musicSlider = document.getElementById('volume-music-slider');
     if (musicSlider) {
@@ -89,35 +94,14 @@ function setupAllGameListeners() {
         };
     }
     
-    const toSquadBtn = document.getElementById('to-squad-btn');
-    if (toSquadBtn) toSquadBtn.onclick = function() { showScreen('squad-screen'); };
-
-    const toStorageBtn = document.getElementById('to-storage-btn');
-    if (toStorageBtn) {
-        toStorageBtn.onclick = function() {
-            if (typeof updateSquadHeroesSpecScreenDOM === 'function') updateSquadHeroesSpecScreenDOM();
-            showScreen('squad-heroes-spec-screen');
-        };
-    }
-    
     const closeHeroesSpecBtn = document.getElementById('close-heroes-spec-btn');
     if (closeHeroesSpecBtn) closeHeroesSpecBtn.onclick = function() { showScreen('main-menu'); };
 
     const closeStorageBtn = document.getElementById('close-storage-btn');
     if (closeStorageBtn) closeStorageBtn.onclick = function() { showScreen('main-menu'); };
 
-    const toMissionsBtn = document.getElementById('to-missions-btn');
-    if (toMissionsBtn) {
-        toMissionsBtn.onclick = function() {
-            showScreen('missions-screen');
-        };
-    }
-    
     const closeMissionsBtn = document.getElementById('close-missions-btn');
     if (closeMissionsBtn) closeMissionsBtn.onclick = function() { showScreen('main-menu'); };
-
-    const toChronicleBtn = document.getElementById('to-chronicle-btn');
-    if (toChronicleBtn) toChronicleBtn.onclick = function() { showScreen('chronicle-screen'); };
 
     const closeChronicleBtn = document.getElementById('close-chronicle-btn');
     if (closeChronicleBtn) closeChronicleBtn.onclick = function() { showScreen('main-menu'); };
