@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.9.4-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.9.5-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v4.9.4-BETA";
+const GAME_VERSION = "v4.9.5-BETA";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
@@ -44,10 +44,6 @@ function sanitizeAndMigrateStorage() {
         'khamach_html_backup', 'cached_menu_dom'
     ];
     toxicKeys.forEach(k => localStorage.removeItem(k));
-
-    // Сброс триггеров для принудительного вызова лаконичных окон обучения
-    localStorage.removeItem('khamach_combat_tutorial_done');
-    localStorage.removeItem('khamach_combo_tut_done');
 
     localStorage.setItem('khamach_gold', currentGold);
     localStorage.setItem('khamach_max_tier', currentMaxTier);
