@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (РЕДАКЦИЯ - v4.8.6-BETA)
+   КХАМАЧ — МОДУЛЬ ИГРОВОГО ПОЛЯ MATCH-3 (РЕДАКЦИЯ - v4.8.7-BETA)
    ========================================================================== */
 
 let isBoardLocked = false;
@@ -10,13 +10,13 @@ function initMatch3Board() {
     if (!boardContainer) return;
     
     boardContainer.innerHTML = '';
-    match3BoardData = new Array();
+    match3BoardData = [];
     isBoardLocked = false;
     selectedCell = null;
     if (typeof resetSwipeTracker === 'function') resetSwipeTracker();
     
     for (let r = 0; r < BOARD_ROWS; r++) {
-        match3BoardData[r] = new Array();
+        match3BoardData[r] = [];
         for (let c = 0; c < BOARD_COLS; c++) {
             let allowedTypes = RUNE_TYPES.filter(type => {
                 if (r >= 2 && match3BoardData[r-1][c] === type && match3BoardData[r-2][c] === type) return false;
@@ -27,10 +27,10 @@ function initMatch3Board() {
             match3BoardData[r][c] = randomType;
         }
     }
-    renderBoardDOM(true, new Array());
+    renderBoardDOM(true, []);
 }
 
-function renderBoardDOM(isIntro = false, newRunesCoords = new Array()) {
+function renderBoardDOM(isIntro = false, newRunesCoords = []) {
     const boardContainer = document.getElementById('match3-board-container');
     if (!boardContainer) return;
     boardContainer.innerHTML = '';
