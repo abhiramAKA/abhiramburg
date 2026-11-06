@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v3.9.5-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v3.9.6-BETA)
    ========================================================================== */
 
 function setupAllGameListeners() {
@@ -90,6 +90,13 @@ function setupAllGameListeners() {
     const closeModeDesc = document.getElementById('close-mode-desc-btn');
     if (closeModeDesc) closeModeDesc.addEventListener('click', () => showScreen('main-menu'));
 
+    const leaveCombatBtn = document.getElementById('leave-combat-btn');
+    if (leaveCombatBtn) {
+        leaveCombatBtn.addEventListener('click', () => {
+            if (confirm("Вы уверены, что хотите сбежать из рейда?")) showScreen('main-menu');
+        });
+    }
+
     const clearChronicleBtn = document.getElementById('clear-chronicle-btn');
     if (clearChronicleBtn) {
         clearChronicleBtn.addEventListener('click', () => {
@@ -125,17 +132,7 @@ function setupAllGameListeners() {
         });
     }
 
-    // Слушатель закрытия окна первого приветствия
-    const closeWelcomeBtn = document.getElementById('close-welcome-palace-btn');
-    if (closeWelcomeBtn) {
-        closeWelcomeBtn.addEventListener('click', () => {
-            localStorage.setItem('khamach_welcome_done', 'true');
-            const screen = document.getElementById('welcome-palace-screen');
-            if (screen) screen.style.display = 'none';
-        });
-    }
-
-    // Инициализация принудительных боевых кнопок
+    // Удален старый листенер главного приветствия
     setupCombatHelpListeners();
 }
 
@@ -156,11 +153,20 @@ function setupCombatHelpListeners() {
             if (screen) screen.style.display = 'none';
         };
     }
-    // Обработчик верхнего крестика ❌ побега из рейда
     const escapeTopBtn = document.getElementById('combat-escape-top-btn');
     if (escapeTopBtn) {
         escapeTopBtn.onclick = function() {
             if (confirm("Вы уверены, что хотите сбежать из рейда?")) showScreen('main-menu');
+        };
+    }
+    // Листенер закрытия первого боевого мануала
+    const closeTutorialBtn = document.getElementById('close-combat-tutorial-btn');
+    if (closeTutorialBtn) {
+        closeTutorialBtn.onclick = function() {
+            localStorage.setItem('khamach_combat_tutorial_done', 'true');
+            if (typeof isBoardLocked !== 'undefined') isBoardLocked = false; // Размораживаем сетку рун
+            const screen = document.getElementById('combat-welcome-tutorial-screen');
+            if (screen) screen.style.display = 'none';
         };
     }
 }
