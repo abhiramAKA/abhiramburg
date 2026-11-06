@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v3.8.0-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v3.8.1-BETA)
    ========================================================================== */
 
 function setupAllGameListeners() {
@@ -58,6 +58,10 @@ function setupAllGameListeners() {
         });
     }
     
+    // Кнопка Кланов на Главном экране
+    const toClansBtn = document.getElementById('to-clans-btn');
+    if (toClansBtn) toClansBtn.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('clans'); });
+    
     const toSquadBtn = document.getElementById('to-squad-btn');
     if (toSquadBtn) toSquadBtn.addEventListener('click', () => showScreen('squad-screen'));
 
@@ -79,7 +83,33 @@ function setupAllGameListeners() {
     const closeChronicleBtn = document.getElementById('close-chronicle-btn');
     if (closeChronicleBtn) closeChronicleBtn.addEventListener('click', () => showScreen('main-menu'));
 
-    // Привязка нового окна индивидуальной усталости отряда
+    const closeModeDesc = document.getElementById('close-mode-desc-btn');
+    if (closeModeDesc) closeModeDesc.addEventListener('click', () => showScreen('main-menu'));
+
+    const leaveCombatBtn = document.getElementById('leave-combat-btn');
+    if (leaveCombatBtn) {
+        leaveCombatBtn.addEventListener('click', () => {
+            if (confirm("Вы уверены, что хотите сбежать из рейда?")) showScreen('main-menu');
+        });
+    }
+
+    const clearChronicleBtn = document.getElementById('clear-chronicle-btn');
+    if (clearChronicleBtn) {
+        clearChronicleBtn.addEventListener('click', () => {
+            if (confirm("Очистить все записи в Летописи Цитадели?")) {
+                localStorage.setItem('khamach_chronicle_logs', JSON.stringify());
+                if (typeof renderChronicleDOM === 'function') renderChronicleDOM();
+            }
+        });
+    }
+
+    // Привязка интерактивного золота в шапке к вызову Склада
+    const goldDisplayLink = document.getElementById('main-gold-display');
+    if (goldDisplayLink) {
+        goldDisplayLink.addEventListener('click', () => showScreen('storage-screen'));
+    }
+
+    // Привязка окна индивидуальной усталости отряда
     const teamFatigueBtn = document.getElementById('team-fatigue-display');
     if (teamFatigueBtn) {
         teamFatigueBtn.addEventListener('click', () => {
