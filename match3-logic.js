@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНАЯ ЛОГИКА СОВПАДЕНИЙ И КОМБО (ВЫНЕСЕН - v4.8.8-BETA)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНАЯ ЛОГИКА СОВПАДЕНИЙ И КОМБО (ВЫНЕСЕН - v4.8.9-BETA)
    ========================================================================== */
 
 function checkMatchesAndExecute() {
@@ -76,21 +76,6 @@ function checkMatchesAndExecute() {
             }
         }
         
-        if (detectedAdvancedCombo && !localStorage.getItem('khamach_combo_tut_done')) {
-            setTimeout(() => {
-                const comboScreen = document.getElementById('combat-combo-tutorial-screen');
-                const closeComboBtn = document.getElementById('close-combat-combo-tutorial-btn');
-                if (comboScreen && closeComboBtn) {
-                    comboScreen.style.display = 'flex';
-                    closeComboBtn.onclick = function() {
-                        localStorage.setItem('khamach_combo_tut_done', 'true');
-                        comboScreen.style.display = 'none';
-                        isBoardLocked = false;
-                    };
-                }
-            }, 100);
-        }
-        
         setTimeout(() => {
             for (let c = 0; c < BOARD_COLS; c++) {
                 let emptyRow = BOARD_ROWS - 1;
@@ -114,6 +99,22 @@ function checkMatchesAndExecute() {
             
             setTimeout(() => {
                 let chainMatched = checkMatchesAndExecute();
+                
+                // Переносим вызов модалки СТРОГО сюда — когда все анимации падений завершены
+                if (detectedAdvancedCombo && !localStorage.getItem('khamach_combo_tut_done')) {
+                    isBoardLocked = true;
+                    const comboScreen = document.getElementById('combat-combo-tutorial-screen');
+                    const closeComboBtn = document.getElementById('close-combat-combo-tutorial-btn');
+                    if (comboScreen && closeComboBtn) {
+                        comboScreen.style.display = 'flex';
+                        closeComboBtn.onclick = function() {
+                            localStorage.setItem('khamach_combo_tut_done', 'true');
+                            comboScreen.style.display = 'none';
+                            isBoardLocked = false;
+                        };
+                    }
+                }
+
                 const comboScreenActive = document.getElementById('combat-combo-tutorial-screen')?.style.display === 'flex';
                 if (!chainMatched && combatData.playerAP > 0 && !comboScreenActive) {
                     isBoardLocked = false;
