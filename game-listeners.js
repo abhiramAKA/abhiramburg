@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.7.2-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.7.6-BETA)
    ========================================================================== */
 
 window.closeModeDescriptionUnified = function() {
@@ -17,68 +17,72 @@ window.closeModeDescriptionUnified = function() {
 };
 
 function setupAllGameListeners() {
+    // Полная блокировка старых глобальных перехватчиков кликов по окну document/body
+    document.onclick = null;
+    document.body.onclick = null;
+
     const toCombatBtn = document.getElementById('to-combat-btn');
-    if (toCombatBtn) toCombatBtn.addEventListener('click', () => showScreen('dragon-select-screen'));
+    if (toCombatBtn) toCombatBtn.onclick = function() { showScreen('dragon-select-screen'); };
 
     const fromSelectBtn = document.getElementById('from-select-to-menu-btn');
-    if (fromSelectBtn) fromSelectBtn.addEventListener('click', () => showScreen('main-menu'));
+    if (fromSelectBtn) fromSelectBtn.onclick = function() { showScreen('main-menu'); };
     
     const infoBtn = document.getElementById('info-btn');
     if (infoBtn) {
-        infoBtn.addEventListener('click', () => {
+        infoBtn.onclick = function() {
             const textContainer = document.getElementById('info-screen-text');
             if (textContainer) textContainer.innerHTML = typeof getTownText === 'function' ? getTownText('mainInfo') : '';
             showScreen('info-screen');
-        });
+        };
     }
     
     const fromInfoBtn = document.getElementById('from-info-to-menu-btn');
-    if (fromInfoBtn) fromInfoBtn.addEventListener('click', () => showScreen('main-menu'));
+    if (fromInfoBtn) fromInfoBtn.onclick = function() { showScreen('main-menu'); };
     
     const toSettingsBtn = document.getElementById('to-settings-btn');
     if (toSettingsBtn) {
-        toSettingsBtn.addEventListener('click', () => {
+        toSettingsBtn.onclick = function() {
             document.getElementById('volume-music-slider').value = (parseFloat(localStorage.getItem('khamach_vol_music') || '0.5') * 100);
             document.getElementById('volume-fx-slider').value = (parseFloat(localStorage.getItem('khamach_vol_fx') || '0.7') * 100);
             if (typeof initAudioContext === 'function') initAudioContext();
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('settings-screen').style.display = 'flex';
-        });
+        };
     }
 
     const musicSlider = document.getElementById('volume-music-slider');
     if (musicSlider) {
-        musicSlider.addEventListener('input', (e) => {
+        musicSlider.oninput = function(e) {
             if (typeof updateEngineVolumeValues === 'function') updateEngineVolumeValues('music', e.target.value);
-        });
+        };
     }
     
     const fxSlider = document.getElementById('volume-fx-slider');
     if (fxSlider) {
-        fxSlider.addEventListener('input', (e) => {
+        fxSlider.oninput = function(e) {
             if (typeof updateEngineVolumeValues === 'function') updateEngineVolumeValues('fx', e.target.value);
-        });
-        fxSlider.addEventListener('change', () => {
+        };
+        fxSlider.onchange = function() {
             if (typeof playMatch3Sound === 'function') playMatch3Sound('swap');
-        });
+        };
     }
 
     const closeSettingsBtn = document.getElementById('close-settings-btn');
     if (closeSettingsBtn) {
-        closeSettingsBtn.addEventListener('click', () => {
+        closeSettingsBtn.onclick = function() {
             document.getElementById('settings-screen').style.display = 'none';
             document.getElementById('main-menu').style.display = 'flex';
             if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
-        });
+        };
     }
     
     const toClansBtn = document.getElementById('to-clans-btn');
-    if (toClansBtn) toClansBtn.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('clans'); });
+    if (toClansBtn) toClansBtn.onclick = function() { if (typeof openModeDescription === 'function') openModeDescription('clans'); };
     
     const toSquadBtn = document.getElementById('to-squad-btn');
-    if (toSquadBtn) toSquadBtn.addEventListener('click', () => showScreen('squad-screen'));
+    if (toSquadBtn) toSquadBtn.onclick = function() { showScreen('squad-screen'); };
 
-    // ИСПРАВЛЕНО: Кнопка Отряд вызывает меню взаимодействия с бойцами, а не Склад!
+    // Кнопка Отряд вызывает меню взаимодействия с бойцами
     const toStorageBtn = document.getElementById('to-storage-btn');
     if (toStorageBtn) {
         toStorageBtn.onclick = function() {
@@ -94,57 +98,57 @@ function setupAllGameListeners() {
     if (closeStorageBtn) closeStorageBtn.onclick = function() { showScreen('main-menu'); };
 
     const toMissionsBtn = document.getElementById('to-missions-btn');
-    if (toMissionsBtn) toMissionsBtn.addEventListener('click', () => showScreen('missions-screen'));
+    if (toMissionsBtn) toMissionsBtn.onclick = function() { showScreen('missions-screen'); };
     
     const closeMissionsBtn = document.getElementById('close-missions-btn');
-    if (closeMissionsBtn) closeMissionsBtn.addEventListener('click', () => showScreen('main-menu'));
+    if (closeMissionsBtn) closeMissionsBtn.onclick = function() { showScreen('main-menu'); };
 
     const toChronicleBtn = document.getElementById('to-chronicle-btn');
-    if (toChronicleBtn) toChronicleBtn.addEventListener('click', () => showScreen('chronicle-screen'));
+    if (toChronicleBtn) toChronicleBtn.onclick = function() { showScreen('chronicle-screen'); };
 
     const closeChronicleBtn = document.getElementById('close-chronicle-btn');
-    if (closeChronicleBtn) closeChronicleBtn.addEventListener('click', () => showScreen('main-menu'));
+    if (closeChronicleBtn) closeChronicleBtn.onclick = function() { showScreen('main-menu'); };
 
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
     if (leaveCombatBtn) {
-        leaveCombatBtn.addEventListener('click', () => {
+        leaveCombatBtn.onclick = function() {
             if (confirm("Вы уверены, что хотите сбежать из рейда?")) showScreen('main-menu');
-        });
+        };
     }
 
     const clearChronicleBtn = document.getElementById('clear-chronicle-btn');
     if (clearChronicleBtn) {
-        clearChronicleBtn.addEventListener('click', () => {
+        clearChronicleBtn.onclick = function() {
             if (confirm("Очистить все записи в Летописи Цитадели?")) {
                 localStorage.setItem('khamach_chronicle_logs', JSON.stringify());
                 if (typeof renderChronicleDOM === 'function') renderChronicleDOM();
             }
-        });
+        };
     }
 
     const goldDisplayLink = document.getElementById('main-gold-display');
     if (goldDisplayLink) {
-        goldDisplayLink.addEventListener('click', () => {
+        goldDisplayLink.onclick = function() {
             if (typeof updateStorageScreenDOM === 'function') updateStorageScreenDOM();
             showScreen('storage-screen');
-        });
+        };
     }
 
     const teamFatigueBtn = document.getElementById('team-fatigue-display');
     if (teamFatigueBtn) {
-        teamFatigueBtn.addEventListener('click', () => {
+        teamFatigueBtn.onclick = function() {
             if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
             const screen = document.getElementById('squad-fatigue-screen');
             if (screen) screen.style.display = 'flex';
-        });
+        };
     }
     
     const closeFatigueBtn = document.getElementById('close-fatigue-screen-btn');
     if (closeFatigueBtn) {
-        closeFatigueBtn.addEventListener('click', () => {
+        closeFatigueBtn.onclick = function() {
             const screen = document.getElementById('squad-fatigue-screen');
             if (screen) screen.style.display = 'none';
-        });
+        };
     }
 
     if (typeof setupSquadInterfaceListeners === 'function') setupSquadInterfaceListeners();
