@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БАЛАНСА БОССА (v3.3.2-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БАЛАНСА БОССА (v3.4.1-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -155,6 +155,14 @@ function checkBattleResolution() {
         let lootName = lootNames[randIndex];
 
         if (typeof addPlayerResource === 'function') addPlayerResource(lootKey, 1);
+        
+        // Исправлено: жестко отправляем запись в Летопись до вызова алертов
+        if (typeof window.addChronicleLog === 'function') {
+            window.addChronicleLog(`ПОБЕДА: Ликвидирован дракон Тира ${activeSessionLevel}. На склад зачислена 1 шт. материала: ${lootName}`);
+        } else if (typeof addChronicleLog === 'function') {
+            addChronicleLog(`ПОБЕДА: Ликвидирован дракон Тира ${activeSessionLevel}. На склад зачислена 1 шт. материала: ${lootName}`);
+        }
+        
         alert(`ВЕЛИКАЯ ПОБЕДА! Дракон Тира ${activeSessionLevel} повержен!\n📦 На склад Цитадели доставлено: ${lootName} (1 шт). Золотые монеты за боссов более не выплачиваются!`);
         
         if (typeof saveCompletedTier === 'function') saveCompletedTier(activeSessionLevel);
