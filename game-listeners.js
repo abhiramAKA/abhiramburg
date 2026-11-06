@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v3.6.1-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v3.8.0-BETA)
    ========================================================================== */
 
 function setupAllGameListeners() {
@@ -58,27 +58,8 @@ function setupAllGameListeners() {
         });
     }
     
-    const toForge = document.getElementById('to-forge-btn');
-    if (toForge) toForge.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('forge'); });
-    
-    const toAlchemy = document.getElementById('to-alchemy-btn');
-    if (toAlchemy) toAlchemy.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('alchemy'); });
-    
-    const toClans = document.getElementById('to-clans-btn');
-    if (toClans) toClans.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('clans'); });
-    
     const toSquadBtn = document.getElementById('to-squad-btn');
     if (toSquadBtn) toSquadBtn.addEventListener('click', () => showScreen('squad-screen'));
-    
-    const closeModeDesc = document.getElementById('close-mode-desc-btn');
-    if (closeModeDesc) closeModeDesc.addEventListener('click', () => showScreen('main-menu'));
-
-    const leaveCombatBtn = document.getElementById('leave-combat-btn');
-    if (leaveCombatBtn) {
-        leaveCombatBtn.addEventListener('click', () => {
-            if (confirm("Вы уверены, что хотите сбежать из рейда?")) showScreen('main-menu');
-        });
-    }
 
     const toStorageBtn = document.getElementById('to-storage-btn');
     if (toStorageBtn) toStorageBtn.addEventListener('click', () => showScreen('storage-screen'));
@@ -98,31 +79,20 @@ function setupAllGameListeners() {
     const closeChronicleBtn = document.getElementById('close-chronicle-btn');
     if (closeChronicleBtn) closeChronicleBtn.addEventListener('click', () => showScreen('main-menu'));
 
-    const clearChronicleBtn = document.getElementById('clear-chronicle-btn');
-    if (clearChronicleBtn) {
-        clearChronicleBtn.addEventListener('click', () => {
-            if (confirm("Очистить все записи в Летописи Цитадели?")) {
-                localStorage.setItem('khamach_chronicle_logs', JSON.stringify([]));
-                if (typeof renderChronicleDOM === 'function') renderChronicleDOM();
-            }
-        });
-    }
-}
-
-function setupCombatHelpListeners() {
-    const combatHelpBtn = document.getElementById('combat-help-btn');
-    if (combatHelpBtn) {
-        combatHelpBtn.addEventListener('click', () => {
-            const container = document.getElementById('combat-help-text-container');
-            if (container) container.innerHTML = typeof getTownText === 'function' ? getTownText('combatHelp') : '';
-            const screen = document.getElementById('combat-help-screen');
+    // Привязка нового окна индивидуальной усталости отряда
+    const teamFatigueBtn = document.getElementById('team-fatigue-display');
+    if (teamFatigueBtn) {
+        teamFatigueBtn.addEventListener('click', () => {
+            if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
+            const screen = document.getElementById('squad-fatigue-screen');
             if (screen) screen.style.display = 'flex';
         });
     }
-    const closeCombatHelpBtn = document.getElementById('close-combat-help-btn');
-    if (closeCombatHelpBtn) {
-        closeCombatHelpBtn.addEventListener('click', () => {
-            const screen = document.getElementById('combat-help-screen');
+    
+    const closeFatigueBtn = document.getElementById('close-fatigue-screen-btn');
+    if (closeFatigueBtn) {
+        closeFatigueBtn.addEventListener('click', () => {
+            const screen = document.getElementById('squad-fatigue-screen');
             if (screen) screen.style.display = 'none';
         });
     }
