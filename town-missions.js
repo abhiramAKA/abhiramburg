@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ ОДНОЙ СЛУЧАЙНОЙ СМЕНОЙ ГОРОЖАН (v3.2.7-BETA)
+   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ ОДНОЙ СЛУЧАЙНОЙ СМЕНОЙ ГОРОЖАН (v3.2.8-BETA)
    ========================================================================== */
 
 const CITY_MISSIONS_POOL = [
@@ -18,7 +18,7 @@ function renderMissionsDOM() {
     if (!container) return;
     container.innerHTML = '';
     
-    // Проверяем, есть ли уже активное в данный момент поручение
+    // Проверяем, есть ли уже сохраненное активное поручение
     let activeMissionId = localStorage.getItem('khamach_current_mission_id');
     let currentMission = null;
     
@@ -26,11 +26,11 @@ function renderMissionsDOM() {
         currentMission = CITY_MISSIONS_POOL.find(m => m.id === activeMissionId);
     }
     
-    // Если активного поручения нет, выбираем одно полностью случайное
+    // Если сохраненного поручения нет, выбираем одно рандомное из пула
     if (!currentMission) {
         const randomIndex = Math.floor(Math.random() * CITY_MISSIONS_POOL.length);
         currentMission = CITY_MISSIONS_POOL[randomIndex];
-        // Запоминаем его, чтобы оно не прыгало при каждом клике внутри окна
+        // Жестко фиксируем его ID, чтобы оно не менялось при перезаходе на экран
         localStorage.setItem('khamach_current_mission_id', currentMission.id);
     }
     
@@ -77,7 +77,8 @@ window.startMission = function(missionId, heroId) {
 window.finishMission = function(missionId, heroId, reward) {
     localStorage.removeItem(`khamach_hero_busy_${heroId}`);
     localStorage.removeItem(`khamach_mission_active_${missionId}`);
-    // Удаляем закрепление текущего поручения, чтобы в следующий раз вышло новое случайное
+    
+    // Стираем ID старого поручения, чтобы игра сгенерировала абсолютно новое рандомное задание
     localStorage.removeItem('khamach_current_mission_id');
     
     if (typeof addPlayerGold === 'function') addPlayerGold(reward);
