@@ -1,14 +1,12 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.5.1-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.7.2-BETA)
    ========================================================================== */
 
-// Глобальный неуязвимый метод контекстного закрытия окон Цитадели по крестику
 window.closeModeDescriptionUnified = function() {
     const squadScreen = document.getElementById('squad-screen');
     const isInsideSquad = (squadScreen && squadScreen.style.display !== 'none') || 
                           ['tank', 'damage', 'archer', 'mage', 'forge', 'alchemy'].includes(currentOpenedModeKey);
     
-    // Исключение для Кланов — они вызываются только из Главного Меню
     if (currentOpenedModeKey === 'clans') {
         showScreen('main-menu');
     } else if (isInsideSquad) {
@@ -80,21 +78,23 @@ function setupAllGameListeners() {
     const toSquadBtn = document.getElementById('to-squad-btn');
     if (toSquadBtn) toSquadBtn.addEventListener('click', () => showScreen('squad-screen'));
 
+    // ИСПРАВЛЕНО: Кнопка Отряд вызывает меню взаимодействия с бойцами, а не Склад!
     const toStorageBtn = document.getElementById('to-storage-btn');
     if (toStorageBtn) {
-        toStorageBtn.addEventListener('click', () => {
-            if (typeof updateStorageScreenDOM === 'function') updateStorageScreenDOM();
-            showScreen('storage-screen');
-        });
+        toStorageBtn.onclick = function() {
+            if (typeof updateSquadHeroesSpecScreenDOM === 'function') updateSquadHeroesSpecScreenDOM();
+            showScreen('squad-heroes-spec-screen');
+        };
     }
     
+    const closeHeroesSpecBtn = document.getElementById('close-heroes-spec-btn');
+    if (closeHeroesSpecBtn) closeHeroesSpecBtn.onclick = function() { showScreen('main-menu'); };
+
     const closeStorageBtn = document.getElementById('close-storage-btn');
-    if (closeStorageBtn) closeStorageBtn.addEventListener('click', () => showScreen('main-menu'));
+    if (closeStorageBtn) closeStorageBtn.onclick = function() { showScreen('main-menu'); };
 
     const toMissionsBtn = document.getElementById('to-missions-btn');
-    if (toMissionsBtn) {
-        toMissionsBtn.addEventListener('click', () => showScreen('missions-screen'));
-    }
+    if (toMissionsBtn) toMissionsBtn.addEventListener('click', () => showScreen('missions-screen'));
     
     const closeMissionsBtn = document.getElementById('close-missions-btn');
     if (closeMissionsBtn) closeMissionsBtn.addEventListener('click', () => showScreen('main-menu'));
@@ -104,9 +104,6 @@ function setupAllGameListeners() {
 
     const closeChronicleBtn = document.getElementById('close-chronicle-btn');
     if (closeChronicleBtn) closeChronicleBtn.addEventListener('click', () => showScreen('main-menu'));
-
-    const closeModeDesc = document.getElementById('close-mode-desc-btn');
-    if (closeModeDesc) closeModeDesc.addEventListener('click', () => showScreen('main-menu'));
 
     const leaveCombatBtn = document.getElementById('leave-combat-btn');
     if (leaveCombatBtn) {
@@ -150,6 +147,7 @@ function setupAllGameListeners() {
         });
     }
 
+    if (typeof setupSquadInterfaceListeners === 'function') setupSquadInterfaceListeners();
     setupCombatHelpListeners();
 }
 
