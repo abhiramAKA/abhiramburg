@@ -1,143 +1,111 @@
-/* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.5.0-BETA)
-   ========================================================================== */
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>КХАМАЧ — Легенды Абхирамбурга</title>
+    <script>
+        (function() {
+            const enforceBuster = Date.now() + '_' + Math.floor(Math.random() * 100000);
+            
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'styles.css?t=' + enforceBuster;
+            document.head.appendChild(link);
 
-const INLINE_TOWN_TEXTS = {
-    mainInfo: `<p><strong>«КХАМАЧ: Восхождение Рейдов»</strong></p><p>В недрах древних подземелий Абхирамбурга пробудился великий закон змея. Соберите свой верный отряд, заряжайте шкалы суперсил через камни стихий и сокрушите огнедышащих тварей в пошаговых тактических битвах Горнила!</p>`,
-    squadInfo: `<p><strong>«Военная Цитадель Казарм»:</strong></p><p>Здесь сосредоточены тренировочные лагеря, полигоны и алтари ваших героев.</p>`,
-    combatHelp: `<p>🛡️-Танк: Провокация. 🔥-Дамагер: Чистый урон. ⚡-Лучник: Слепота босса. 💚-Маг: Масс-хил.</p>`
-};
+            const scripts = [
+                'game.js',
+                'background.js',
+                'audio-engine.js',
+                'match3-fx.js',
+                'match3-input.js',
+                'match3.js',
+                'match3-progression.js',
+                'town-engine.js',
+                'town-chronicle.js',
+                'town-missions-pool.js',
+                'town-missions-engine.js',
+                'town-missions-dom.js',
+                'squad-engine.js',
+                'squad-dom.js',
+                'town-dom.js',
+                'combat-dom.js',
+                'combat.js',
+                'game-listeners.js'
+            ];
 
-const INLINE_MODE_DESCRIPTIONS = {
-    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНЯ", reqText: "В полумраке кузницы тяжело вздыхают мехи. Здесь из костей и чешуи великих ящеров куется мифический доспех, не знающий износа.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Кузня открывается только на 12-м уровне развития отряда!</strong>", isLocked: true },
-    clans: { title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", reqText: "Знамена великих гильдий замерли под сводами залов безмолвия. Здесь куется коллективное Величие фракций, координируются рейды и возводятся Врата Разломов в другие измерения.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Клановый шлюз открывается на 12-м уровне развития отряда!</strong>", isLocked: true },
-    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", buyText: "Полки уставлены древними фолиантами и склянками со светящимися эссенциями. Лаборатории требуется постройка рунического очага реагентов за 100 🪙.", activeText: "Реагенты закуплены. Лаборатория полностью готова дистиллировать эссенции драконов.", isLocked: false, isHero: false },
-    
-    tank: { title: "🛡️ ГАРНИЗОН", isLocked: false, isHero: true, heroId: "tank" },
-    damage: { title: "🔥 КАЗАРМЫ", isLocked: false, isHero: true, heroId: "damage" },
-    archer: { title: "⚡ СТРЕЛЬБИЩЕ", isLocked: false, isHero: true, heroId: "archer" },
-    mage: { title: "💚 ОБИТЕЛЬ", isLocked: false, isHero: true, heroId: "mage" }
-};
+            function injectScript(index) {
+                if (index >= scripts.length) {
+                    console.log("КХАМАЧ: Модули успешно загружены.");
+                    if (typeof initDispatcherModule === 'function') {
+                        initDispatcherModule();
+                    }
+                    document.body.addEventListener('click', function initAudioOnFirstTouch() {
+                        if (typeof initAudioContext === 'function') initAudioContext();
+                        if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
+                        document.body.removeEventListener('click', initAudioOnFirstTouch);
+                    }, { once: true });
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = scripts[index] + '?t=' + enforceBuster;
+                script.async = false; 
+                script.onload = function() { injectScript(index + 1); };
+                document.head.appendChild(script);
+            }
 
-window.getTownText = function(key) { return INLINE_TOWN_TEXTS[key] || ''; };
+            injectScript(0);
+        })();
+    </script>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
 
-window.getPlayerGold = function() { return parseInt(localStorage.getItem('khamach_gold') || '0'); };
-window.addPlayerGold = function(amount) { localStorage.setItem('khamach_gold', window.getPlayerGold() + amount); window.updateTownGoldDisplay(); };
-window.getPlayerResource = function(key) { return parseInt(localStorage.getItem(`khamach_res_${key}`) || '0'); };
-window.addPlayerResource = function(key, amount) { localStorage.setItem(`khamach_res_${key}`, window.getPlayerResource(key) + amount); if (typeof window.updateTownGoldDisplay === 'function') window.updateTownGoldDisplay(); };
-window.isBuildingPurchased = function(id) { return localStorage.getItem(`khamach_purchased_${id}`) === 'true'; };
-
-window.buyTownBuilding = function(id) {
-    const cost = 100; 
-    if (window.getPlayerGold() >= cost && !window.isBuildingPurchased(id)) {
-        localStorage.setItem('khamach_gold', window.getPlayerGold() - cost);
-        localStorage.setItem(`khamach_purchased_${id}`, 'true');
-        window.updateTownGoldDisplay();
-        return true;
-    }
-    return false;
-};
-
-window.openModeDescription = function(modeKey) {
-    currentOpenedModeKey = modeKey;
-    const modeData = INLINE_MODE_DESCRIPTIONS[modeKey];
-    if (!modeData) return;
-    
-    document.getElementById('mode-desc-title').innerText = modeData.title;
-    const buyBtn = document.getElementById('mode-buy-btn');
-    const textEl = document.getElementById('mode-desc-text');
-    
-    if (modeData.isLocked) {
-        textEl.innerHTML = `<p>${modeData.reqText}</p>`;
-        buyBtn.style.display = 'none';
-    } else if (modeData.isHero) {
-        const hId = modeData.heroId;
-        const isPurchased = localStorage.getItem(`khamach_squad_build_${hId}`) === 'true';
-        const currentLvl = parseInt(localStorage.getItem(`khamach_build_${hId}`) || '0');
-        const loreData = typeof SQUAD_HERO_LORE !== 'undefined' ? SQUAD_HERO_LORE[hId === 'mage' ? 'damage_mage' : hId] : null;
+    <div id="game-interface">
         
-        if (!loreData) return;
-
-        if (!isPurchased) {
-            textEl.innerHTML = `<p>${loreData.lore}</p><p style='color:#cdb38c;'>Постройка не возведена. Требуется мгновенное возведение.</p>`;
-            buyBtn.style.display = 'block';
-            buyBtn.innerText = `⚒️ ПОСТРОИТЬ ЗДЕНИЕ (100 🪙)`;
-        } else if (currentLvl >= 15) {
-            textEl.innerHTML = `<p>${loreData.title}</p><p style='color:#ffd700;'>Достигнут максимальный уровень тренировок (15 ур)!<br>Текущий бонус: ${loreData.statBonus}</p>`;
-            buyBtn.style.display = 'none';
-        } else {
-            const nextLvl = currentLvl + 1;
-            const resCount = window.getPlayerResource(loreData.resourceKey);
-            textEl.innerHTML = `
-                <p>${loreData.lore}</p>
-                <div style='background:rgba(0,0,0,0.3); padding:8px; border:1px dashed #544432; font-size:12px; text-align:left;'>
-                    <div>• Текущий уровень: <strong>${currentLvl} из 15</strong></div>
-                    <div>• Эффект: <span style='color:#2ecc71;'>${loreData.statBonus}</span></div>
-                    <div style='margin-top:4px; color:#e6c280;'>Стоимость улучшения до ${nextLvl} ур:</div>
-                    <div>🪙 Золото: 150 (У вас: ${window.getPlayerGold()})</div>
-                    <div>${loreData.resourceIcon} ${loreData.resourceName}: 1 шт. (У вас: ${resCount} шт.)</div>
-                </div>
-            `;
-            buyBtn.style.display = 'block';
-            buyBtn.innerText = `🏋️ НАЧАТЬ ТРЕНИРОВКУ (150 🪙)`;
-        }
-    } else {
-        const purchased = window.isBuildingPurchased(modeKey);
-        if (!purchased) {
-            textEl.innerHTML = `<p>${modeData.buyText}</p>`;
-            buyBtn.style.display = 'block';
-            buyBtn.innerText = `⚒️ ПОСТРОИТЬ ЗДЕНИЕ (100 🪙)`;
-        } else {
-            textEl.innerHTML = `<p>${modeData.activeText}</p><p style='color:#2ecc71;'>Здание успешно функционирует в вашей цитадели!</p>`;
-            buyBtn.style.display = 'none';
-        }
-    }
-    showScreen('mode-desc-screen');
-};
-
-window.getBuildingLevel = function(id) { return parseInt(localStorage.getItem(`khamach_build_${id}`) || '0'); };
-window.getMetaPerkValue = function(key) { return parseInt(localStorage.getItem(key) || '0'); };
-
-window.updateTownGoldDisplay = function() {
-    document.querySelectorAll('.gold-counter-display').forEach(el => { 
-        el.innerText = `🪙 ${window.getPlayerGold()} Золота`; 
-    });
-    
-    const tFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_tank') || '0'));
-    const dFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_damage') || '0'));
-    const aFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_archer') || '0'));
-    const mFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_mage') || '0'));
-    
-    const fatigueContainer = document.getElementById('team-fatigue-display');
-    if (fatigueContainer) {
-        const averageFatigue = Math.round((tFat + dFat + aFat + mFat) / 4);
-        fatigueContainer.innerHTML = `🥱 ${averageFatigue}%`;
-    }
-
-    const listContainer = document.getElementById('individual-fatigue-list-container');
-    if (listContainer) {
-        listContainer.innerHTML = `
-            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #3a3025; padding-bottom:4px;"><span>🛡️ Защитник:</span><strong>${tFat}%</strong></div>
-            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #3a3025; padding-bottom:4px;"><span>🔥 Воин:</span><strong>${dFat}%</strong></div>
-            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #3a3025; padding-bottom:4px;"><span>⚡ Стрелок:</span><strong>${aFat}%</strong></div>
-            <div style="display:flex; justify-content:space-between;"><span>💚 Маг:</span><strong>${mFat}%</strong></div>
-        `;
-    }
-    
-    if (typeof window.updateStorageScreenDOM === 'function') window.updateStorageScreenDOM();
-};
-
-window.updateStorageScreenDOM = function() {
-    const listContainer = document.getElementById('storage-resources-list');
-    if (!listContainer) return;
-    
-    listContainer.innerHTML = `
-        <div style="color: #e6c280; font-weight: bold; border-bottom: 1px solid #544432; padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase; font-size: 13px;">📜 Материалы Хранилища:</div>
-        <div style="display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 14px; color: #cdb38c;">
-            <div>🌋 Плазма древнего змея: <strong style="color:#fff; float: right;">${window.getPlayerResource('plasma')} шт.</strong></div>
-            <div>🩸 Первородная кровь дракона: <strong style="color:#fff; float: right;">${window.getPlayerResource('blood')} шт.</strong></div>
-            <div>🪶 Плотная чешуя ящера: <strong style="color:#fff; float: right;">${window.getPlayerResource('scale')} шт.</strong></div>
-            <div>💧 Чистые слезы природы: <strong style="color:#fff; float: right;">${window.getPlayerResource('tears')} шт.</strong></div>
+        <!-- ================= ГЛАВНОЕ МЕНЮ ================= -->
+        <div id="main-menu" class="game-window" style="display: flex;">
+            <h1>КХАМАЧ</h1>
+            <span class="subtitle">Легенды Абхирамбурга</span>
+            
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; font-size: 16px; font-weight: bold; background: rgba(30, 20, 15, 0.4); padding: 6px 14px; border: 1px double #544432; border-radius: 4px; border-left: none; border-right: none;">
+                <span id="main-gold-display" class="gold-counter-display" style="color: #ffd700; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffd700'">🪙 0 Золота</span>
+                <span style="color: #4a3e31; font-weight: normal;">|</span>
+                <span id="team-fatigue-display" style="color: #ffb3ba; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ffb3ba'">🥱 0%</span>
+            </div>
+            
+            <div class="menu-row">
+                <button id="to-combat-btn" class="menu-btn">В БОЙ</button>
+                <button id="to-settings-btn" class="info-btn" style="font-size: 18px;">⚙️</button>
+                <button id="info-btn" class="info-btn">❓</button>
+            </div>
+            <div class="menu-row">
+                <button id="to-squad-btn" class="menu-btn">🏙️ Цитадель</button>
+            </div>
+            <div class="menu-row">
+                <button id="to-storage-btn" class="menu-btn">👥 Отряд</button>
+            </div>
+            <div class="menu-row">
+                <button id="to-missions-btn" class="menu-btn">📜 Поручения</button>
+            </div>
+            <div class="menu-row">
+                <button id="to-chronicle-btn" class="menu-btn">📖 Летопись</button>
+            </div>
+            <div class="menu-row">
+                <button id="to-clans-btn" class="menu-btn">🛡️ Кланы</button>
+            </div>
+            
+            <div id="game-version" class="version-footer">v4.6.0-BETA</div>
         </div>
-    `;
-};
+
+        <div id="dynamic-town-screens"></div>
+        <div id="squad-screen" class="game-window" style="display: none;"></div>
+        <div id="dynamic-combat-screen"></div>
+
+    </div>
+</body>
+</html>
