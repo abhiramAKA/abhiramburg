@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ОБНОВЛЕН - v3.2.0-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ОБНОВЛЕН - v3.2.6-BETA)
    ========================================================================== */
 
 function setupAllGameListeners() {
@@ -43,6 +43,12 @@ function setupAllGameListeners() {
     document.getElementById('volume-fx-slider').addEventListener('input', (e) => {
         if (typeof updateEngineVolumeValues === 'function') updateEngineVolumeValues('fx', e.target.value);
     });
+    
+    // Новое событие: при отпускании ползунка эффектов проигрывается тестовый щелчок звука
+    document.getElementById('volume-fx-slider').addEventListener('change', () => {
+        if (typeof playMatch3Sound === 'function') playMatch3Sound('swap');
+    });
+
     document.getElementById('eq-low-slider').addEventListener('input', (e) => {
         if (typeof changeEqualizerGain === 'function') changeEqualizerGain('low', parseInt(e.target.value));
     });
@@ -69,20 +75,17 @@ function setupAllGameListeners() {
     if (leaveCombatBtn) {
         leaveCombatBtn.addEventListener('click', () => {
             if (confirm("Вы уверены, что хотите сбежать из рейда?")) {
-                if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
                 showScreen('main-menu');
             }
         });
     }
 
-    // Обработчики окна склада цитадели
     const toStorageBtn = document.getElementById('to-storage-btn');
     if (toStorageBtn) toStorageBtn.addEventListener('click', () => showScreen('storage-screen'));
     
     const closeStorageBtn = document.getElementById('close-storage-btn');
     if (closeStorageBtn) closeStorageBtn.addEventListener('click', () => showScreen('main-menu'));
 
-    // Обработчики доски городских поручений
     const toMissionsBtn = document.getElementById('to-missions-btn');
     if (toMissionsBtn) toMissionsBtn.addEventListener('click', () => showScreen('missions-screen'));
     
