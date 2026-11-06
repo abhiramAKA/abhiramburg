@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v3.8.1-BETA)
+   КХАМАЧ — МОДУЛЬ УПРАВЛЕНИЯ И СТРОИТЕЛЬСТВА В ОКНЕ ЦИТАДЕЛИ (v4.0.0-BETA)
    ========================================================================== */
 
 function setupSquadInterfaceListeners() {
@@ -11,29 +11,39 @@ function setupSquadInterfaceListeners() {
         }
     });
     
-    // Исправлено: привязка кликов для перенесенных построек внутри окна Цитадели
     const forgeBtn = document.getElementById('city-forge-btn');
-    if (forgeBtn) {
-        forgeBtn.addEventListener('click', () => { 
-            if (typeof openModeDescription === 'function') openModeDescription('forge'); 
-        });
-    }
+    if (forgeBtn) forgeBtn.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('forge'); });
     
     const alchemyBtn = document.getElementById('city-alchemy-btn');
-    if (alchemyBtn) {
-        alchemyBtn.addEventListener('click', () => { 
-            if (typeof openModeDescription === 'function') openModeDescription('alchemy'); 
-        });
-    }
+    if (alchemyBtn) alchemyBtn.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('alchemy'); });
 
     const closeBtn = document.getElementById('close-squad-btn');
     if (closeBtn) {
         closeBtn.addEventListener('click', () => showScreen('main-menu'));
     }
+
+    // Привязка интерактивных элементов шапки внутри Цитадели
+    const squadGoldLink = document.getElementById('squad-gold-display');
+    if (squadGoldLink) {
+        squadGoldLink.addEventListener('click', () => {
+            if (typeof updateStorageScreenDOM === 'function') updateStorageScreenDOM();
+            showScreen('storage-screen');
+        });
+    }
+
+    const squadFatigueLink = document.getElementById('squad-fatigue-display');
+    if (squadFatigueLink) {
+        squadFatigueLink.addEventListener('click', () => {
+            if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
+            const screen = document.getElementById('squad-fatigue-screen');
+            if (screen) screen.style.display = 'flex';
+        });
+    }
 }
 
 function handleSquadHeroClick(id) {
-    const data = SQUAD_HERO_LORE[id];
+    const loreKey = id === 'mage' ? 'damage_mage' : id;
+    const data = SQUAD_HERO_LORE[loreKey];
     if (!data) return;
 
     const isPurchased = localStorage.getItem(`khamach_squad_build_${id}`) === 'true';
@@ -95,19 +105,18 @@ function handleSquadHeroClick(id) {
 }
 
 function updateSquadVisualStyles() {
-    const invLookup = document.getElementById('squad-inventory-lookup');
-    if (invLookup && typeof getPlayerResource === 'function') {
-        invLookup.innerHTML = `🛒 Склады: 🌋 ${getPlayerResource('plasma')} | 🩸 ${getPlayerResource('blood')} | 🪶 ${getPlayerResource('scale')} | 💧 ${getPlayerResource('tears')}`;
-    }
+    const tFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_tank') || '0'));
+    const dFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_damage') || '0'));
+    const aFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_archer') || '0'));
+    const mFat = Math.round(parseFloat(localStorage.getItem('khamach_fatigue_mage') || '0'));
+    const averageFatigue = Math.round((tFat + dFat + aFat + mFat) / 4);
 
-    const fatigueLookup = document.getElementById('squad-fatigue-lookup');
-    if (fatigueLookup) {
-        const tFat = Math.round(parseInt(localStorage.getItem('khamach_fatigue_tank') || '0'));
-        const dFat = Math.round(parseInt(localStorage.getItem('khamach_fatigue_damage') || '0'));
-        const aFat = Math.round(parseInt(localStorage.getItem('khamach_fatigue_archer') || '0'));
-        const mFat = Math.round(parseInt(localStorage.getItem('khamach_fatigue_mage') || '0'));
-        fatigueLookup.innerHTML = `🥱 Усталость: 🛡️ ${tFat}% | 🔥 ${dFat}% | ⚡ ${aFat}% | 💚 ${mFat}%`;
-    }
+    // Синхронизация дашборда шапки внутри Цитадели
+    const sFatEl = document.getElementById('squad-fatigue-display');
+    if (sFatEl) sFatEl.innerHTML = `🥱 ${averageFatigue}%`;
+
+    const sGoldEl = document.getElementById('squad-gold-display');
+    if (sGoldEl && typeof getPlayerGold === 'function') sGoldEl.innerHTML = `🪙 ${getPlayerGold()} Золота`;
 
     const ids = ['tank', 'damage', 'archer', 'mage'];
     ids.forEach(id => {
@@ -115,7 +124,8 @@ function updateSquadVisualStyles() {
         if (!btn) return;
 
         const isPurchased = localStorage.getItem(`khamach_squad_build_${id}`) === 'true';
-        const data = SQUAD_HERO_LORE[id];
+        const loreKey = id === 'mage' ? 'damage_mage' : id;
+        const data = SQUAD_HERO_LORE[loreKey];
         
         if (isPurchased) {
             const currentLvl = localStorage.getItem(`khamach_build_${id}`) || '0';
