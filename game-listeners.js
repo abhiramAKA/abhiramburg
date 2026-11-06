@@ -1,13 +1,14 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.7.6-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.7.9-BETA)
    ========================================================================== */
 
 window.closeModeDescriptionUnified = function() {
     const squadScreen = document.getElementById('squad-screen');
+    const activeKey = window.currentOpenedModeKey || '';
     const isInsideSquad = (squadScreen && squadScreen.style.display !== 'none') || 
-                          ['tank', 'damage', 'archer', 'mage', 'forge', 'alchemy'].includes(currentOpenedModeKey);
+                          ['tank', 'damage', 'archer', 'mage', 'forge', 'alchemy'].includes(activeKey);
     
-    if (currentOpenedModeKey === 'clans') {
+    if (activeKey === 'clans') {
         showScreen('main-menu');
     } else if (isInsideSquad) {
         showScreen('squad-screen');
@@ -17,7 +18,6 @@ window.closeModeDescriptionUnified = function() {
 };
 
 function setupAllGameListeners() {
-    // Полная блокировка старых глобальных перехватчиков кликов по окну document/body
     document.onclick = null;
     document.body.onclick = null;
 
