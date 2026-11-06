@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v3.2.2-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v3.7.4-BETA)
    ========================================================================== */
 
 const INLINE_TOWN_TEXTS = {
@@ -66,6 +66,18 @@ window.updateTownGoldDisplay = function() {
     document.querySelectorAll('.gold-counter-display').forEach(el => { 
         el.innerText = `🪙 ${window.getPlayerGold()} Золота`; 
     });
+    
+    // Вычисление единой средней усталости всей команды
+    const fatigueContainer = document.getElementById('team-fatigue-display');
+    if (fatigueContainer) {
+        const tFat = parseFloat(localStorage.getItem('khamach_fatigue_tank') || '0');
+        const dFat = parseFloat(localStorage.getItem('khamach_fatigue_damage') || '0');
+        const aFat = parseFloat(localStorage.getItem('khamach_fatigue_archer') || '0');
+        const mFat = parseFloat(localStorage.getItem('khamach_fatigue_mage') || '0');
+        
+        const averageFatigue = Math.round((tFat + dFat + aFat + mFat) / 4);
+        fatigueContainer.innerHTML = `🥱 Усталость команды: ${averageFatigue}%`;
+    }
 };
 
 window.updateStorageScreenDOM = function() {
