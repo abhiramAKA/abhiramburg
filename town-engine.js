@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.9.11-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.9.17-BETA)
    ========================================================================== */
 
 const TOWN_BUILDING_PRICES = {
@@ -66,6 +66,7 @@ window.openModeDescription = function(id) {
         if (config.isLocked) {
             textEl.innerHTML = config.reqText;
             if (buyBtn) buyBtn.style.display = 'none';
+            showScreen('mode-desc-screen');
             return;
         }
 
