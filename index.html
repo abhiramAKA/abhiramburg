@@ -36,10 +36,16 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Модули v3.2.1 успешно загружены.");
+                    console.log("КХАМАЧ: Модули v3.2.2 успешно загружены.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
+                    // Разблокировка звука при первом клике по документу
+                    document.body.addEventListener('click', function initAudioOnFirstTouch() {
+                        if (typeof initAudioContext === 'function') initAudioContext();
+                        if (typeof startBackgroundMusic === 'function') startBackgroundMusic();
+                        document.body.removeEventListener('click', initAudioOnFirstTouch);
+                    }, { once: true });
                     return;
                 }
                 
@@ -90,7 +96,7 @@
                 <button id="to-clans-btn" class="menu-btn">🛡️ Кланы</button>
             </div>
             
-            <div id="game-version" class="version-footer">v3.2.1-BETA</div>
+            <div id="game-version" class="version-footer">v3.2.2-BETA</div>
         </div>
 
         <!-- ================= ОКНО АУДИО-МИКШЕРА И НАСТРОЕК ================= -->
