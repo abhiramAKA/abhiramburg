@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БАЛАНСА БОССА (v4.8.2-BETA)
+   КХАМАЧ — ПОШАГОВЫЙ ТАКТИЧЕСКИЙ ДВИЖОК СУПЕРСИЛ И БАЛАНСА БОССА (v4.9.7-BETA)
    ========================================================================== */
 
 let activeSessionLevel = 1;
@@ -7,6 +7,7 @@ let activeSessionLevel = 1;
 function startCombatSession(level) {
     activeSessionLevel = level || 1;
     combatData.currentRound = 1;
+    combatData.pendingComboTutorial = false;
     
     const calculatedHP = 120 + (activeSessionLevel - 1) * 60;
     combatData.dragonMaxHP = calculatedHP; 
@@ -59,9 +60,8 @@ function startCombatSession(level) {
     if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
     if (typeof initMatch3Board === 'function') initMatch3Board();
 
-    // Перехват управления для первого в истории запуска боевой сцены
     if (!localStorage.getItem('khamach_combat_tutorial_done')) {
-        if (typeof isBoardLocked !== 'undefined') isBoardLocked = true; // Замораживаем камни
+        if (typeof isBoardLocked !== 'undefined') isBoardLocked = true;
         const tutorialScreen = document.getElementById('combat-welcome-tutorial-screen');
         if (tutorialScreen) tutorialScreen.style.display = 'flex';
     }
@@ -116,8 +116,27 @@ function executeDragonTurnAI() {
     if (typeof updateCombatInterfaceDOM === 'function') updateCombatInterfaceDOM();
     setTimeout(() => {
         if (dModel) { dModel.classList.remove('dragon-attacking'); dModel.classList.add('dragon-idle'); }
-        combatData.currentRound++; combatData.playerAP = combatData.playerMaxAP;
-        if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
+        combatData.currentRound++; 
+        combatData.playerAP = combatData.playerMaxAP;
+        
+        // ВСПЛЫВАЮЩЕЕ ОКНО СТРОГО ПОСЛЕ АТАКИ ДРАКОНА ПЕРЕД СЛЕДУЮЩИМ ХОДОМ ИГРОКА
+        if (combatData.pendingComboTutorial && !localStorage.getItem('khamach_combo_tut_done')) {
+            if (typeof isBoardLocked !== 'undefined') isBoardLocked = true;
+            const comboScreen = document.getElementById('combat-combo-tutorial-screen');
+            const closeComboBtn = document.getElementById('close-combat-combo-tutorial-btn');
+            if (comboScreen && closeComboBtn) {
+                comboScreen.style.display = 'flex';
+                closeComboBtn.onclick = function() {
+                    localStorage.setItem('khamach_combo_tut_done', 'true');
+                    combatData.pendingComboTutorial = false;
+                    comboScreen.style.display = 'none';
+                    if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
+                };
+            }
+        } else {
+            if (typeof isBoardLocked !== 'undefined') isBoardLocked = false;
+        }
+
         document.getElementById('combat-ap-display').innerText = "Сделайте ход на поле!";
         document.getElementById('combat-ap-display').style.color = "#ffd700";
         checkBattleResolution();
@@ -169,7 +188,7 @@ function checkBattleResolution() {
             addChronicleLog(`ПОБЕДА: Ликвидирован дракон Тира ${activeSessionLevel}. На склад зачислена 1 шт. материала: ${lootName}`);
         }
         
-        alert(`ВЕЛИКАЯ ПОБЕДА! Дракон Тира ${activeSessionLevel} повержен!\n📦 На склад Цитадели доставлено: ${lootName} (1 шт). Золотые монеты за боссов более не выплачиваются!`);
+        alert(`ВЕЛИКАЯ ПОБЕДА! Дракон Тира ${activeSessionLevel} повержен!\n📦 На склад Цитадели доставлено: ${lootName} (1 шт). Монеты за боссов более не выплачиваются!`);
         
         if (typeof saveCompletedTier === 'function') saveCompletedTier(activeSessionLevel);
         if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
@@ -180,4 +199,3 @@ function checkBattleResolution() {
         showScreen('main-menu');
     }
 }
-
