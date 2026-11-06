@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.7.9-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.8.0-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v4.7.9-BETA";
+const GAME_VERSION = "v4.8.0-BETA";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
@@ -27,7 +27,6 @@ let match3BoardData =;
 let selectedCell = null;
 let selectedDragonLevel = 1;
 
-// Жесткая глобальная привязка ключа окна для избежания ReferenceError в других модулях
 window.currentOpenedModeKey = null;
 
 function sanitizeAndMigrateStorage() {
