@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА (ОБНОВЛЕН - v3.2.2-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ОБНОВЛЕН - v3.3.0-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v3.2.2-BETA";
+const GAME_VERSION = "v3.3.0-BETA";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
@@ -38,10 +38,17 @@ function initDispatcherModule() {
 
     if (typeof setupAllGameListeners === 'function') setupAllGameListeners();
     if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
+
+    // Запуск фонового глобального таймера игры для обработки автоматического возвращения со смен
+    setInterval(() => {
+        if (typeof checkAndProcessMissionsBackground === 'function') {
+            checkAndProcessMissionsBackground();
+        }
+    }, 1000);
 }
 
 function showScreen(screenId) {
-    const screens = ['main-menu', 'dragon-select-screen', 'info-screen', 'mode-desc-screen', 'squad-screen', 'combat-screen', 'storage-screen', 'missions-screen'];
+    const screens = ['main-menu', 'dragon-select-screen', 'info-screen', 'mode-desc-screen', 'squad-screen', 'combat-screen', 'storage-screen', 'missions-screen', 'chronicle-screen'];
     screens.forEach(id => {
         const screenEl = document.getElementById(id);
         if (screenEl) screenEl.style.display = (id === screenId) ? 'flex' : 'none';
@@ -57,6 +64,9 @@ function showScreen(screenId) {
     }
     if (screenId === 'missions-screen' && typeof renderMissionsDOM === 'function') {
         renderMissionsDOM();
+    }
+    if (screenId === 'chronicle-screen' && typeof renderChronicleDOM === 'function') {
+        renderChronicleDOM();
     }
     if (screenId === 'main-menu' || screenId === 'squad-screen' || screenId === 'mode-desc-screen' || screenId === 'storage-screen') {
         if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
