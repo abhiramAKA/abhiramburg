@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ГЛОБАЛЬНАЯ ГРАФИЧЕСКАЯ ФАБРИКА ГОРОДСКИХ ИНТЕРФЕЙСОВ (v3.9.0-BETA)
+   КХАМАЧ — ГЛОБАЛЬНАЯ ГРАФИЧЕСКАЯ ФАБРИКА ГОРОДСКИХ ИНТЕРФЕЙСОВ (v4.4.0-BETA)
    ========================================================================== */
 
 function injectTownScreensDOM() {
@@ -28,7 +28,6 @@ function injectTownScreensDOM() {
         <div id="mode-desc-screen" class="game-window" style="display: none;">
             <h2 id="mode-desc-title">РЕЖИМ ИГРЫ</h2>
             <span class="subtitle">Управление зданиями</span>
-            <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🪙 0 Золота</div>
             <div id="mode-desc-text">Описание режима загружается...</div>
             <button id="mode-buy-btn" class="menu-btn" style="margin-bottom: 10px; background: linear-gradient(to bottom, #1d421e 0%, #102411 100%); border-color: #316e34; color: #aae6ab;">🛒 ВЫКУПИТЬ ЗДЕНИЕ (100 🪙)</button>
             <button id="close-mode-desc-btn" class="menu-btn back-btn" style="margin-top: 5px; width: 100%;">Назад в меню</button>
@@ -86,6 +85,23 @@ function injectTownScreensDOM() {
                 <div id="individual-fatigue-list-container" style="display: flex; flex-direction: column; gap: 10px; text-align: left; background: rgba(0,0,0,0.5); padding: 15px; border: 1px solid #544432; border-radius: 4px; font-size: 14px;"></div>
                 <p style="font-size: 11px; margin-top: 12px; color: #8a7350; line-height: 1.4; text-align: center;">Бойцы пассивно сбрасывают усталость во время отдыха, когда не выполняют поручения города.</p>
                 <button id="close-fatigue-screen-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в меню</button>
+            </div>
+        </div>
+
+        <!-- ================= ОКНО ПЕРВОГО ЗАПУСКА И ПРИВЕТСТВИЯ ================= -->
+        <div id="welcome-palace-screen" class="game-window combat-help-popup" style="display: none;">
+            <div class="combat-help-content" style="max-width: 420px; padding: 25px;">
+                <h2>ПРИВЕТСТВИЕ</h2>
+                <span class="subtitle">Хроники Абхирамбурга</span>
+                <p style="font-size: 14px; color: #e6c280; text-align: left; line-height: 1.6; margin-bottom: 15px;">
+                    Добро пожаловать в мрачные чертоги тактической ролевой стратегии <strong>«КХАМАЧ»</strong>! 
+                </p>
+                <div style="font-size: 12px; color: #cdb38c; text-align: left; line-height: 1.5; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.4); padding: 12px; border: 1px dashed #8a7350; border-radius: 4px;">
+                    <div>• ⚔️ <strong>Боевые Рейды:</strong> Собирайте руны стихий три в ряд, чтобы заряжать суперсилы героев и сокрушать великих драконов.</div>
+                    <div>• ⛺ <strong>Развитие Цитадели:</strong> Повышайте уровни лагерей за золото и добытые в бою стихийные трофеи ящеров.</div>
+                    <div>• 📜 <strong>Поручения:</strong> Отправляйте свободных бойцов на городские задания ради добычи монет, но следите за их общей 🥱 усталостью!</div>
+                </div>
+                <button id="close-welcome-palace-btn" class="menu-btn" style="margin-top: 20px; width: 100%; background: linear-gradient(to bottom, #1d3a1e, #0f2110); border-color: #316e34;">Принять командование</button>
             </div>
         </div>
     `;
