@@ -1,15 +1,13 @@
 /* ==========================================================================
-   КХАМАЧ — ПРОЦЕДУРНЫЙ АУДИО-ДВИЖОК С ЭКВАЛАЙЗЕРОМ И МИКШЕРОМ (v3.2.4-BETA)
+   КХАМАЧ — ПРОЦЕДУРНЫЙ АУДИО-ДВИЖОК С ЭКВАЛАЙЗЕРОМ И МИКШЕРОМ (v3.2.6-BETA)
    ========================================================================== */
 
 let audioCtx = null;
 let isMusicPlaying = false; 
 
-// Глобальные переменные громкости (от 0.0 до 1.0)
 let audioVolumeMusic = 0.5;
 let audioVolumeFX = 0.7;
 
-// Ноды эквалайзера частот
 let eqLowNode = null;
 let eqMidNode = null;
 let eqHighNode = null;
@@ -27,26 +25,22 @@ function initAudioContext() {
 function setupEqualizerBands() {
     if (!audioCtx) return;
     
-    // Низкие частоты (бас до 250 Гц)
     eqLowNode = audioCtx.createBiquadFilter();
     eqLowNode.type = 'lowshelf';
     eqLowNode.frequency.value = 250;
     eqLowNode.gain.value = parseInt(localStorage.getItem('khamach_eq_low') || '0');
 
-    // Средние частоты (тело от 250 Гц до 2000 Гц)
     eqMidNode = audioCtx.createBiquadFilter();
     eqMidNode.type = 'peaking';
     eqMidNode.Q.value = 1.0;
     eqMidNode.frequency.value = 1000;
     eqMidNode.gain.value = parseInt(localStorage.getItem('khamach_eq_mid') || '3');
 
-    // Высокие частоты (блеск от 2000 Гц)
     eqHighNode = audioCtx.createBiquadFilter();
     eqHighNode.type = 'highshelf';
     eqHighNode.frequency.value = 4000;
     eqHighNode.gain.value = parseInt(localStorage.getItem('khamach_eq_high') || '0');
 
-    // Соединяем фильтры последовательно
     eqLowNode.connect(eqMidNode);
     eqMidNode.connect(eqHighNode);
     eqHighNode.connect(audioCtx.destination);
@@ -123,6 +117,7 @@ function playAmbientNode() {
 }
 
 function startBackgroundMusic() {
+    if (isMusicPlaying) return; // Исключаем повторный перезапуск эмбиента
     isMusicPlaying = true;
     initAudioContext();
     playAmbientNode();
