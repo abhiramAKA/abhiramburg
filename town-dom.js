@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ГЛОБАЛЬНАЯ ГРАФИЧЕСКАЯ ФАБРИКА ГОРОДСКИХ ИНТЕРФЕЙСОВ (v4.7.0-BETA)
+   КХАМАЧ — ГЛОБАЛЬНАЯ ГРАФИЧЕСКАЯ ФАБРИКА ГОРОДСКИХ ИНТЕРФЕЙСОВ (v4.9.2-BETA)
    ========================================================================== */
 
 function injectTownScreensDOM() {
@@ -23,13 +23,12 @@ function injectTownScreensDOM() {
         </div>
 
         <div id="mode-desc-screen" class="game-window" style="display: none; padding: 25px 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; width: 100%;">
-                <h2 id="mode-desc-title" style="margin: 0; font-size: 20px;">РЕЖИМ ИГРЫ</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; width: 100%;">
+                <h2 id="mode-desc-title" style="margin: 0; font-size: 20px;">ЗДЕНИЕ ЦИТАДЕЛИ</h2>
                 <button id="close-mode-desc-top-btn" class="info-btn back-btn" style="width: 26px; height: 26px; font-size: 11px; box-shadow: none; border-radius: 4px; margin: 0; padding: 0;" onclick="if(typeof window.closeModeDescriptionUnified === 'function') window.closeModeDescriptionUnified()">❌</button>
             </div>
-            <span class="subtitle" style="margin-bottom: 15px; padding-bottom: 6px;">Управление строениями</span>
-            <div id="mode-desc-text">Описание режима загружается...</div>
-            <button id="mode-buy-btn" class="menu-btn" style="margin-top: 15px; background: linear-gradient(to bottom, #1d421e 0%, #102411 100%); border-color: #316e34; color: #aae6ab;">⚒️ ПОСТРОИТЬ ЗДЕНИЕ (100 🪙)</button>
+            <div id="mode-desc-text" style="text-align: left; font-size: 13px; line-height: 1.5; color: #cdb38c; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid #4a3e31; border-radius: 4px;">Описание режима загружается...</div>
+            <button id="mode-buy-btn" class="menu-btn" style="margin-top: 15px; background: linear-gradient(to bottom, #1d421e 0%, #102411 100%); border-color: #316e34; color: #aae6ab;">⚒️ ПОСТРОИТЬ (🪙 100)</button>
         </div>
 
         <div id="settings-screen" class="game-window" style="display: none; padding: 20px;">
@@ -51,7 +50,7 @@ function injectTownScreensDOM() {
         <div id="storage-screen" class="game-window" style="display: none;">
             <h2>СКЛАД ЦИТАДЕЛИ</h2>
             <span class="subtitle">Учет Ресурсов и Трофеев</span>
-            <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🪙 0 Золота</div>
+            <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🪙 0</div>
             <div id="storage-resources-list" style="background: rgba(0, 0, 0, 0.4); border: 1px double #544432; padding: 15px; margin-bottom: 15px; border-radius: 4px; text-align: left;"></div>
             <button id="close-storage-btn" class="menu-btn back-btn" style="width: 100%;">Назад в меню</button>
         </div>
@@ -98,3 +97,4 @@ function injectTownScreensDOM() {
         </div>
     `;
 }
+
