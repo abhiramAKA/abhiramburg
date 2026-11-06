@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.3.1-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И ТАЙМЕРОВ (ИСПРАВЛЕН - v4.7.6-BETA)
    ========================================================================== */
 
-const GAME_VERSION = "v4.3.1-BETA";
+const GAME_VERSION = "v4.7.6-BETA";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
@@ -23,25 +23,28 @@ let combatData = {
     ]
 };
 
-let match3BoardData = [];
+let match3BoardData =;
 let selectedCell = null;
 let selectedDragonLevel = 1;
 let currentOpenedModeKey = null;
 
 function sanitizeAndMigrateStorage() {
-    // Каскадная очистка застрявших старых версий UI в памяти без потери золота
+    // Сохраняем ТОЛЬКО чистый игровой прогресс
     const currentGold = localStorage.getItem('khamach_gold') || '0';
     const currentMaxTier = localStorage.getItem('khamach_max_tier') || '1';
     
-    // Переносим только чистые ресурсы
     const plasma = localStorage.getItem('khamach_res_plasma') || '0';
     const blood = localStorage.getItem('khamach_res_blood') || '0';
     const scale = localStorage.getItem('khamach_res_scale') || '0';
     const tears = localStorage.getItem('khamach_res_tears') || '0';
 
-    // Удаляем старые системные конфликты, если они форсируют загрузку старого меню
-    const legacyKeys = ['GAME_TEXTS', 'town_dom_backup', 'main_menu_html_v2', 'khamach_menu_backup'];
-    legacyKeys.forEach(k => localStorage.removeItem(k));
+    // Тотально уничтожаем текстовые HTML-бэкапы старых интерфейсов
+    const toxicKeys = [
+        'GAME_TEXTS', 'town_dom_backup', 'main_menu_html_v2', 
+        'khamach_menu_backup', 'town_dom_html', 'town_dom_backup_html',
+        'khamach_html_backup', 'cached_menu_dom'
+    ];
+    toxicKeys.forEach(k => localStorage.removeItem(k));
 
     // Возвращаем на место чистый прогресс игрока
     localStorage.setItem('khamach_gold', currentGold);
@@ -53,7 +56,7 @@ function sanitizeAndMigrateStorage() {
 }
 
 function initDispatcherModule() {
-    // Принудительная изоляция данных от старого кэша
+    // Принудительное выжигание старого кэша разметки
     sanitizeAndMigrateStorage();
 
     if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
@@ -77,7 +80,7 @@ function initDispatcherModule() {
 }
 
 function showScreen(screenId) {
-    const screens = ['main-menu', 'dragon-select-screen', 'info-screen', 'mode-desc-screen', 'squad-screen', 'combat-screen', 'storage-screen', 'missions-screen', 'chronicle-screen'];
+    const screens = ['main-menu', 'dragon-select-screen', 'info-screen', 'mode-desc-screen', 'squad-screen', 'combat-screen', 'storage-screen', 'missions-screen', 'chronicle-screen', 'squad-heroes-spec-screen'];
     screens.forEach(id => {
         const screenEl = document.getElementById(id);
         if (screenEl) screenEl.style.display = (id === screenId) ? 'flex' : 'none';
@@ -90,6 +93,9 @@ function showScreen(screenId) {
     }
     if (screenId === 'storage-screen' && typeof updateStorageScreenDOM === 'function') {
         updateStorageScreenDOM();
+    }
+    if (screenId === 'squad-heroes-spec-screen' && typeof updateSquadHeroesSpecScreenDOM === 'function') {
+        updateSquadHeroesSpecScreenDOM();
     }
     if (screenId === 'missions-screen' && typeof renderMissionsDOM === 'function') {
         renderMissionsDOM();
