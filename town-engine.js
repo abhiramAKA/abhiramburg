@@ -1,80 +1,198 @@
-/* ==========================================================================
-   КХАМАЧ — ЭКОНОМИКА ЦИТАДЕЛИ И ПРЯМОЙ СКЛАД НИШТЯКОВ (ОБНОВЛЕН - v2.9.1-BETA)
-   ========================================================================== */
-
-const INLINE_TOWN_TEXTS = {
-    mainInfo: `<p><strong>«КХАМАЧ: Восхождение Рейдов»</strong></p><p>В недрах древних подземелий Абхирамбурга пробудился великий закон змея. Соберите свой верный отряд, заряжайте шкалы суперсил через камни стихий и сокрушите огнедышащих тварей в пошаговых тактических битвах Горнила!</p>`,
-    squadInfo: `<p><strong>«Военная Цитадель Казарм»:</strong></p><p>Здесь сосредоточены тренировочные лагеря, полигоны и алтари ваших героев. Развивайте инфраструктуру отряда, чтобы открыть скрытые вехи развития и многократно приумножить характеристики воинов перед вылазкой в рейд.</p>`,
-    combatHelp: `<p>🛡️-Танк: Провокация. 🔥-Дамагер: Чистый урон. ⚡-Лучник: Слепота босса. 💚-Маг: Масс-хил.</p>`
-};
-
-const INLINE_MODE_DESCRIPTIONS = {
-    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНЯ", reqText: "В полумраке кузницы тяжело вздыхают мехи. Здесь из костей и чешуи великих ящеров куется мифический доспех, не знающий износа.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Кузня открывается только на 12-м уровень развития отряда!</strong>", isLocked: true },
-    alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", buyText: "Полки уставлены древними фолиантами и склянками со светящимися эссенциями. Лаборатории требуется закупка редких алхимических реагентов за 100 🪙.", activeText: "Реагенты закуплены. Лаборатория Абхирамбурга полностью готова дистиллировать эссенции драконов.", isLocked: false },
-    clans: { title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", reqText: "Знамена великих гильдий замерли под сводами залов безмолвия. Здесь куется коллективное Величие фракций, координируются рейды и возводятся Врата Разломов в Мир 2.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Клановый шлюз открывается на 12-м уровне развития отряда!</strong>", isLocked: true }
-};
-
-function getTownText(key) { return INLINE_TOWN_TEXTS[key] || ''; }
-
-function getPlayerGold() { return parseInt(localStorage.getItem('khamach_gold') || '0'); }
-function addPlayerGold(amount) { localStorage.setItem('khamach_gold', getPlayerGold() + amount); updateTownGoldDisplay(); }
-function getPlayerResource(key) { return parseInt(localStorage.getItem(`khamach_res_${key}`) || '0'); }
-function addPlayerResource(key, amount) { localStorage.setItem(`khamach_res_${key}`, getPlayerResource(key) + amount); if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay(); }
-function isBuildingPurchased(id) { return localStorage.getItem(`khamach_purchased_${id}`) === 'true'; }
-
-function buyTownBuilding(id) {
-    const cost = 100; 
-    if (getPlayerGold() >= cost && !isBuildingPurchased(id)) {
-        localStorage.setItem('khamach_gold', getPlayerGold() - cost);
-        localStorage.setItem(`khamach_purchased_${id}`, 'true');
-        updateTownGoldDisplay();
-        return true;
-    }
-    return false;
-}
-
-function openModeDescription(modeKey) {
-    currentOpenedModeKey = modeKey;
-    const modeData = INLINE_MODE_DESCRIPTIONS[modeKey];
-    if (!modeData) return;
-    
-    document.getElementById('mode-desc-title').innerText = modeData.title;
-    const buyBtn = document.getElementById('mode-buy-btn');
-    const textEl = document.getElementById('mode-desc-text');
-    
-    if (modeData.isLocked) {
-        textEl.innerHTML = `<p>${modeData.reqText}</p>`;
-        buyBtn.style.display = 'none';
-    } else {
-        const purchased = isBuildingPurchased(modeKey);
-        if (!purchased) {
-            textEl.innerHTML = `<p>${modeData.buyText}</p>`;
-            buyBtn.style.display = 'block';
-            buyBtn.innerText = `🛒 ВЫКУПИТЬ ЛАБОРАТОРИЮ (100 🪙)`;
-        } else {
-            textEl.innerHTML = `<p>${modeData.activeText}</p><p style='color:#2ecc71;'>Лаборатория успешно функционирует в вашей цитадели!</p>`;
-            buyBtn.style.display = 'none';
-        }
-    }
-    showScreen('mode-desc-screen');
-}
-
-function getBuildingLevel(id) { return parseInt(localStorage.getItem(`khamach_build_${id}`) || '0'); }
-function getMetaPerkValue(key) { return parseInt(localStorage.getItem(key) || '0'); }
-
 function updateTownGoldDisplay() {
-    document.querySelectorAll('.gold-counter-display').forEach(el => { el.innerText = `🪙 ${getPlayerGold()} Золота`; });
-    const invContainer = document.getElementById('main-menu-inventory');
-    if (!invContainer) return;
+    document.querySelectorAll('.gold-counter-display').forEach(el => { 
+        el.innerText = `🪙 ${getPlayerGold()} Золота`; 
+    });
+}
+
+// РЕНДЕРИНГ И СОДЕРЖИМОЕ ОКНА СКЛАДА
+function updateStorageScreenDOM() {
+    const listContainer = document.getElementById('storage-resources-list');
+    if (!listContainer) return;
     
-    // Исправлено на чистый русский язык по ТЗ
-    invContainer.innerHTML = `
-        <div style="color: #bfae96; text-transform: uppercase; font-size: 10px; border-bottom: 1px solid #3a3025; padding-bottom: 2px; font-weight: bold;">📜 Хранилище Цитадели</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 12px; margin: 6px 0; color: #cdb38c; text-align: left; padding: 0 5px;">
-            <span>🌋 Плазма: <strong style="color:#fff;">${getPlayerResource('plasma')}</strong></span>
-            <span>🩸 Кровь: <strong style="color:#fff;">${getPlayerResource('blood')}</strong></span>
-            <span>🪶 Чешуя: <strong style="color:#fff;">${getPlayerResource('scale')}</strong></span>
-            <span>💧 Слезы: <strong style="color:#fff;">${getPlayerResource('tears')}</strong></span>
+    listContainer.innerHTML = `
+        <div style="color: #e6c280; font-weight: bold; border-bottom: 1px solid #544432; padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase; font-size: 13px;">📜 Добытые материалы:</div>
+        <div style="display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 14px; color: #cdb38c;">
+            <div>🌋 Плазма древнего змея: <strong style="color:#fff; float: right;">${getPlayerResource('plasma')} шт.</strong></div>
+            <div>🩸 Первородная кровь дракона: <strong style="color:#fff; float: right;">${getPlayerResource('blood')} шт.</strong></div>
+            <div>🪶 Плотная чешуя ящера: <strong style="color:#fff; float: right;">${getPlayerResource('scale')} шт.</strong></div>
+            <div>💧 Чистые слезы природы: <strong style="color:#fff; float: right;">${getPlayerResource('tears')} шт.</strong></div>
         </div>
     `;
 }
+
+// БАЗА ДАННЫХ ДЛЯ ГОРОДСКИХ ПОРУЧЕНИЙ (СМЕН)
+const CITY_MISSIONS_POOL = [
+    {
+        id: "m_tank_1",
+        allowedHero: "tank",
+        heroName: "Танк",
+        type: "обычное",
+        duration: "1 ч",
+        reward: 133, // Из таблицы баланса
+        text: "Кузнец просит придержать наковальню и помочь с переносом тяжелых слитков метеоритной стали.",
+        title: "Помощь в кузнице"
+    },
+    {
+        id: "m_tank_2",
+        allowedHero: "tank",
+        heroName: "Танк",
+        type: "обычное",
+        duration: "1 ч",
+        reward: 133,
+        text: "Городская стража просит постоять на центральных воротах во время пивного фестиваля для усмирения буйных.",
+        title: "Охрана правопорядка"
+    },
+    {
+        id: "m_damage_1",
+        allowedHero: "damage",
+        heroName: "Дамагер",
+        type: "обычное",
+        duration: "1 ч",
+        reward: 133,
+        text: "Лесорубы боятся углубляться в чащу из-за расплодившихся диких кабанов-мутантов. Нужна грубая сила.",
+        title: "Зачистка старой просеки"
+    },
+    {
+        id: "m_damage_2",
+        allowedHero: "damage",
+        heroName: "Дамагер",
+        type: "обычное",
+        duration: "1 ч",
+        reward: 133,
+        text: "Хозяин таверны ищет вышибалу, способного одним взглядом ломать дубовые столы и прекращать драки.",
+        title: "Усмирение в таверне"
+    },
+    {
+        id: "m_archer_1",
+        allowedHero: "archer",
+        heroName: "Лучник",
+        type: "обычное",
+        duration: "1 ч",
+        reward: 133,
+        text: "Старый мельник жалуется на стаи гигантских ворон, ворующих мешки со склада. Нужен зоркий глаз.",
+        title: "Отстрел вредителей"
+    },
+    {
+        id: "m_archer_2",
+        allowedHero: "archer",
+        heroName: "Лучник",
+        type: "обычное",
+        duration: "1 ч",
+        reward: 133,
+        text: "Купеческий караван ищет разведчика для проверки безопасности горного перевала от засад бандитов.",
+        title: "Разведка перевала"
+    },
+    {
+        id: "m_mage_1",
+        allowedHero: "mage",
+        heroName: "Маг",
+        type: "обычное",
+        duration: "1 ч",
+        reward: 133,
+        text: "В местном госпитале лихорадка косит детей. Знахари бессильны, требуется подпитка чистой магией жизни.",
+        title: "Исцеление больных"
+    },
+    {
+        id: "m_mage_2",
+        allowedHero: "mage",
+        heroName: "Маг",
+        type: "обычное",
+        duration: "1 ч",
+        reward: 133,
+        text: "У алхимика-ученого скисло ценное зелье из-за нарушения температурной стабильности. Нужна стабилизация рун.",
+        title: "Калибровка эссенций"
+    },
+    // Продвинутые смены для последующих этапов игры
+    {
+        id: "m_rare_1",
+        allowedHero: "damage",
+        heroName: "Дамагер",
+        type: "редкое",
+        duration: "2 ч",
+        reward: 388, //
+        text: "Торговцы наткнулись на логово редких подземных чудовищ. Задание повышенной опасности.",
+        title: "Зачистка катакомб"
+    },
+    {
+        id: "m_epic_1",
+        allowedHero: "mage",
+        heroName: "Маг",
+        type: "эпическое",
+        duration: "4 ч",
+        reward: 1110, //
+        text: "Лорды просят запечатать древний разлом магии, который грозит уничтожить четверть Абхирамбурга.",
+        title: "Закрытие Разлома Пустоты"
+    }
+];
+
+// ЛОГИКА ОТОБРАЖЕНИЯ ПОРУЧЕНИЙ
+function renderMissionsDOM() {
+    const container = document.getElementById('missions-list-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    // Определяем текущий этап игры по открытому тиру дракона
+    const maxUnlockedTier = typeof getMaxUnlockedTier === 'function' ? getMaxUnlockedTier() : 1;
+    
+    // Блокировка редких/эпических смен на первых 3-х уровнях (Этап 1)
+    const currentTierLimit = maxUnlockedTier; 
+    
+    CITY_MISSIONS_POOL.forEach(mission => {
+        // Если тир игрока <= 3, скрываем редкие и эпические смены
+        if (currentTierLimit <= 3 && mission.type !== "обычное") {
+            return; 
+        }
+        
+        const isHeroBusy = localStorage.getItem(`khamach_hero_busy_${mission.allowedHero}`) === 'true';
+        const isThisMissionActive = localStorage.getItem(`khamach_mission_active_${mission.id}`) === 'true';
+        
+        const card = document.createElement('div');
+        card.style.background = "rgba(25, 20, 18, 0.9)";
+        card.style.border = "1px solid #544432";
+        card.style.padding = "8px";
+        card.style.borderRadius = "3px";
+        card.style.textAlign = "left";
+        
+        let actionButtonHTML = '';
+        
+        if (isThisMissionActive) {
+            actionButtonHTML = `<button class="menu-btn" style="padding: 6px; font-size: 11px; background: #421e1e;" onclick="finishMission('${mission.id}', '${mission.allowedHero}', ${mission.reward})">Завершить смену</button>`;
+        } else if (isHeroBusy) {
+            actionButtonHTML = `<button class="menu-btn disabled" style="padding: 6px; font-size: 11px;" disabled>Герой занят</button>`;
+        } else {
+            actionButtonHTML = `<button class="menu-btn" style="padding: 6px; font-size: 11px; background: #1d3a1e;" onclick="startMission('${mission.id}', '${mission.allowedHero}')">Отправить (${mission.heroName})</button>`;
+        }
+        
+        card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; font-weight: bold; color: #e6c280; font-size: 13px;">
+                <span>${mission.title} (${mission.type})</span>
+                <span style="color: #ffd700;">🪙 ${mission.reward}</span>
+            </div>
+            <div style="font-size: 11px; color: #bfae96; margin: 4px 0;">${mission.text}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                <span style="font-size: 10px; color: #8a7350;">⏱️ Длительность: ${mission.duration}</span>
+                ${actionButtonHTML}
+            </div>
+        `;
+        
+        container.appendChild(card);
+    });
+}
+
+// НАЧАТЬ СМЕНУ
+window.startMission = function(missionId, heroId) {
+    localStorage.setItem(`khamach_hero_busy_${heroId}`, 'true');
+    localStorage.setItem(`khamach_mission_active_${missionId}`, 'true');
+    alert(`Воин успешно отправлен на городское поручение! На время смены он покидает боевой отряд для рейдов.`);
+    renderMissionsDOM();
+};
+
+// ЗАВЕРШИТЬ СМЕНУ И ПОЛУЧИТЬ ЗОЛОТО
+window.finishMission = function(missionId, heroId, reward) {
+    localStorage.removeItem(`khamach_hero_busy_${heroId}`);
+    localStorage.removeItem(`khamach_mission_active_${missionId}`);
+    addPlayerGold(reward);
+    alert(`Смена благополучно отработана! Наш боец вернулся в казармы, а казна пополнилась на 🪙 ${reward} золота.`);
+    renderMissionsDOM();
+};
