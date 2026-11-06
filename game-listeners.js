@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.9.14-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v4.9.15-BETA)
    ========================================================================== */
 
 window.closeModeDescriptionUnified = function() {
@@ -21,7 +21,6 @@ function setupAllGameListeners() {
     document.onclick = null;
     document.body.onclick = null;
 
-    // ПАТТЕРН ДЕЛЕГИРОВАНИЯ: Намертво привязываем клик Клана к контейнеру Главного меню
     const mainMenuEl = document.getElementById('main-menu');
     if (mainMenuEl) {
         mainMenuEl.onclick = function(e) {
