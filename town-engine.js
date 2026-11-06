@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.9.3-BETA)
+   КХАМАЧ — ЦЕНТРАЛЬНАЯ ЭКОНОМИКА ЦИТАДЕЛИ И ХРАНИЛИЩЕ РЕСУРСОВ (v4.9.4-BETA)
    ========================================================================== */
 
 const INLINE_TOWN_TEXTS = {
@@ -8,7 +8,7 @@ const INLINE_TOWN_TEXTS = {
 };
 
 const INLINE_MODE_DESCRIPTIONS = {
-    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНЯ", reqText: "В полумраке кузницы тяжело вздыхают мехи. Здесь из костей и чешуи великих ящеров куется мифический доспех, не знающий износа.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Кузня открывается только на 12-м уровне развития отряда!</strong>", isLocked: true },
+    forge: { title: "⚒️ ДРЕВНЯЯ КУЗНЯ", reqText: "В полумраке кузницы тяжело вздыхают мехи. Здесь из костей и чешуи великих ящеров куется мифический доспех, не знающий износа.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Кузня открывается только на 12-м уровень развития отряда!</strong>", isLocked: true },
     clans: { title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", reqText: "Знамена великих гильдий замерли под сводами залов безмолвия. Здесь куется коллективное Величие фракций, координируются рейды и возводятся Врата Разломов в другие измерения.<br><br><strong style='color:#ff6666;'>⚠️ Доступ заблокирован. Клановый шлюз открывается на 12-м уровне развития отряда!</strong>", isLocked: true },
     alchemy: { title: "🧪 ЛАБОРАТОРИЯ АЛХИМИИ", buyText: "Полки уставлены древними фолиантами и склянками со светящимися эссенциями. Лаборатории требуется постройка рунического очага реагентов за 🪙 100.", activeText: "Реагенты закуплены. Лаборатория полностью готова дистиллировать эссенции драконов.", isLocked: false, isHero: false },
     tank: { title: "🛡️ ГАРНИЗОН", isLocked: false, isHero: true, heroId: "tank" },
@@ -44,21 +44,22 @@ window.openModeDescription = function(id) {
             const bldLvl = parseInt(localStorage.getItem(`khamach_build_${id}`) || '0');
             const data = typeof SQUAD_HERO_LORE !== 'undefined' ? SQUAD_HERO_LORE[id === 'mage' ? 'damage_mage' : id] : null;
             
-            let loreText = data ? data.lore : "Помещение для тренировки бойцов Цитадели.";
+            let loreText = data ? data.lore : "Оборонительное или тренировочное сооружение Цитадели.";
             let bonusText = data ? data.statBonus : "";
 
+            let instructionText = "<br><br><span style='color:#cdb38c;'>⚠️ Данное здание необходимо для снятия ограничений и расширения текущего потолка прокачки бойца внутри Военного Лагеря. Каждая модернизация увеличивает максимальный доступный уровень тренировок.</span>";
+
             if (!isPurchased) {
-                textEl.innerHTML = `${loreText}<br><br><span style='color:#cdb38c;'>Эффект: ${bonusText}</span>`;
+                textEl.innerHTML = `${loreText}${instructionText}<br><br><span style='color:#ffb3ba;'>Ожидаемый эффект прокачки бойца: ${bonusText}</span>`;
                 if (buyBtn) { buyBtn.style.display = 'block'; buyBtn.innerText = `⚒️ ПОСТРОИТЬ (🪙 100)`; }
             } else if (bldLvl >= 15) {
-                textEl.innerHTML = `${loreText}<br><br><span style='color:#2ecc71;'>Максимальный уровень модернизации [15] достигнут!</span>`;
+                textEl.innerHTML = `${loreText}<br><br><span style='color:#2ecc71;'>Максимальный уровень модернизации здания достигнут! Потолок прокачки расширен до максимума.</span>`;
                 if (buyBtn) buyBtn.style.display = 'none';
             } else {
-                textEl.innerHTML = `${loreText}<br><br><span style='color:#ffd700;'>Текущий уровень строения: ${bldLvl}</span><br>Эффект: ${bonusText}`;
+                textEl.innerHTML = `${loreText}${instructionText}<br><br><span style='color:#ffd700;'>Текущий лимит уровня бойца: ${bldLvl}</span><br>Потенциал тренировок: ${bonusText}`;
                 if (buyBtn) { buyBtn.style.display = 'block'; buyBtn.innerText = `⚒️ УЛУЧШИТЬ ДО УР. ${bldLvl + 1} (🪙 150)`; }
             }
         } else {
-            // Обычные постройки (например, Алхимия)
             const purchased = window.isBuildingPurchased(id);
             textEl.innerHTML = purchased ? config.activeText : config.buyText;
             if (buyBtn) {
