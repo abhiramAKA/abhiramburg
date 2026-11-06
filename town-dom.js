@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ ГЕНЕРАТОР ИНТЕРФЕЙСОВ ГОРОДА (ИСПРАВЛЕН - v3.8.0-BETA)
+   КХАМАЧ — ГЛОБАЛЬНАЯ ГРАФИЧЕСКАЯ ФАБРИКА ГОРОДСКИХ ИНТЕРФЕЙСОВ (v3.9.0-BETA)
    ========================================================================== */
 
 function injectTownScreensDOM() {
@@ -34,14 +34,56 @@ function injectTownScreensDOM() {
             <button id="close-mode-desc-btn" class="menu-btn back-btn" style="margin-top: 5px; width: 100%;">Назад в меню</button>
         </div>
 
-        <!-- ================= НОВОЕ ОКНО ДЕТАЛЬНОЙ УСТАЛОСТИ ОТРЯДА ================= -->
+        <!-- ================= ОКНО НАСТРОЕК ЗВУКА ================= -->
+        <div id="settings-screen" class="game-window" style="display: none; padding: 20px;">
+            <h2>ЗВУКОВОЙ ПУЛЬТ</h2>
+            <span class="subtitle">Микшер Абхирамбурга</span>
+            <div style="text-align: left; font-size: 13px; color: #cdb38c; margin-bottom: 15px;">
+                <div style="margin-bottom: 10px;">
+                    <label>🎵 Громкость Музыки:</label>
+                    <input type="range" id="volume-music-slider" min="0" max="100" value="50" style="width: 100%; accent-color: #ffd700;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label>🎇 Громкость Эффектов:</label>
+                    <input type="range" id="volume-fx-slider" min="0" max="100" value="70" style="width: 100%; accent-color: #ffd700;">
+                </div>
+            </div>
+            <button id="close-settings-btn" class="menu-btn back-btn" style="width: 100%;">Сохранить настройки</button>
+        </div>
+
+        <!-- ================= ОКНО СКЛАДА ================= -->
+        <div id="storage-screen" class="game-window" style="display: none;">
+            <h2>СКЛАД ЦИТАДЕЛИ</h2>
+            <span class="subtitle">Учет Ресурсов и Трофеев</span>
+            <div class="gold-counter-display" style="color: #ffd700; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🪙 0 Золота</div>
+            <div id="storage-resources-list" style="background: rgba(0, 0, 0, 0.4); border: 1px double #544432; padding: 15px; margin-bottom: 15px; border-radius: 4px; text-align: left;"></div>
+            <button id="close-storage-btn" class="menu-btn back-btn" style="width: 100%;">Назад в меню</button>
+        </div>
+
+        <!-- ================= ОКНО ПОРУЧЕНИЙ ================= -->
+        <div id="missions-screen" class="game-window" style="display: none;">
+            <h2>ГОРОДСКОЕ ПОРУЧЕНИЕ</h2>
+            <span class="subtitle">Доска Объявлений Абхирамбурга</span>
+            <p style="font-size: 12px; margin-bottom: 10px;">Отправляйте бойцов помогать горожанам. Занятые бойцы автоматически вернутся по истечении таймера!</p>
+            <div id="missions-list-container" style="max-height: 45vh; overflow-y: auto; padding: 4px; margin-bottom: 15px; border: 1px solid #4a3e31; background: rgba(0,0,0,0.4); border-radius: 4px; display: flex; flex-direction: column; gap: 8px;"></div>
+            <button id="close-missions-btn" class="menu-btn back-btn" style="width: 100%; margin-top: 0;">Назад в меню</button>
+        </div>
+
+        <!-- ================= ОКНО ЛЕТОПИСИ ================= -->
+        <div id="chronicle-screen" class="game-window" style="display: none;">
+            <h2>ЛЕТОПИСЬ ЦИТАДЕЛИ</h2>
+            <span class="subtitle">Архив Истории Абхирамбурга</span>
+            <div id="chronicle-list-container" style="max-height: 50vh; overflow-y: auto; padding: 10px; margin-bottom: 15px; border: 1px dashed #8a7350; background: rgba(10,8,6,0.6); border-radius: 4px; text-align: left; font-size: 12px; display: flex; flex-direction: column; gap: 6px;"></div>
+            <button id="clear-chronicle-btn" class="menu-btn" style="background: linear-gradient(to bottom, #421e1e, #241010); border-color: #6e3131; font-size: 12px; padding: 8px; margin-bottom: 8px;">Очистить архив</button>
+            <button id="close-chronicle-btn" class="menu-btn back-btn" style="width: 100%; margin-top: 0;">Назад в меню</button>
+        </div>
+
+        <!-- ================= ОКНО ИНДИВИДУАЛЬНОЙ УСТАЛОСТИ ================= -->
         <div id="squad-fatigue-screen" class="game-window combat-help-popup" style="display: none;">
             <div class="combat-help-content" style="max-width: 400px; padding: 20px 25px;">
                 <h2>СОСТОЯНИЕ ОТРЯДА</h2>
                 <span class="subtitle">Стихийное Истощение сил</span>
-                <div id="individual-fatigue-list-container" style="display: flex; flex-direction: column; gap: 10px; text-align: left; background: rgba(0,0,0,0.5); padding: 15px; border: 1px solid #544432; border-radius: 4px; font-size: 14px;">
-                    <!-- Рендерится динамически из town-engine.js -->
-                </div>
+                <div id="individual-fatigue-list-container" style="display: flex; flex-direction: column; gap: 10px; text-align: left; background: rgba(0,0,0,0.5); padding: 15px; border: 1px solid #544432; border-radius: 4px; font-size: 14px;"></div>
                 <p style="font-size: 11px; margin-top: 12px; color: #8a7350; line-height: 1.4; text-align: center;">Бойцы пассивно сбрасывают усталость во время отдыха, когда не выполняют поручения города.</p>
                 <button id="close-fatigue-screen-btn" class="menu-btn back-btn" style="margin-top: 15px; width: 100%;">Вернуться в меню</button>
             </div>
