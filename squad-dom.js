@@ -1,10 +1,10 @@
 /* ==========================================================================
-   КХАМАЧ — ГЕНЕРАТОР ИНТЕРФЕЙСА ВНУТРИ ЦИТАДЕЛИ (ОБНОВЛЕН - v4.2.0-BETA)
+   КХАМАЧ — ГЕНЕРАТОР ИНТЕРФЕЙСА ВНУТРИ ЦИТАДЕЛИ (ОБНОВЛЕН - v4.3.0-BETA)
    ========================================================================== */
 
 const SQUAD_HERO_LORE = {
     tank: {
-        name: "⛺ Лагерь защитников",
+        name: "🛡️ Гарнизон",
         title: "🛡️ РЫЦАРЬ СМЕРТИ (ЗАЩИТНИК)",
         resourceKey: "plasma",
         resourceIcon: "🌋",
@@ -13,7 +13,7 @@ const SQUAD_HERO_LORE = {
         lore: "Латные рукавицы намертво сжимают ростовой щит из костей. Он — несокрушимая скала Абхирамбурга, принимающая на себя всю ярость извергаемого драконьего пламени."
     },
     damage: {
-        name: "🛡️ Казармы воинов",
+        name: "🔥 Казармы",
         title: "🔥 БЕРСЕРК ГОРНИЛА (ВОИН)",
         resourceKey: "blood",
         resourceIcon: "🩸",
@@ -22,7 +22,7 @@ const SQUAD_HERO_LORE = {
         lore: "Одержимый первобытным гневом рун Кхамача, этот безумный боец не признает защиты. Его парные топоры жаждут лишь одного — вскрыть хребет древнего змея."
     },
     archer: {
-        name: "⚡ Стрельбище стрелков",
+        name: "⚡ Стрельбище",
         title: "⚡ СЛЕДОПЫТ ГРОЗЫ (СТРЕЛОК)",
         resourceKey: "scale",
         resourceIcon: "🪶",
@@ -31,7 +31,7 @@ const SQUAD_HERO_LORE = {
         lore: "Его стрелы оперены чешуей драконов света, а тетива поет песнь молний. Метким выстрелом Следопыт способен ослепить чудовище."
     },
     damage_mage: {
-        name: "💚 Обитель магов",
+        name: "💚 Обитель",
         title: "💚 ОТРИЦАТЕЛЬ СМЕРТИ (МАГ)",
         resourceKey: "tears",
         resourceIcon: "💧",
@@ -49,14 +49,14 @@ function injectSquadInterfaceDOM() {
         <h1>Цитадель</h1>
         <span class="subtitle">Инфраструктура строений</span>
         
-        <!-- Полноразмерный вертикальный ряд кнопок, идентичный Главному меню -->
+        <!-- Очищенный вертикальный ряд кнопок с обновленными лаконичными названиями -->
         <div style="display: flex; flex-direction: column; width: 100%; box-sizing: border-box;">
             <div class="menu-row"><button id="city-forge-btn" class="menu-btn">⚒️ Древняя кузня</button></div>
             <div class="menu-row"><button id="city-alchemy-btn" class="menu-btn">🧪 Лаборатория алхимии</button></div>
-            <div class="menu-row"><button id="upgrade-tank-btn" class="menu-btn">⛺ Лагерь защитников</button></div>
-            <div class="menu-row"><button id="upgrade-damage-btn" class="menu-btn">🛡️ Казармы воинов</button></div>
-            <div class="menu-row"><button id="upgrade-archer-btn" class="menu-btn">⚡ Стрельбище стрелков</button></div>
-            <div class="menu-row"><button id="upgrade-mage-btn" class="menu-btn">💚 Обитель магов</button></div>
+            <div class="menu-row"><button id="upgrade-tank-btn" class="menu-btn">🛡️ Гарнизон</button></div>
+            <div class="menu-row"><button id="upgrade-damage-btn" class="menu-btn">🔥 Казармы</button></div>
+            <div class="menu-row"><button id="upgrade-archer-btn" class="menu-btn">⚡ Стрельбище</button></div>
+            <div class="menu-row"><button id="upgrade-mage-btn" class="menu-btn">💚 Обитель</button></div>
         </div>
         
         <button id="close-squad-btn" class="menu-btn back-btn" style="width: 100%;">Назад в меню</button>
