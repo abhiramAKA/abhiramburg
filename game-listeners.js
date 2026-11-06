@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v3.8.1-BETA)
+   КХАМАЧ — АВТОНОМНЫЙ МОДУЛЬ ОБРАБОТЧИКОВ ИНТЕРФЕЙСА (ИСПРАВЛЕН - v3.9.2-BETA)
    ========================================================================== */
 
 function setupAllGameListeners() {
@@ -58,15 +58,24 @@ function setupAllGameListeners() {
         });
     }
     
-    // Кнопка Кланов на Главном экране
+    // Глобальное исправление: Клик на "Кланы" на главном экране
     const toClansBtn = document.getElementById('to-clans-btn');
-    if (toClansBtn) toClansBtn.addEventListener('click', () => { if (typeof openModeDescription === 'function') openModeDescription('clans'); });
+    if (toClansBtn) {
+        toClansBtn.addEventListener('click', () => { 
+            if (typeof openModeDescription === 'function') openModeDescription('clans'); 
+        });
+    }
     
     const toSquadBtn = document.getElementById('to-squad-btn');
     if (toSquadBtn) toSquadBtn.addEventListener('click', () => showScreen('squad-screen'));
 
     const toStorageBtn = document.getElementById('to-storage-btn');
-    if (toStorageBtn) toStorageBtn.addEventListener('click', () => showScreen('storage-screen'));
+    if (toStorageBtn) {
+        toStorageBtn.addEventListener('click', () => {
+            if (typeof updateStorageScreenDOM === 'function') updateStorageScreenDOM();
+            showScreen('storage-screen');
+        });
+    }
     
     const closeStorageBtn = document.getElementById('close-storage-btn');
     if (closeStorageBtn) closeStorageBtn.addEventListener('click', () => showScreen('main-menu'));
@@ -97,19 +106,22 @@ function setupAllGameListeners() {
     if (clearChronicleBtn) {
         clearChronicleBtn.addEventListener('click', () => {
             if (confirm("Очистить все записи в Летописи Цитадели?")) {
-                localStorage.setItem('khamach_chronicle_logs', JSON.stringify());
+                localStorage.setItem('khamach_chronicle_logs', JSON.stringify([]));
                 if (typeof renderChronicleDOM === 'function') renderChronicleDOM();
             }
         });
     }
 
-    // Привязка интерактивного золота в шапке к вызову Склада
+    // Клик на интерактивное золото в шапке
     const goldDisplayLink = document.getElementById('main-gold-display');
     if (goldDisplayLink) {
-        goldDisplayLink.addEventListener('click', () => showScreen('storage-screen'));
+        goldDisplayLink.addEventListener('click', () => {
+            if (typeof updateStorageScreenDOM === 'function') updateStorageScreenDOM();
+            showScreen('storage-screen');
+        });
     }
 
-    // Привязка окна индивидуальной усталости отряда
+    // Клик на интерактивный значок 🥱
     const teamFatigueBtn = document.getElementById('team-fatigue-display');
     if (teamFatigueBtn) {
         teamFatigueBtn.addEventListener('click', () => {
