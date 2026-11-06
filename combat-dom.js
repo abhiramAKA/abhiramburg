@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ПОЛНОГО РЕНДЕРИНГА БОЕВОГО ИНТЕРФЕЙСА (ОБНОВЛЕН - v4.8.2-BETA)
+   КХАМАЧ — МОДУЛЬ ПОЛНОГО РЕНДЕРИНГА БОЕВОГО ИНТЕРФЕЙСА (ОБНОВЛЕН - v4.8.8-BETA)
    ========================================================================== */
 
 function injectCombatInterfaceBaseDOM() {
@@ -173,4 +173,3 @@ function updateCombatInterfaceDOM() {
     
     if (typeof setupCombatHelpListeners === 'function') setupCombatHelpListeners();
 }
-
