@@ -9,11 +9,12 @@
     <title>КХАМАЧ — Легенды Абхирамбурга</title>
     <script>
         (function() {
-            const versionMarker = "v3.7.1";
+            // Динамический хвостовик времени генерируется при каждом старте страницы
+            const cacheBuster = Date.now();
             
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = 'styles.css?v=' + versionMarker;
+            link.href = 'styles.css?t=' + cacheBuster;
             document.head.appendChild(link);
 
             const scripts = [
@@ -39,7 +40,7 @@
 
             function injectScript(index) {
                 if (index >= scripts.length) {
-                    console.log("КХАМАЧ: Модули v3.7.1 успешно загружены.");
+                    console.log("КХАМАЧ: Все модули успешно загружены со сбросом кэша.");
                     if (typeof initDispatcherModule === 'function') {
                         initDispatcherModule();
                     }
@@ -52,7 +53,7 @@
                 }
                 
                 const script = document.createElement('script');
-                script.src = scripts[index] + '?v=' + versionMarker;
+                script.src = scripts[index] + '?t=' + cacheBuster;
                 script.async = false; 
                 script.onload = function() { injectScript(index + 1); };
                 document.head.appendChild(script);
@@ -95,7 +96,7 @@
                 <button id="to-clans-btn" class="menu-btn">🛡️ Кланы</button>
             </div>
             
-            <div id="game-version" class="version-footer">v3.7.1-BETA</div>
+            <div id="game-version" class="version-footer">v3.7.2-BETA</div>
         </div>
 
         <!-- ================= ОКНО НАСТРОЕК ================= -->
