@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — СПОРТЗАЛ: 15 УРОВНЕЙ ПРОКАЧКИ ЗА 5 ЭПОХ РЕСУРСОВ (v6.3.3-STABLE)
+   КХАМАЧ — СПОРТЗАЛ: 15 УРОВНЕЙ ПРОКАЧКИ ЗА 5 ЭПОХ РЕСУРСОВ (v6.3.5-STABLE)
    ========================================================================== */
 
 const SQUAD_HERO_LORE = {
@@ -61,11 +61,12 @@ window.updateSquadHeroesSpecScreenDOM = function() {
             bonusText = `+${incVal} ${lore.statName}`;
             priceText = `Цена: ${req.cost} ${req.icon} ${req.name}`;
 
-            const needsBuildingUpgrade = heroLvl >= buildLvl;
+            const reqBuildLvl = nextLvl - 1;
+            const needsBuildingUpgrade = buildLvl < reqBuildLvl;
             const hasEnoughRes = currentResAmount >= req.cost;
 
             if (needsBuildingUpgrade) {
-                actionBtnHTML = `<button class="menu-btn disabled" style="padding:8px 6px; font-size:10px; width:140px; height:44px; line-height:1.1; color:#ffb3ba;" disabled>Нужно здание ${nextLvl} ур.</button>`;
+                actionBtnHTML = `<button class="menu-btn disabled" style="padding:8px 6px; font-size:10px; width:140px; height:44px; line-height:1.1; color:#ffb3ba;" disabled>Нужно здание ${reqBuildLvl} ур.</button>`;
             } else if (!hasEnoughRes) {
                 actionBtnHTML = `<button class="menu-btn disabled" style="padding:8px 6px; font-size:10px; width:140px; height:44px; line-height:1.1; color:#cca3a3;" disabled>Не хватает ${req.icon}</button>`;
             } else {
@@ -97,10 +98,11 @@ window.triggerHeroLevelUpgrade = function(heroId) {
 
     const buildLvl = window.getBuildingLevel(heroId);
     const nextLvl = heroLvl + 1;
+    const reqBuildLvl = nextLvl - 1;
     const req = HERO_TRAINING_COSTS[nextLvl];
     const currentRes = parseInt(localStorage.getItem(req.key) || '0');
 
-    if (heroLvl >= buildLvl) return;
+    if (buildLvl < reqBuildLvl) return;
     if (currentRes < req.cost) return;
 
     localStorage.setItem(req.key, (currentRes - req.cost).toString());
