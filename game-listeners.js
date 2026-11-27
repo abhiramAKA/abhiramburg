@@ -1,9 +1,13 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ОБРАБОТЧИКОВ И ЗВУКОВОГО ОТКЛИКА НАСТРОЕК (v6.2.2)
+   КХАМАЧ — МОДУЛЬ ОБРАБОТЧИКОВ И ЗВУКОВОГО ОТКЛИКА НАСТРОЕК (v6.2.4)
    ========================================================================== */
 
 window.closeModeDescriptionUnified = function() {
-    showScreen('squad-screen');
+    if (window.currentOpenedModeKey === 'clans') {
+        showScreen('main-menu');
+    } else {
+        showScreen('squad-screen');
+    }
 };
 
 function safeBindElementClick(id, callback, checkLock = false) {
@@ -53,7 +57,6 @@ function setupAllGameListeners() {
                 localStorage.setItem('khamach_vol_fx', val.toString());
                 if (typeof setEffectsVolume === 'function') setEffectsVolume(val);
             };
-            // Проигрываем тестовый звук при отпускании ползунка эффектов
             fxSlider.onchange = function() {
                 const val = this.value / 100;
                 localStorage.setItem('khamach_vol_fx', val.toString());
