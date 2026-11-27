@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И УРОВНЯ ОТРЯДА (v6.2.6-STABLE)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И УРОВНЯ ОТРЯДА (v6.3.0-STABLE)
    ========================================================================== */
 
 const BOARD_ROWS = 8;
@@ -42,11 +42,12 @@ function sanitizeAndMigrateStorage() {
         localStorage.setItem('khamach_res_dark', '0');
         localStorage.setItem('khamach_res_dust', '0');
         
-        localStorage.setItem('khamach_build_tank', '2');
-        localStorage.setItem('khamach_hero_lvl_tank', '2');
+        localStorage.setItem('khamach_build_tank', '1');
         localStorage.setItem('khamach_build_damage', '1');
         localStorage.setItem('khamach_build_archer', '1');
         localStorage.setItem('khamach_build_mage', '1');
+        
+        localStorage.setItem('khamach_hero_lvl_tank', '1');
         localStorage.setItem('khamach_hero_lvl_damage', '1');
         localStorage.setItem('khamach_hero_lvl_archer', '1');
         localStorage.setItem('khamach_hero_lvl_mage', '1');
@@ -69,6 +70,8 @@ function updateMenuOnboardingVisibility() {
     if (!gridContainer) return;
 
     const currentLvl = window.getSquadPower();
+    const isClansUnlocked = currentLvl >= 2;
+    const clansStyle = isClansUnlocked ? '' : 'style="opacity: 0.45; filter: grayscale(0.85);"';
 
     gridContainer.style.gridTemplateColumns = "repeat(2, 1fr)";
     gridContainer.innerHTML = `
@@ -77,7 +80,7 @@ function updateMenuOnboardingVisibility() {
         <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
         <button id="to-storage-btn" class="emoji-grid-btn">🏋️</button>
         <button id="to-chronicle-btn" class="emoji-grid-btn">📜</button>
-        <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
+        <button id="to-clans-btn" class="emoji-grid-btn" ${clansStyle}>👥</button>
     `;
 
     const lvlBtn = document.getElementById('indicator-level-btn');
