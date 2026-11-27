@@ -1,135 +1,47 @@
-/* ==========================================================================
-   КХАМАЧ — СПОРТЗАЛ: 15 УРОВНЕЙ ПРОКАЧКИ ЗА 5 ЭПОХ РЕСУРСОВ (v6.3.0-STABLE)
-   ========================================================================== */
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>КХАМАЧ — Вход в Чертоги</title>
+    <style>
+        body, html { margin:0; padding:0; width:100%; height:100%; background:#050508; display:flex; justify-content:center; align-items:center; font-family:'Georgia', serif; user-select:none; -webkit-user-select:none; }
+        .gate-window { width:92vw; max-width:400px; background:radial-gradient(circle, #1a1512 0%, #0d0a08 100%); border:4px solid #1a1613; outline:2px solid #8a7350; outline-offset:-3px; padding:25px 20px; text-align:center; box-sizing:border-box; box-shadow:0 0 30px rgba(0,0,0,0.95); display: flex; flex-direction: column; gap: 12px; }
+        h1 { font-size:36px; color:#e6c280; letter-spacing:5px; margin:0 0 5px 0; text-shadow:0 2px 4px #000; font-weight:900; }
+        .subtitle { font-size: 11px; color: #8a7350; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; display: block; border-bottom: 1px dashed #4a3f2c; padding-bottom: 8px; }
+        .play-btn { width:100%; padding:14px; font-size:16px; font-family:'Georgia', serif; font-weight:bold; letter-spacing:1px; color:#cdb38c; background:linear-gradient(to bottom, #2d2621 0%, #171311 100%); border:1px solid #544432; box-shadow:0 5px 10px rgba(0,0,0,0.6); cursor:pointer; transition:all 0.2s ease; border-radius:4px; text-shadow:2px 2px 2px #000; box-sizing: border-box; }
+        .play-btn:hover { color:#fff; border-color:#cbb281; box-shadow:0 0 15px rgba(203,178,129,0.5); letter-spacing:1.5px; }
+        .play-btn:active { transform:scale(0.98); }
+        .changelog { text-align:center; background:rgba(0,0,0,0.5); border:1px solid #3a3025; padding:8px; font-size:11px; color:#bfae96; border-radius:2px; margin-top: 5px; }
+        .changelog h3 { margin:0; color:#e6c280; font-size:12px; letter-spacing:1px; }
+    </style>
+</head>
+<body>
+    <div class="gate-window">
+        <h1>КХАМАЧ</h1>
+        <span class="subtitle">Управление Доступом</span>
 
-const SQUAD_HERO_LORE = {
-    tank:   { title: "🛡️ ЗАЩИТНИК", statName: "Max HP",      increments: },
-    damage: { title: "🔥 ВОИН",     statName: "Урон ульты",  increments: },
-    archer: { title: "⚡ СТРЕЛОК",  statName: "Урон молнии", increments: },
-    mage:   { title: "💚 МАГ",      statName: "Масс-хил",    increments: }
-};
-
-const HERO_TRAINING_COSTS = {
-    2:  { key: 'khamach_dragon_ore', icon: '🪨', name: 'Горной руды', cost: 2 },
-    3:  { key: 'khamach_dragon_ore', icon: '🪨', name: 'Горной руды', cost: 4 },
-    4:  { key: 'khamach_res_coal',   icon: '🔥', name: 'Угля пламени', cost: 2 },
-    5:  { key: 'khamach_res_coal',   icon: '🔥', name: 'Угля пламени', cost: 4 },
-    6:  { key: 'khamach_res_coal',   icon: '🔥', name: 'Угля пламени', cost: 6 },
-    7:  { key: 'khamach_res_ice',    icon: '❄️', name: 'Лед. осколка', cost: 3 },
-    8:  { key: 'khamach_res_ice',    icon: '❄️', name: 'Лед. осколка', cost: 5 },
-    9:  { key: 'khamach_res_ice',    icon: '❄️', name: 'Лед. осколка', cost: 8 },
-    10: { key: 'khamach_res_dark',   icon: '🔮', name: 'Сферы Тьмы', cost: 4 },
-    11: { key: 'khamach_res_dark',   icon: '🔮', name: 'Сферы Тьмы', cost: 7 },
-    12: { key: 'khamach_res_dark',   icon: '🔮', name: 'Сферы Тьмы', cost: 10 },
-    13: { key: 'khamach_res_dust',   icon: '✨', name: 'Звёзд. пыли', cost: 5 },
-    14: { key: 'khamach_res_dust',   icon: '✨', name: 'Звёзд. пыли', cost: 10 },
-    15: { key: 'khamach_res_dust',   icon: '✨', name: 'Звёзд. пыли', cost: 15 }
-};
-
-window.getHeroLevel = function(id) { return parseInt(localStorage.getItem(`khamach_hero_lvl_${id}`) || '1'); };
-window.getBuildingLevel = function(id) { return parseInt(localStorage.getItem(`khamach_build_${id}`) || '1'); };
-
-window.updateSquadHeroesSpecScreenDOM = function() {
-    const container = document.getElementById('heroes-upgrade-list-container');
-    if (!container) return;
-    container.innerHTML = '';
-    
-    container.style.display = "flex";
-    container.style.flexDirection = "column";
-    container.style.gap = "6px";
-    container.style.width = "100%";
-    
-    const heroesData = [{ id: "tank" }, { id: "damage" }, { id: "archer" }, { id: "mage" }];
-    
-    heroesData.forEach(h => {
-        const lore = SQUAD_HERO_LORE[h.id];
-        if (!lore) return;
+        <button class="play-btn" onclick="redirectToOnboardingSandbox()">ПРОЙТИ ОБУЧЕНИЕ</button>
+        <button id="continue-game-btn" class="play-btn" style="background: linear-gradient(to bottom, #3a2a18, #1c130a); border-color: #8a7350;" onclick="handleContinueClick()">ПРОДОЛЖИТЬ ИГРУ</button>
         
-        const heroLvl = window.getHeroLevel(h.id);
-        const buildLvl = window.getBuildingLevel(h.id);
-        const nextLvl = heroLvl + 1;
-        
-        let actionBtnHTML = '';
-        let bonusText = "МАКС";
-        let priceText = "Достигнут предел";
-
-        if (heroLvl < 15) {
-            const req = HERO_TRAINING_COSTS[nextLvl];
-            const currentResAmount = parseInt(localStorage.getItem(req.key) || '0');
-            const incVal = lore.increments[heroLvl - 1] || 10;
-            
-            bonusText = `+${incVal} ${lore.statName}`;
-            priceText = `Цена: ${req.cost} ${req.icon} ${req.name}`;
-
-            const needsBuildingUpgrade = heroLvl >= buildLvl;
-            const hasEnoughRes = currentResAmount >= req.cost;
-
-            if (needsBuildingUpgrade) {
-                actionBtnHTML = `<button class="menu-btn disabled" style="padding:8px 6px; font-size:10px; width:140px; height:44px; line-height:1.1; color:#ffb3ba;" disabled>Нужно здание ${nextLvl} ур.</button>`;
-            } else if (!hasEnoughRes) {
-                actionBtnHTML = `<button class="menu-btn disabled" style="padding:8px 6px; font-size:10px; width:140px; height:44px; line-height:1.1; color:#cca3a3;" disabled>Не хватает ${req.icon}</button>`;
-            } else {
-                actionBtnHTML = `<button class="menu-btn" style="padding:10px; font-size:12px; background:linear-gradient(to bottom, #1d3a1e, #0f2110); border-color:#316e34; width:140px; height:44px;" onclick="window.triggerHeroLevelUpgrade('${h.id}')">Тренировать</button>`;
-            }
-        } else {
-            actionBtnHTML = `<button class="menu-btn disabled" style="padding:10px; font-size:12px; width:140px; height:44px;" disabled>МАКС УР</button>`;
-        }
-        
-        const card = document.createElement('div');
-        card.style = "background: rgba(20, 16, 14, 0.95); border: 1px solid #544432; padding: 10px 12px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; width:100%; gap:10px;";
-        card.innerHTML = `
-            <div style="flex:1; text-align:left;">
-                <div style="font-weight:bold; color:#e6c280; font-size:13px; letter-spacing:0.5px;">
-                    ${lore.title} <span style="color:#ffd700; font-size:11px; margin-left:6px;">Ур. ${heroLvl}</span>
-                </div>
-                <div style="font-size:11px; color:#2ecc71; margin-top:2px;">Развитие: ${bonusText}</div>
-                <div style="font-size:11px; color:#bfae96; font-weight: bold; margin-top:2px;">${priceText}</div>
-            </div>
-            <div style="display:flex; align-items:center;">${actionBtnHTML}</div>
-        `;
-        container.appendChild(card);
-    });
-};
-
-window.triggerHeroLevelUpgrade = function(heroId) {
-    const heroLvl = window.getHeroLevel(heroId);
-    if (heroLvl >= 15) return;
-
-    const buildLvl = window.getBuildingLevel(heroId);
-    const nextLvl = heroLvl + 1;
-    const req = HERO_TRAINING_COSTS[nextLvl];
-    const currentRes = parseInt(localStorage.getItem(req.key) || '0');
-
-    if (heroLvl >= buildLvl) return;
-    if (currentRes < req.cost) return;
-
-    localStorage.setItem(req.key, (currentRes - req.cost).toString());
-    localStorage.setItem(`khamach_hero_lvl_${heroId}`, nextLvl.toString());
-    
-    window.updateSquadHeroesSpecScreenDOM();
-    if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
-};
-
-function injectSquadInterfaceDOM() {
-    const screen = document.getElementById('squad-screen'); 
-    if(!screen) return;
-    
-    const tBld = window.getBuildingLevel('tank');
-    const dBld = window.getBuildingLevel('damage');
-    const aBld = window.getBuildingLevel('archer');
-    const mBld = window.getBuildingLevel('mage');
-    
-    screen.innerHTML = `
-        <h2>Цитадель</h2>
-        <span class="subtitle">Инфраструктура строений Замка</span>
-        <div style="display: flex; flex-direction: column; width: 100%; box-sizing: border-box; gap: 8px;">
-            <div class="menu-row"><button id="upgrade-tank-btn" class="menu-btn" style="background:linear-gradient(to bottom, #1d3a1e, #0f2110); border-color:#316e34; color:#fff; letter-spacing:1px; font-weight:900;">🛡️ ГАРНИЗОН [УР. ${tBld}]</button></div>
-            <div class="menu-row"><button id="upgrade-damage-btn" class="menu-btn" style="background:linear-gradient(to bottom, #1d3a1e, #0f2110); border-color:#316e34; color:#fff; letter-spacing:1px; font-weight:900;">🔥 КАЗАРМЫ [УР. ${dBld}]</button></div>
-            <div class="menu-row"><button id="upgrade-archer-btn" class="menu-btn" style="background:linear-gradient(to bottom, #1d3a1e, #0f2110); border-color:#316e34; color:#fff; letter-spacing:1px; font-weight:900;">⚡ СТРЕЛЬБИЩЕ [УР. ${aBld}]</button></div>
-            <div class="menu-row"><button id="upgrade-mage-btn" class="menu-btn" style="background:linear-gradient(to bottom, #1d3a1e, #0f2110); border-color:#316e34; color:#fff; letter-spacing:1px; font-weight:900;">💚 ОБИТЕЛЬ [УР. ${mBld}]</button></div>
+        <div class="changelog">
+            <h3>v6.3.2</h3>
         </div>
-        <button id="close-squad-btn" class="menu-btn back-btn" style="width: 100%; margin-top: 15px;">Назад в меню</button>
-    `;
-    
-    if (typeof setupSquadInterfaceListeners === 'function') setupSquadInterfaceListeners();
-}
+    </div>
+
+    <script>
+        function redirectToOnboardingSandbox() {
+            localStorage.removeItem('khamach_full_onboarding_complete');
+            sessionStorage.removeItem('khamach_session_fresh_start');
+            window.location.href = 'https://github.io';
+        }
+
+        function handleContinueClick() {
+            window.location.href = 'hub.html?t=' + Date.now();
+        }
+    </script>
+</body>
+</html>
