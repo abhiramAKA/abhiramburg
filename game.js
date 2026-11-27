@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И УРОВНЯ ОТРЯДА (v6.2.2-STABLE)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И УРОВНЯ ОТРЯДА (v6.2.4-STABLE)
    ========================================================================== */
 
 const BOARD_ROWS = 8;
@@ -21,7 +21,6 @@ let selectedCell = null;
 let selectedDragonLevel = 2;
 window.currentOpenedModeKey = null;
 
-// НОВАЯ ФОРМУЛА: Среднее арифметическое уровней прокачки 4 героев
 window.getSquadPower = function() {
     const t = parseInt(localStorage.getItem('khamach_hero_lvl_tank') || '1');
     const d = parseInt(localStorage.getItem('khamach_hero_lvl_damage') || '1');
@@ -67,7 +66,7 @@ function updateMenuOnboardingVisibility() {
     if (!gridContainer) return;
 
     const currentLvl = window.getSquadPower();
-    const clanLockedStyle = currentLvl < 4 ? 'opacity: 0.45; filter: grayscale(0.8);' : '';
+    const clanLockedStyle = currentLvl < 2 ? 'opacity: 0.45; filter: grayscale(0.8);' : '';
 
     gridContainer.style.gridTemplateColumns = "repeat(2, 1fr)";
     gridContainer.innerHTML = `
