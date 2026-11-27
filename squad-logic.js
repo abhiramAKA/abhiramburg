@@ -1,16 +1,14 @@
 /* ==========================================================================
-   КХАМАЧ — СПОРТЗАЛ: 15 УРОВНЕЙ ПРОКАЧКИ ЗА 5 ЭПОХ РЕСУРСОВ (v6.2.0-STABLE)
+   КХАМАЧ — СПОРТЗАЛ: 15 УРОВНЕЙ ПРОКАЧКИ ЗА 5 ЭПОХ РЕСУРСОВ (v6.3.0-STABLE)
    ========================================================================== */
 
 const SQUAD_HERO_LORE = {
-    tank:   { title: "🛡️ ЗАЩИТНИК", statName: "Max HP",      increments: [20, 20, 35, 35, 35, 60, 60, 60, 100, 100, 100, 160, 160, 160] },
-    damage: { title: "🔥 ВОИН",     statName: "Урон ульты",  increments: [15, 15, 25, 25, 25, 40, 40, 40, 70,  70,  70,  120, 120, 120] },
-    archer: { title: "⚡ СТРЕЛОК",  statName: "Урон молнии", increments: [10, 10, 18, 18, 18, 30, 30, 30, 50,  50,  50,  85,  85,  85] },
-    mage:   { title: "💚 МАГ",      statName: "Масс-хил",    increments: [5,  5,  10, 10, 10, 18, 18, 18, 30,  30,  30,  50,  50,  50] }
+    tank:   { title: "🛡️ ЗАЩИТНИК", statName: "Max HP",      increments: },
+    damage: { title: "🔥 ВОИН",     statName: "Урон ульты",  increments: },
+    archer: { title: "⚡ СТРЕЛОК",  statName: "Урон молнии", increments: },
+    mage:   { title: "💚 МАГ",      statName: "Масс-хил",    increments: }
 };
 
-
-// Таблица стоимости перехода НА указанный уровень (с 1->2 до 14->15)
 const HERO_TRAINING_COSTS = {
     2:  { key: 'khamach_dragon_ore', icon: '🪨', name: 'Горной руды', cost: 2 },
     3:  { key: 'khamach_dragon_ore', icon: '🪨', name: 'Горной руды', cost: 4 },
@@ -63,7 +61,7 @@ window.updateSquadHeroesSpecScreenDOM = function() {
             bonusText = `+${incVal} ${lore.statName}`;
             priceText = `Цена: ${req.cost} ${req.icon} ${req.name}`;
 
-            const needsBuildingUpgrade = (heroLvl >= 2) && (heroLvl >= buildLvl);
+            const needsBuildingUpgrade = heroLvl >= buildLvl;
             const hasEnoughRes = currentResAmount >= req.cost;
 
             if (needsBuildingUpgrade) {
@@ -102,13 +100,14 @@ window.triggerHeroLevelUpgrade = function(heroId) {
     const req = HERO_TRAINING_COSTS[nextLvl];
     const currentRes = parseInt(localStorage.getItem(req.key) || '0');
 
-    if ((heroLvl >= 2) && (heroLvl >= buildLvl)) return;
+    if (heroLvl >= buildLvl) return;
     if (currentRes < req.cost) return;
 
     localStorage.setItem(req.key, (currentRes - req.cost).toString());
     localStorage.setItem(`khamach_hero_lvl_${heroId}`, nextLvl.toString());
     
     window.updateSquadHeroesSpecScreenDOM();
+    if (typeof updateTownGoldDisplay === 'function') updateTownGoldDisplay();
 };
 
 function injectSquadInterfaceDOM() {
