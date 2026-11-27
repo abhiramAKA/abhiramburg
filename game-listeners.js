@@ -1,8 +1,8 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ОБРАБОТЧИКОВ И ЗВУКОВОГО ОТКЛИКА НАСТРОЕК (v6.2.5)
+   КХАМАЧ — МОДУЛЬ ОБРАБОТЧИКОВ И ДОСТУПА К КЛАНАМ (v6.3.0)
    ========================================================================== */
 
-const GUILDS_REPO_URL = 'https://abhiramaka.github.io/khamach-guild/index.html';
+const GUILDS_REPO_URL = 'https://github.io';
 
 window.closeModeDescriptionUnified = function() {
     showScreen('squad-screen');
@@ -36,7 +36,20 @@ function setupAllGameListeners() {
     safeBindElementClick('indicator-gold-btn', function() { showScreen('storage-screen'); });
 
     safeBindElementClick('to-clans-btn', function() {
+        const squadLvl = typeof window.getSquadPower === 'function' ? window.getSquadPower() : 1;
+        if (squadLvl < 2) {
+            if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
+            const lockScr = document.getElementById('clans-lock-info-screen');
+            if (lockScr) lockScr.style.display = 'flex';
+            setupAllGameListeners();
+            return;
+        }
         window.location.href = GUILDS_REPO_URL + '?t=' + Date.now();
+    });
+
+    safeBindElementClick('close-clans-lock-btn', function() {
+        const lockScr = document.getElementById('clans-lock-info-screen');
+        if (lockScr) lockScr.style.display = 'none';
     });
 
     safeBindElementClick('to-settings-btn', function() {
