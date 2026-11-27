@@ -1,19 +1,19 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И УРОВНЯ ОТРЯДА (v6.3.0-STABLE)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И УРОВНЯ ОТРЯДА (v6.3.5-STABLE)
    ========================================================================== */
 
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
-const RUNE_TYPES = ['🔥', '🛡️', '⚡', '💚'];
+const RUNE_TYPES = new Array('🔥', '🛡️', '⚡', '💚');
 
 let combatData = {
     dragonHP: 180, dragonMaxHP: 180, playerAP: 3, playerMaxAP: 3, currentRound: 1, tankTaunting: false, dragonBlinded: false,
-    squad: [
+    squad: new Array(
         { id: "tank", name: "Защитник", hp: 150, maxHP: 150, sp: 0, maxSP: 100, icon: "🛡️", color: "#4a90e2" },
         { id: "damage", name: "Воин", hp: 90, maxHP: 90, sp: 0, maxSP: 100, icon: "🔥", color: "#ff4500" },
         { id: "archer", name: "Стрелок", hp: 100, maxHP: 100, sp: 0, maxSP: 100, icon: "⚡", color: "#f1c40f" },
         { id: "mage", name: "Маг", hp: 80, maxHP: 80, sp: 0, maxSP: 100, icon: "💚", color: "#2ecc71" }
-    ]
+    )
 };
 
 let match3BoardData = null;
@@ -52,7 +52,7 @@ function sanitizeAndMigrateStorage() {
         localStorage.setItem('khamach_hero_lvl_archer', '1');
         localStorage.setItem('khamach_hero_lvl_mage', '1');
         
-        localStorage.setItem('khamach_active_triad_ids', JSON.stringify(['m_t1', 'm_d1']));
+        localStorage.setItem('khamach_active_triad_ids', JSON.stringify(new Array('m_t1', 'm_d1')));
         localStorage.setItem('khamach_hero_busy_tank', 'true');
         localStorage.setItem('khamach_mission_active_m_t1', 'true');
         localStorage.setItem('khamach_mission_start_m_t1', Date.now().toString());
@@ -116,7 +116,7 @@ function initDispatcherModule() {
 }
 
 function showScreen(screenId) {
-    const screens = ['main-menu', 'dragon-select-screen', 'info-screen', 'mode-desc-screen', 'squad-screen', 'combat-screen', 'storage-screen', 'missions-screen', 'chronicle-screen', 'squad-heroes-spec-screen', 'settings-screen'];
+    const screens = new Array('main-menu', 'dragon-select-screen', 'info-screen', 'mode-desc-screen', 'squad-screen', 'combat-screen', 'storage-screen', 'missions-screen', 'chronicle-screen', 'squad-heroes-spec-screen', 'settings-screen');
     screens.forEach(id => {
         const screenEl = document.getElementById(id);
         if (screenEl) screenEl.style.display = (id === screenId) ? 'flex' : 'none';
