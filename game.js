@@ -21,6 +21,7 @@ let selectedCell = null;
 let selectedDragonLevel = 2;
 window.currentOpenedModeKey = null;
 
+// Среднее арифметическое уровней прокачки 4 героев
 window.getSquadPower = function() {
     const t = parseInt(localStorage.getItem('khamach_hero_lvl_tank') || '1');
     const d = parseInt(localStorage.getItem('khamach_hero_lvl_damage') || '1');
@@ -66,7 +67,6 @@ function updateMenuOnboardingVisibility() {
     if (!gridContainer) return;
 
     const currentLvl = window.getSquadPower();
-    const clanLockedStyle = currentLvl < 2 ? 'opacity: 0.45; filter: grayscale(0.8);' : '';
 
     gridContainer.style.gridTemplateColumns = "repeat(2, 1fr)";
     gridContainer.innerHTML = `
@@ -75,7 +75,7 @@ function updateMenuOnboardingVisibility() {
         <button id="to-squad-btn" class="emoji-grid-btn">🏰</button>
         <button id="to-storage-btn" class="emoji-grid-btn">🏋️</button>
         <button id="to-chronicle-btn" class="emoji-grid-btn">📜</button>
-        <button id="to-clans-btn" class="emoji-grid-btn" style="${clanLockedStyle}">👥</button>
+        <button id="to-clans-btn" class="emoji-grid-btn">👥</button>
     `;
 
     const lvlBtn = document.getElementById('indicator-level-btn');
