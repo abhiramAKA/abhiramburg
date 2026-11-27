@@ -2,7 +2,7 @@
    КХАМАЧ — МОДУЛЬ ОБРАБОТЧИКОВ И ЗВУКОВОГО ОТКЛИКА НАСТРОЕК (v6.2.5)
    ========================================================================== */
 
-const GUILDS_REPO_URL = 'https://abhiramaka.github.io/khamach-guilds/index.html';
+const GUILDS_REPO_URL = 'https://abhiramaka.github.io/khamach-guild/index.html';
 
 window.closeModeDescriptionUnified = function() {
     showScreen('squad-screen');
