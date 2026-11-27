@@ -1,8 +1,6 @@
 /* ==========================================================================
-   КХАМАЧ — ЭКОНОМИКА ЦИТАДЕЛИ И ПЕРЕХОД В ОРДЕН (v6.2.4-STABLE)
+   КХАМАЧ — ЭКОНОМИКА ЦИТАДЕЛИ И СКЛАД 5 РЕСУРСОВ (v6.2.4-STABLE)
    ========================================================================== */
-
-const GUILD_REPO_URL = '../khamach-guild/index.html';
 
 const TOWN_BUILDING_PRICES = {
     2: 100, 3: 300, 4: 900, 5: 2700, 6: 11000, 7: 30000, 8: 75000,
@@ -15,7 +13,7 @@ const INLINE_TOWN_TEXTS = {
 };
 
 const INLINE_MODE_DESCRIPTIONS = {
-    clans: { title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", reqText: "⚠️ Доступ заблокирован. Вход в Орден открывается при достижении уровня отряда <strong>👑 2</strong> (прокачайте героев в среднем до 2 уровня).", isLocked: true },
+    clans: { title: "🛡️ ОРДЕН КХАМАЧА (КЛАНЫ)", isLocked: false },
     tank: { title: "🛡️ ГАРНИЗОН", isLocked: false, heroId: "tank", lore: "Оплот Защитников. Повышение уровня открывает новые ранги тренировок Танка (+20..+160 Max HP)." },
     damage: { title: "🔥 КАЗАРМЫ", isLocked: false, heroId: "damage", lore: "Тренировочный плац Воинов. Повышение уровня увеличивает разрушительную мощь ультимейта." },
     archer: { title: "⚡ СТРЕЛЬБИЩЕ", isLocked: false, heroId: "archer", lore: "Полигон Стрелков. Усиливает урон стихийных молний и ослепление врага." },
@@ -38,6 +36,7 @@ window.updateTownGoldDisplay = function() {
         el.innerText = `🪙 ${goldVal.toLocaleString('ru-RU')}`;
     });
 
+    // Выводим только иконку короны и цифру уровня
     const lvlBtn = document.getElementById('indicator-level-btn');
     if (lvlBtn && typeof window.getSquadPower === 'function') {
         lvlBtn.innerText = `👑 ${window.getSquadPower()}`;
@@ -84,14 +83,6 @@ window.openModeDescription = function(id) {
     const config = INLINE_MODE_DESCRIPTIONS[id];
     if (!config) return;
 
-    if (id === 'clans') {
-        const currentLvl = typeof window.getSquadPower === 'function' ? window.getSquadPower() : 1;
-        if (currentLvl >= 2) {
-            window.location.href = GUILD_REPO_URL + '?t=' + Date.now();
-            return;
-        }
-    }
-
     const titleEl = document.getElementById('mode-desc-title');
     const textEl = document.getElementById('mode-desc-text');
     const buyBtn = document.getElementById('mode-buy-btn');
@@ -100,7 +91,7 @@ window.openModeDescription = function(id) {
     if (textEl) {
         if (id === 'clans') {
             const currentLvl = typeof window.getSquadPower === 'function' ? window.getSquadPower() : 1;
-            textEl.innerHTML = `${config.reqText}<br><br>Ваш текущий уровень отряда: <strong>👑 ${currentLvl}</strong>.`;
+            textEl.innerHTML = `✅ Доступ к Ордену открыт со старта (Ваш уровень отряда: <strong>👑 ${currentLvl}</strong>).<br><br>Зал Гильдий, Купеческая лавка и Синхронные Блиц-Рейды готовятся к открытию в следующем обновлении!`;
             if (buyBtn) buyBtn.style.display = 'none';
             showScreen('mode-desc-screen');
             return;
