@@ -2,7 +2,7 @@
    КХАМАЧ — МОДУЛЬ ОБРАБОТЧИКОВ И ДОСТУПА К КЛАНАМ (v6.3.5)
    ========================================================================== */
 
-const GUILDS_REPO_URL = 'https://github.io';
+const GUILDS_REPO_URL = 'https://abhiramaka.github.io/khamach-guild';
 
 window.closeModeDescriptionUnified = function() {
     showScreen('squad-screen');
