@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И УРОВНЯ ОТРЯДА (v6.2.4-STABLE)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И УРОВНЯ ОТРЯДА (v6.2.6-STABLE)
    ========================================================================== */
 
 const BOARD_ROWS = 8;
@@ -21,7 +21,6 @@ let selectedCell = null;
 let selectedDragonLevel = 2;
 window.currentOpenedModeKey = null;
 
-// Среднее арифметическое уровней прокачки 4 героев
 window.getSquadPower = function() {
     const t = parseInt(localStorage.getItem('khamach_hero_lvl_tank') || '1');
     const d = parseInt(localStorage.getItem('khamach_hero_lvl_damage') || '1');
@@ -33,7 +32,9 @@ window.getSquadPower = function() {
 function sanitizeAndMigrateStorage() {
     if (!localStorage.getItem('khamach_hub_initialized')) {
         localStorage.setItem('khamach_hub_initialized', 'true');
-        localStorage.setItem('khamach_gold', '0');
+        if (localStorage.getItem('khamach_gold') === null) {
+            localStorage.setItem('khamach_gold', '0');
+        }
         localStorage.setItem('khamach_max_tier', '2');
         localStorage.setItem('khamach_dragon_ore', '0');
         localStorage.setItem('khamach_res_coal', '0');
@@ -50,6 +51,7 @@ function sanitizeAndMigrateStorage() {
         localStorage.setItem('khamach_hero_lvl_archer', '1');
         localStorage.setItem('khamach_hero_lvl_mage', '1');
         
+        localStorage.setItem('khamach_active_triad_ids', JSON.stringify(['m_t1', 'm_d1']));
         localStorage.setItem('khamach_hero_busy_tank', 'true');
         localStorage.setItem('khamach_mission_active_m_t1', 'true');
         localStorage.setItem('khamach_mission_start_m_t1', Date.now().toString());
