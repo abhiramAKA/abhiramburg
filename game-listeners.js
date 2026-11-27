@@ -1,13 +1,11 @@
 /* ==========================================================================
-   КХАМАЧ — МОДУЛЬ ОБРАБОТЧИКОВ И ЗВУКОВОГО ОТКЛИКА НАСТРОЕК (v6.2.4)
+   КХАМАЧ — МОДУЛЬ ОБРАБОТЧИКОВ И ЗВУКОВОГО ОТКЛИКА НАСТРОЕК (v6.2.5)
    ========================================================================== */
 
+const GUILDS_REPO_URL = 'https://abhiramaka.github.io/khamach-guilds/index.html';
+
 window.closeModeDescriptionUnified = function() {
-    if (window.currentOpenedModeKey === 'clans') {
-        showScreen('main-menu');
-    } else {
-        showScreen('squad-screen');
-    }
+    showScreen('squad-screen');
 };
 
 function safeBindElementClick(id, callback, checkLock = false) {
@@ -36,6 +34,10 @@ function setupAllGameListeners() {
     safeBindElementClick('to-storage-btn', function() { showScreen('squad-heroes-spec-screen'); });
     safeBindElementClick('to-chronicle-btn', function() { showScreen('chronicle-screen'); });
     safeBindElementClick('indicator-gold-btn', function() { showScreen('storage-screen'); });
+
+    safeBindElementClick('to-clans-btn', function() {
+        window.location.href = GUILDS_REPO_URL + '?t=' + Date.now();
+    });
 
     safeBindElementClick('to-settings-btn', function() {
         if (typeof injectTownScreensDOM === 'function') injectTownScreensDOM();
@@ -74,7 +76,6 @@ function setupAllGameListeners() {
         showScreen('info-screen');
     });
 
-    safeBindElementClick('to-clans-btn', function() { if (typeof window.openModeDescription === 'function') window.openModeDescription('clans'); });
     safeBindElementClick('from-select-to-menu-btn', function() { showScreen('main-menu'); });
     safeBindElementClick('from-info-to-menu-btn', function() { showScreen('main-menu'); });
     safeBindElementClick('close-settings-btn', function() { showScreen('main-menu'); });
