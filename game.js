@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И УРОВНЯ ОТРЯДА (v6.3.5-STABLE)
+   КХАМАЧ — ЦЕНТРАЛЬНЫЙ ДИСПЕТЧЕР СТЭЙТА И УРОВНЯ ОТРЯДА (v6.3.6-STABLE)
    ========================================================================== */
 
 const BOARD_ROWS = 8;
@@ -42,12 +42,12 @@ function sanitizeAndMigrateStorage() {
         localStorage.setItem('khamach_res_dark', '0');
         localStorage.setItem('khamach_res_dust', '0');
         
-        localStorage.setItem('khamach_build_tank', '1');
+        localStorage.setItem('khamach_build_tank', '2');
         localStorage.setItem('khamach_build_damage', '1');
         localStorage.setItem('khamach_build_archer', '1');
         localStorage.setItem('khamach_build_mage', '1');
         
-        localStorage.setItem('khamach_hero_lvl_tank', '1');
+        localStorage.setItem('khamach_hero_lvl_tank', '2');
         localStorage.setItem('khamach_hero_lvl_damage', '1');
         localStorage.setItem('khamach_hero_lvl_archer', '1');
         localStorage.setItem('khamach_hero_lvl_mage', '1');
