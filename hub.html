@@ -19,15 +19,15 @@
     </style>
     <script>
         (function() {
-            window.GAME_VERSION = "v6.3.1-STABLE";
+            window.GAME_VERSION = "v6.3.5-STABLE";
             const buster = Date.now() + '_' + Math.floor(Math.random() * 999999);
             const link = document.createElement('link'); link.rel = 'stylesheet'; link.href = 'styles.css?v=' + window.GAME_VERSION + '&t=' + buster; document.head.appendChild(link);
 
-            const scripts = [
+            const scripts = new Array(
                 'game.js', 'background.js', 'audio-engine.js', 'match3-fx.js', 'match3-input.js', 'match3.js', 'match3-logic.js', 'match3-data.js',
                 'campaign.js', 'town-engine.js', 'town-chronicle.js', 'missions-pool.js', 'missions-engine.js', 'town-popups.js', 'town-dom.js', 'squad-dom.js',
                 'combat-dom.js', 'missions-board.js', 'squad-logic.js', 'squad-core.js', 'combat-actions.js', 'combat.js', 'game-listeners.js'
-            ];
+            );
             function injectScript(index) {
                 if (index >= scripts.length) {
                     if (typeof initDispatcherModule === 'function') initDispatcherModule();
