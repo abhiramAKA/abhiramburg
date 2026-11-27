@@ -15,9 +15,8 @@
         .play-btn { width:100%; padding:14px; font-size:16px; font-family:'Georgia', serif; font-weight:bold; letter-spacing:1px; color:#cdb38c; background:linear-gradient(to bottom, #2d2621 0%, #171311 100%); border:1px solid #544432; box-shadow:0 5px 10px rgba(0,0,0,0.6); cursor:pointer; transition:all 0.2s ease; border-radius:4px; text-shadow:2px 2px 2px #000; box-sizing: border-box; }
         .play-btn:hover { color:#fff; border-color:#cbb281; box-shadow:0 0 15px rgba(203,178,129,0.5); letter-spacing:1.5px; }
         .play-btn:active { transform:scale(0.98); }
-        .changelog { text-align:left; background:rgba(0,0,0,0.5); border:1px solid #3a3025; padding:10px; max-height:100px; overflow-y:auto; font-size:11px; color:#bfae96; line-height:1.45; border-radius:2px; margin-top: 5px; }
-        .changelog h3 { margin:0 0 4px 0; color:#e6c280; font-size:12px; text-transform:uppercase; letter-spacing:1px; }
-        .ver { font-size:11px; color:#ffd700; letter-spacing:1px; font-weight:bold; }
+        .changelog { text-align:center; background:rgba(0,0,0,0.5); border:1px solid #3a3025; padding:8px; font-size:11px; color:#bfae96; border-radius:2px; margin-top: 5px; }
+        .changelog h3 { margin:0; color:#e6c280; font-size:12px; letter-spacing:1px; }
     </style>
 </head>
 <body>
@@ -25,12 +24,11 @@
         <h1>КХАМАЧ</h1>
         <span class="subtitle">Управление Доступом</span>
 
-        <!-- ОБЕ КНОПКИ ТЕПЕРЬ ПОЛНОСТЬЮ АКТИВНЫ СО СТАРТА -->
         <button class="play-btn" onclick="redirectToOnboardingSandbox()">ПРОЙТИ ОБУЧЕНИЕ</button>
         <button id="continue-game-btn" class="play-btn" style="background: linear-gradient(to bottom, #3a2a18, #1c130a); border-color: #8a7350;" onclick="handleContinueClick()">ПРОДОЛЖИТЬ ИГРУ</button>
         
         <div class="changelog">
-            <h3>📜 ЦЕНТРАЛЬНЫЙ ШЛЮЗ v6.2.5</h3>
+            <h3>v6.2.7</h3>
         </div>
     </div>
 
@@ -38,12 +36,10 @@
         function redirectToOnboardingSandbox() {
             localStorage.removeItem('khamach_full_onboarding_complete');
             sessionStorage.removeItem('khamach_session_fresh_start');
-            // Перенаправление в первый репозиторий обучения
             window.location.href = 'https://ТВОЙ_АККАУНТ.github.io/khamach-onboarding/index.html';
         }
 
         function handleContinueClick() {
-            // Мгновенный пуск в полноценный Хаб Цитадели взрослой игры
             window.location.href = 'hub.html?t=' + Date.now();
         }
     </script>
