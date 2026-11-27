@@ -1,5 +1,5 @@
 /* ==========================================================================
-   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ ДВИЖОК ТАЙМЕРОВ И УСТАЛОСТИ (v5.2.5-BETA)
+   КХАМАЧ — ВЫЧИСЛИТЕЛЬНЫЙ ДВИЖОК ТАЙМЕРОВ И УСТАЛОСТИ (v6.2.6-STABLE)
    ========================================================================== */
 
 function getHeroFatigue(heroId) {
@@ -38,17 +38,18 @@ function checkAndProcessMissionsBackground() {
     });
 
     let activeMissionsJSON = localStorage.getItem('khamach_active_triad_ids');
-    if (!activeMissionsJSON) return;
-    
-    // ИСПРАВЛЕНО: Восстановлен корректный пустой массив на случай сбоя парсинга
-    let currentTriad = [];
-    try { currentTriad = JSON.parse(activeMissionsJSON); } catch(e) { return; }
+    let currentTriad = ['m_t1', 'm_d1'];
+    if (activeMissionsJSON) {
+        try {
+            const parsed = JSON.parse(activeMissionsJSON);
+            if (Array.isArray(parsed) && parsed.length > 0) currentTriad = parsed;
+        } catch(e) {}
+    }
     
     let stateChanged = false;
     
     currentTriad.forEach((mId, index) => {
-        const isThisMissionActive = localStorage.getItem(`khamach_mission_active_${mId}`) === 'true';
-        if (!isThisMissionActive) return;
+        if (localStorage.getItem(`khamach_mission_active_${mId}`) !== 'true') return;
         
         const mission = CITY_MISSIONS_POOL.find(m => m.id === mId);
         if (!mission) return;
@@ -56,12 +57,12 @@ function checkAndProcessMissionsBackground() {
         const startTimestamp = parseInt(localStorage.getItem(`khamach_mission_start_${mission.id}`) || '0');
         
         if (Date.now() - startTimestamp >= mission.durationMs) {
-            localStorage.removeItem(`khamach_hero_busy_${mission.allowedHero}`);
+            const finalReward = parseInt(localStorage.getItem(`khamach_mission_reward_frozen_${mission.id}`) || mission.reward || '133');
+
             localStorage.removeItem(`khamach_mission_active_${mission.id}`);
             localStorage.removeItem(`khamach_mission_start_${mission.id}`);
-            
-            const finalReward = parseInt(localStorage.getItem(`khamach_mission_reward_frozen_${mission.id}`) || '0');
             localStorage.removeItem(`khamach_mission_reward_frozen_${mission.id}`);
+            localStorage.removeItem(`khamach_hero_busy_${mission.allowedHero}`);
             
             if (typeof addPlayerGold === 'function') addPlayerGold(finalReward);
             if (typeof addChronicleLog === 'function') {
